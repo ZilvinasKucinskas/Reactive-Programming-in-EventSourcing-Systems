@@ -24,7 +24,7 @@ Visiems apibrėžimams yra būdingas vienas bruožas - publikuoti kiekvieną obj
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.8]{img/current_state}
-    \caption{Paveikslėlio pavyzdys}
+    \caption{Du skirtingi būdai saugoti dabartinę būseną}
     \label{img:current_state}
 \end{figure}
 
@@ -48,4 +48,30 @@ Literatūros šaltiniuose dažnai randama rekomendacijų taikyti įvykių kaupim
 
 Internete galima rasti straipsnių aprašančių kaip įvykių kaupimo principas buvo panaudotas tikrose sistemose. Galima pažymėti dvi išsamias dokumentacijas: finansinės prekybos platforma LMAX. \cite{Fowler:LMAX} ir Microsoft Windows Azure komandos analizė \cite{Betts:2013:ECE:2509680}. Taipogi yra sukurti keli pragramavimo karkasai paremti įvykių kaupimu: Akka\footnote{http://akka.io/} ir Event Store\footnote{http://docs.geteventstore.com/} bei Red Bull Media House kompanijos programavimo priemonių rinkinys Eventuate\footnote{https://rbmhtechnology.github.io/eventuate/}.
 
+\subsection{Komandų-užklausų atskyrimo principas (angl. Command Query Separation (CQS))}
+
+Komandų-užklausų atskyrimo principą pirmą kartą aprašė Bertrand Meyer \cite{Meyer:1988:OSC:534929} norėdamas patobulinti šalutinių efektų apdorojimą kuriant programą ar projektuojant API. Pagrindinė idėja yra atskirti prieigą prie objektų į:
+
+\begin{enumerate}
+
+  \item \textbf{Užklausas}, kurios grąžina informaciją,
+
+  \item \textbf{Komandas}, kurios keičia būseną. (Paveikslėlis \ref{img:cqs}.a)
+
+\end{enumerate}
+
+Užklausos neturėtų sukelti pašalinių efektų. Kitais žodžiais tariant - klausimas neturėtų pakeisti atsakymo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{img/cqs}
+    \caption{CQS ir CQRS palyginimas}
+    \label{img:cqs}
+\end{figure}
+
+\subsection{Komandų-užklausų atsakomybių atskyrimas (angl. Command Query Responsibility Segregation (CQRS))}
+
+\subsection{Įvykių kaupimas ir CQRS}
+
+\subsection{DDD}
 
