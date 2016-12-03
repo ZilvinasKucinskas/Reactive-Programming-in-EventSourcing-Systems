@@ -1,0 +1,51 @@
+Šis skyrius aprašo įvykių kaupimą, susijusią terminologiją. privalumus bei trūkumus, įvykių srautus bei panaudojimo atvejus. Taip pat aprašomas architektūrinis stilius - komandų-užklausų atsakomybių atskyrimas (CQRS), kuris yra naudojamas įvykių kaupimu pagrįstose sistemose. 
+
+\subsection{Aktyvus įrašas (angl. Active Record)}
+
+Dauguma programų sistemų reikalauja tam tikro duomenų valdymo. Tipinis būdas išlaikyti dabartinę programos būseną yra naudojant tam tikrą duomenų saugyklą (pvz.: duomenų bazę) ir grąžinti saugomų objektų būseną panaudojant užklausą. Aktyvus įrašas yra programinės įrangos kūrimo šablonas darbui su dabartine programos būsena pritaikant sukūrimo, skaitymo, atnaujinimo ir ištrynimo operacijas (CRUD) objektams reliacinėje duomenų bazėje. \cite{Fowler:2002:PEA:579257} (Paveikslėlis \ref{img:current_state}.a) Taikant šį programinės įrangos kūrimo šabloną, tik dabartinė objekto būsena yra palaikoma ir manipuliuojama, buvusios objekto reikšmės yra perrašomas ir neišsaugoti pakeitimai prarandami. Šis kelias puikiai tinka daugumai programų, bet turi trūkumų kalbant apie veiksmų atsekamumą bei operacijas darbui su programos būsenų istorija.
+
+\subsection{Įvykių kaupimas}
+
+Akademinė literatūra šia tema yra ganėtinai reta. Daugiausia informacijos galima rasti internetiniuose dienoraščiuose, prezentacijose bei programinės įrangos dokumentacijose.
+
+\subsubsection{Apibrėžimas}
+
+Šia tema nėra standartizuoto žodyno, terminologija ir apibrėžimai skiriasi priklausomai nuo autoriaus.
+
+Pirmą kartą įvykių kaupimo terminas 2005 metais paminėjo Martin Fowler savo internetiniame dienoraštyje. \cite{Fowler:EventSourcing} Jis aprašo įvykius kaip eilę programos būsenų pasikeitimų. Šie įvykiai saugo visą informaciją, reikalingą dabartinės būsenos atkūrimui. Įvykiai niekada netrinami. Vienintelis būdas atšaukti įvykį yra sukurti atgalinį įvykį (angl. retroactive event). \cite{Fowler:RetroactiveEvent} Atgalinis įvykis grąžina programos būseną į tokia būseną lyg praeitas įvykis nebūtų nutikęs.
+
+Greg Young yra kitas žymus autorius kalbant apie įvykių kaupimą. Jis apibūdina įvykių kaupimą kaip “dabartinės būsenos saugojimą kaip eilę įvykių bei sistemos būsenos atkūrimą pakartojant tą pačią įvykių seką.“ \cite{Young:CQRS2010} Jo požiūriu, įvykių žurnalas skirtas tik įrašymui: “įvykiai yra lyg faktai. Jie įvyko ir negali būti anuliuoti”. \cite{Young:CQRS2013} Tai ką Martin Fowler vadina atgaliniais įvykiais, Greg Young apibūdina kaip grįžtamąsias operacijas (angl. reversal transactions).
+
+Martin Krasser straipsniai bei prezentacijos apie Akka priemonių rinkinį įrašymo moduliui aprašo dar vieną požiūrį į įvykių kaupimą. \cite{Krasser:AkkaPersistence, Krasser:AkkaYoutube} Šiame kontekste, išsiskaidžiusioje sistemoje aktoriai komunikuoja žinutėmis, kurios pakeičia būseną. Įvykių kaupimas naudojamas perduoti pakitimus aktoriui. Būsenos pakitimai yra pridedami kaip nesikeičiantys faktai į įvykių žurnalą. Šis sprendimas yra motyvuojamas tuo, jog “šis būdas leidžia pasiekti labai aukštą operacijų kiekį ir įgalina efektyvias replikacijas”. Aktoriaus būsenos atkūrimas (po perkrovimo ar klaidos) yra pasiekiamas iš naujo pritaikant jau įrašytus įvykius.
+
+
+Visiems apibrėžimams yra būdingas vienas bruožas - publikuoti kiekvieną objekto (sistemos ar programos) būsenos pasikeitimą kaip nesikeičiantį įvykį į nemodifikuojamą žurnalą. To pasekoje skaitant įvykius iš eilės galima atkurti dabartinę būseną. (Paveikslėlis \ref{img:current_state}.b)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.8]{img/current_state}
+    \caption{Paveikslėlio pavyzdys}
+    \label{img:current_state}
+\end{figure}
+
+\subsection{Įvykių kaupimo privalumai}
+
+Literatūros šaltiniuose dažnai randama rekomendacijų taikyti įvykių kaupimą tik tam tikrose, aiškiai apibrėžtuose sistemos dalyse ir nenaudoti šio principo ten, kur tai nėra svarbu. \cite{Betts:2013:ECE:2509680} Bendras bruožas įvykių kaupimo sistemose yra tai, jog jos turi sudėtingą verslo logiką. Tai yra priešingybė pavyzdžiui programoms, kurios suteikia galimybę keisti reikšmes vartotojo sąsajoje ir saugoti reliacinėje duomenų bazėje. Kad būtų galima įvertinti taikymo galimybes, reikia aiškiai apibrėžti, kokius privalumus gali suteikti įvykiu kaupimo principu pagrįstos architektūros.
+
+\begin{enumerate}
+
+  \item \textbf{Audito žurnalas}. Reguliuojamose srityse (pvz.finansų industrija), daugelyje šalių valstybės nuostatai reikalauja kompanijų laikyti operacijų istoriją sistemoje. Pavyzdžiui, JAV reikalauja tarpininkų saugoti įrašus neperrašomu ir neištrinamu formatu. \cite{US:StorageRules} Įvykių srautas puikiai tinka šiam reikalavimui įgyvendinti, nes įvykių žurnalas pasižymi tik įrašymo funkcionalumu, o patys įvykiai yra nekintantys.
+
+  \item \textbf{Derinimas}. Sukaupti įvykiai gali būti panaudoti analizei kaip sistema pasiekė vieną ar kitą būseną ir kurie įvykiai tai įtakojo. Įvykių kaupimo stiprioji pusė yra atsekamumas ir derinimo galymybės - įmanoma atsekti iš kur kilo sistemos klaida.
+
+  \item \textbf{Išplečiamumas}. Faktas,jog į įvykių žurnalą galima tik įrašyti, yra naudingas išplečiamoms architektūroms. Gana dažnai tokiose architektūrose turima keletą duomenų modelio kopijų. Jog būtų užtikrinta darna - šios kopijos turi būti sinchronizuotos. Įvykių kaupimo sistemose vienintelis būdas suvienodinti duomenų modelio kopijas yra įrašant įvykius. Manoma, jog toks sprendimas turi mažiau blokavimų ir lengviau išplečiama skaitymui negu architektūra atnaujinant duomenų modelį. \cite{GetEventStore:Basics}
+
+  \item \textbf{Informacinė nauda}.  Visos buvusios sistemos būsenos gali būti tiek atkurtos, tiek gaunamos užklausų pagalba. Tai gali atnešti papildomos naudos sistemoms, kuriose kliento elgesys yra svarbus. Tokiose sistemose dažniausiai nežinoma kokio tyrimo reikės iš verslo pusės. Pavyzdžiui, elektroninės komercijos parduotuvėje gali būti naudinga gauti ir nagrinėti visus produktus, kurie kada nors buvo išimti iš apsipirkimo krepšelio. Įvykių kaupimo sistemose, toks uždavinys gali būti lengvai įgyvendintas.
+
+\end{enumerate}
+
+\subsection{Panaudojimo atvejai}
+
+Internete galima rasti straipsnių aprašančių kaip įvykių kaupimo principas buvo panaudotas tikrose sistemose. Galima pažymėti dvi išsamias dokumentacijas: finansinės prekybos platforma LMAX. \cite{Fowler:LMAX} ir Microsoft Windows Azure komandos analizė \cite{Betts:2013:ECE:2509680}. Taipogi yra sukurti keli pragramavimo karkasai paremti įvykių kaupimu: Akka\footnote{http://akka.io/} ir Event Store\footnote{http://docs.geteventstore.com/} bei Red Bull Media House kompanijos programavimo priemonių rinkinys Eventuate\footnote{https://rbmhtechnology.github.io/eventuate/}.
+
+
