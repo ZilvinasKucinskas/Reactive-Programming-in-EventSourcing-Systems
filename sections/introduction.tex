@@ -1,6 +1,6 @@
 \subsection{Tyrimo objektas}
 
-    Tyrimo objektas yra reaktyvaus programavimo bei įvykių kaupimo principai.
+    Tyrimo objektas yra reaktyvaus programavimo bei įvykių kaupimo principai. Reaktyvus programavimas yra susijęs su reaktyviomis sistemomis, o kalbant apie įvykių kaupimo sistemas, įvykių kaupimo principas yra dažniausiai neatsiejamas nuo komandų-užklausų atsakomybių atskyrimo principo. Dėl to reikia apžvelgti ir pačią sistemą, įkomponuojančią šiuos principus, jog būtų galima susidaryti sistemos architektūros (aukštesnės abstrakcijos) vaizdą bei analizuoti panaudojimo atvejus.
 
 \subsection{Darbo tikslai ir uždaviniai}
 
@@ -8,7 +8,11 @@
 
 \begin{itemize}
 
-    \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas tik per įvykių kompoziciją;
+    \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų.
+
+    \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius.
+
+    \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API).
 
     \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai.
 
@@ -17,8 +21,10 @@
     Siekiant šio tikslo, turi būti išspręsti šie uždaviniai:
 
 \begin{itemize}
-        \item įrodyti, kad reaktyvų programavimą įmanoma taikyti įvykių kaupimo sistemose;
-        \item sukurti konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus;
+        \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus.
+        \item išnagrinėti egzistuojančią (-ias) reaktyvaus programavimo bibliotekas.
+        \item išnagrinėti egzistuojančią (-ias) įvykių kaupimo bibliotekas ar programavimo karkasus.
+        \item sukurti arba praplėsti esamą konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus;
         \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
 \end{itemize}
 

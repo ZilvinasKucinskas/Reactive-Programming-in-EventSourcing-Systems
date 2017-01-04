@@ -1,0 +1,81 @@
+  Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Kad būtų galima susidaryti bendrą vaizdą ir suvokti panaudojimo atvejį, pirmiausia reikia suprojektuoti aukštesnį sistemos vaizdą, tai yra suprojektuoti kuriamos sistemos architektūrą. CQRS ir įvykių kaupimo principas dažniausiai naudojami kartu, pritaikant šiuos principus apibrėžtose, sudėtingose, bei verslo logiką apimančiose sistemos srityse. Šiuo atveju pritaikomos ir turimos DDD žinios. Toliau nagrinėjami jau esantys reaktyvaus programavimo įvykių kaupimo programavimo karkasai/bibliotekos. Sekančiame skyriuje seka jų suderinamumo analizė. Aprašomi kilę iššūkiai ir galimi tolimesni darbai.
+
+\subsection{Kuriamos sistemos architektūra}
+
+\subsection{Reaktyvus programavimas Ruby kalboje}
+
+Žemesniame lygyje paradigma iš esmės yra dviejų kūrimo šablonų konstrukcija, naudojama jau daugiau nei 20 metų. Faktiškai viena iš populiariausių kūrimo šablonų knygų yra „Gang of Four“, kurioje aprašyti šie du kūrimo šablonai: iteratoriaus ir stebėtojo šablonai. Tai yra du elgsenos kūrimo šablonai, charakterizuojantys objektų ir klasių sąveiką ir atsakomybę.
+
+\subsubsection{Iteratorius}
+
+Pagrindinė šio šablono (iteratoriaus) idėja – atsakomybė už sąrašo objekto prieigą ir perėjimą ir jo įdėjimas į iteratoriaus objektą. Iteratoriaus klasė apibrėžia prieigos prie sąrašo elementų sąsają. Iteratoriaus objektas atsakingas už esamo elemento stebėjimą; t. y. jis žino, kurie elementai jau buvo pereiti. [GOF knyga]
+
+„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas Enumerable modulis, egzempliorius. Kuris yra beveik bet koks rinkinys.
+
+\subsubsection{Stebėtojas}
+
+Stebėtojo šablonas yra kūrimo šablonas, kuriame objektas (vadinamas tema) tvarko jo priklausinių (vadinamų stebėtojais) sąrašą ir automatiškai praneša apie bet kokius būsenos pasikeitimus, paprastai iškviesdamas vieną iš jų metodų. Paprastai jis naudojamas paskirstytųjų įvykių tvarkymo sistemoms realizuoti.
+
+Iš esmės temos yra objektai, kurie siunčia pranešimus į objektus, stebinčius tokias temas. Temos priverstinai įkelia pranešimus stebėtojams, todėl tai ir vadinama stebėtojo šablonu.
+
+„Ruby“ pateikiama su Observable moduliu standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
+
+\subsubsection{Reactive programming}
+
+Dabar, kai turime supratimą ir apie iteratoriaus, ir apie stebėtojo šablonus, atėjo laikas suformuoti reaktyviojo programavimo paradigmą
+
+Pagal Reaktyvumo manifestą reaktyviosios sistemos yra: reaguojančios, atkuriamos, lanksčios ir valdomos pranešimais. Tokio tipo apibrėžimai labai glumina. Tai, kaip aš suprantu Reaktyvumo manifestą, reaktyviosios sistemos yra asinchroninės, toleruojančios triktis, išplečiamos ir palaikančios ryšį su neblokuojamu pranešimų perdavimu.
+
+Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio?
+
+\subsubsection{RxRuby}
+
+Let’s see how RxRuby works, in it’s simplest form.
+
+\begin{lstlisting}[]
+  RxRuby::Observable.just(7)
+\end{lstlisting}
+
+A RxRuby::Observable is just a stream. A stream is a subject (or, an object) that you can subscribe to (or, observe). Now, the RxRuby:Observable module itself doesn’t do anything, unless we invoke a method on it. Let’s carry on with the example:
+
+\begin{lstlisting}[]
+  stream = RxRuby::Observable.just(7)
+  stream.subscribe {|num| puts "Gautas skaičius #{num}" }
+\end{lstlisting}
+
+The object that we receive is a just the number 7, wrapped as an observable. Since the observable implements (most of) the Enumerable methods, we can do anything with it. But, to avoid any complication in this example, we will just subscribe to the observable and pass in a lambda. The lambda will be invoked on every time the stream pushes any data (or, in this case, just once).
+
+The output of the example will be:
+
+\begin{lstlisting}[]
+  Gautas skaičius 7
+\end{lstlisting}
+
+Now, since we have a lot of the methods from the Enumerable mixin available, let’s do something with an array. There’s two ways of working with arrays in RxRuby: via ranges and via plain arrays.
+
+\begin{lstlisting}[]
+  RxRuby::Observable.range(1,10)
+    .select {|num| num.even? }
+    .sum
+   .subscribe {|s| puts "Suma lyginių skaičių tarp 1 ir 10 yra: #{s}" }
+\end{lstlisting}
+
+This will return:
+
+\begin{lstlisting}[]
+  Suma lyginių skaičių tarp 1 ir 10 yra: 30
+\end{lstlisting}
+
+Let’s break it down. First, we create an observable range, with the numbers from 1 to 10. Then, we invoke select on the observable, with a lambda as a parameter. The lambda takes each number of the range as a parameter, and filters all even numbers from the observable, returning a new observable. Then, we invoke sum on it, which sums all of the even numbers.
+
+At the end, we subscribe on the observable that sum returns. By subscribing we basically “watch over” the observable (or, the stream of data) and invoke the lambda that we pass as an argument to the subscribe. Any time the observable pushes any data, it will go through this “funnel” and invoke the last lambda at the end, which will print out the message.
+
+\subsection{Įvykių kaupimas Ruby kalboje}
+
+\subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
+
+\subsection{Apribojimai}
+
+\subsection{Iššūkiai}
+
+\subsection{Tolimesni darbai}
