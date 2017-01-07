@@ -6,7 +6,7 @@ Deklaratyvusis programavimas siekia paaiškinti, kokias reikšmes reikėtų apdo
 
 Funkcinis reaktyvus programavimas, neretai vadinamas tiesiog FRP, dažnai yra nesuprastas. Prieš 20 metų Conal Elliott labai aiškiai apibrėžė FRP \cite{ElliottHudak97:Fran}. Daugiau šio mokslų daktaro darbų susijusių su FRP galima rasti jo asmeninėje svetainėje\footnote{http://conal.net/papers/frp.html}. FRP terminas neseniai buvo neteisingai panaudotas aprašant technologijas, tokias kaip Elm, Bacon.js, reaktyvius plėtinius (RxJava, Rx.NET, RxJS, RxRuby) bei kitas\footnote{https://begriffs.com/posts/2015-07-22-essence-of-frp.html}. Tai patvirtina ir pats Conal Elliott savo Twitter paskyroje (\ref{img:not_frp1}, \ref{img:not_frp2}, \ref{img:not_frp3}, \ref{img:not_frp4}, \ref{img:not_frp5}, \ref{img:not_frp6}, \ref{img:not_frp7} paveikslėliai prieduose). Dauguma bibliotekų, kurios teigia jog palaiko FRP, beveik vienareikšmiškai aprašo reaktyvų programavimą. Dėl šios priežasties, šiame darbe toliau bus kalbama tik apie reaktyvųjį programavimą.
 
-\subsection{Reaktyvus programavimas (RP)}
+\subsection{Reaktyvus programavimas}
 
 Reaktyvųjį programavimą galima laikyti tam tikra deklaratyviojo programavimo atmaina. Pagrindinė jo idėja – reaktyviųjų reikšmių samprata. Tokios reikšmės priklauso viena nuo kitos, jos dinamiškai keičiasi ir yra skaidriai atnaujinamos. RP tikslas – apibrėžti statinius arba dinaminius reikšmių ryšius, kai jų nereikia atnaujinti ar sinchronizuoti rankomis. Kodas tiesiogiai apibrėžia duomenų srautą, o kalba netiesiogiai apdoroja platinamus pakeitimus. 4 pav. pavaizduota reaktyviojo programavimo idėja imperatyvioje nuoseklių komandų aplinkoje. Reikšmė „sum“ nurodo skaičiavimą a + b. Kai kuri nors iš šių reikšmių pasikeičia, „sum“ reikšmė išlieka teisinga.
 
@@ -14,13 +14,11 @@ Dinaminių kalbų atžvilgiu, RP galima apibrėžti kaip asinchroninį, kadangi 
 
 Reaktyvumo koncepcija leidžia programuotojui reikšmes apibrėžti tik kartą ir nereikia iš naujo įvertinti išraiškos, kai pasikeičia dešinė aprašo pusė. Kai yra kompleksinių reikšmių, programuotojams nereikia tiesiogiai paskelbti funkcijos jai apskaičiuoti, taip pat nereikia perduoti teisingų argumentų iškvietimo metu.
 
-\subsection{Reaktyvus programavimas}
-
 Reaktyvusis programavimas, kurio nereikėtų painioti su funkciniu reaktyviuoju programavimu, tai asinchroninio programavimo porūšis ir paradigma, kai logiką valdo atsiradusi nauja informacija, o ne kontrolės srautą valdo vykdymo gija.
 
 Jis palaiko problemos suskaidymą į keletą atskirų veiksmų, kurių kiekvieną galima įvykdyti asinchroniniu ir neblokuojančiu būdu ir tada iš jų sudaryti darbo eigą, kurios įvestys ir išvestys gali būti begalinės.
 
-„Oxford Dictionary“ žodį „asynchronous“ apibrėžia kaip „nesantį ar nevykstantį tuo pačiu metu“, o tai šiame kontekste reiškia, kad pranešimo ar įvykio apdorojimas vyksta tam tikru atsitiktiniu laiku, tikėtina, ateityje. Tai labai svarbus reaktyviojo programavimo metodas, kadangi jis įgalina neblokuojantį vykdymą, kai vykdymo gijoms, konkuruojančioms dėl bendrai naudojamo ištekliaus, nereikia laukti dėl užblokavimo (dėl ko vykdymo gija negali atlikti kito darbo, kol neatliktas dabartinis) ir jos gali atlikti kitą naudingą darbą, kol išteklius yra užimtas. Amdalo dėsnis teigia, kad konkurencija yra didžiausias išplečiamumo priešas, taigi reaktyvioji programa turėtų retai blokuoti arba neblokuoti visai.
+„Oxford Dictionary“ žodį „asynchronous“\footnote{http://www.oxfordlearnersdictionaries.com/definition/english/asynchronous?q=asynchronous} apibrėžia kaip „nesantį ar nevykstantį tuo pačiu metu“, o tai šiame kontekste reiškia, kad pranešimo ar įvykio apdorojimas vyksta tam tikru atsitiktiniu laiku, tikėtina, ateityje. Tai labai svarbus reaktyviojo programavimo metodas, kadangi jis įgalina neblokuojantį vykdymą, kai vykdymo gijoms, konkuruojančioms dėl bendrai naudojamo ištekliaus, nereikia laukti dėl užblokavimo (dėl ko vykdymo gija negali atlikti kito darbo, kol neatliktas dabartinis) ir jos gali atlikti kitą naudingą darbą, kol išteklius yra užimtas. Amdalo dėsnis teigia \cite{Rodgers:1985:IMS:327070.327215}, kad konkurencija yra didžiausias išplečiamumo priešas, taigi reaktyvioji programa turėtų retai blokuoti arba neblokuoti visai.
 
 Reaktyvųjį programavimą iš esmės valdo įvykiai, skirtingai nuo reaktyviųjų sistemų, kurias valdo pranešimai. Skirtumas tarp įvykių valdomo ir pranešimų valdomo programavimo bus paaiškintas tolesnėje šio darbo dalyje.
 
@@ -39,11 +37,11 @@ Reaktyviojo programavimo programų sąsajos (API) bibliotekos paprastai yra:
   \item Duomenų srauto kintamieji – atskirai priskiriami kintamieji (atminties elementai), kurie gali būti priklausomi nuo įvesties, procedūrų ir kitų elementų, kad jie būtų automatiškai atnaujinami po pakeitimų. Praktinis to pavyzdys yra skaičiuoklės, kuriose pasikeitus langelio reikšmei, tai paveikia visas priklausomas funkcijas ir dėl to sukuriamos naujos reikšmės.
 \end{itemize}
 
-Populiarios bibliotekos, JVM palaikančios reaktyviojo programavimo metodus, apima, bet neapsiriboja, „Akka Streams“, „Ratpack“, „Reactor“, „RxJava“ ir „Vert.x“. Šios bibliotekos realizuoja reaktyviųjų srautų specifikaciją, kuri yra reaktyviojo programavimo bibliotekų JVM funkcinio suderinamumo standartas ir pagal aprašymą yra „...iniciatyva pateikti asinchroninio srauto apdorojimo su neblokuojančiu apkrovos kompensavimu standartą.“
+Populiarios bibliotekos, JVM palaikančios reaktyviojo programavimo metodus, apima, bet neapsiriboja, „Akka Streams“\footnote{http://doc.akka.io/docs/akka/2.4.3/scala/stream/index.html}, „Ratpack“\footnote{https://ratpack.io/}, „Reactor“\footnote{https://projectreactor.io/}, „RxJava“\footnote{https://github.com/ReactiveX/RxJava} ir „Vert.x“\footnote{http://vertx.io/}. Šios bibliotekos realizuoja reaktyviųjų srautų specifikaciją, kuri yra reaktyviojo programavimo bibliotekų JVM funkcinio suderinamumo standartas ir pagal aprašymą yra „...iniciatyva pateikti asinchroninio srauto apdorojimo su neblokuojančiu apkrovos kompensavimu standartą.“
 
 \subsection{Reaktyviojo programavimo pranašumai}
 
-Pagrindiniai reaktyviojo programavimo pranašumai: didesnis skaičiavimo išteklių naudojimas kelių branduolių ir kelių CPU aparatūroje ir didesnis našumas sumažinant nuoseklinimo taškus pagal Amdalo dėsnį ir, žiūrint plačiau, pagal Giunterio universaliojo išplečiamumo dėsnį.
+Pagrindiniai reaktyviojo programavimo pranašumai: didesnis skaičiavimo išteklių naudojimas kelių branduolių ir kelių CPU aparatūroje ir didesnis našumas sumažinant nuoseklinimo taškus pagal Amdalo dėsnį \cite{Rodgers:1985:IMS:327070.327215} ir, žiūrint plačiau, pagal Giunterio universaliojo išplečiamumo dėsnį \cite{opac-b1118020}.
 
 Papildomas pranašumas yra programų kūrėjo produktyvumas, kadangi tradicinėms paradigmoms sunkiai sekėsi pateikti paprastą ir įgyvendinamą metodą asinchroniniam ir neblokuojančiam skaičiavimui ir I/O apdoroti. Reaktyvusis programavimas susitvarko su daugeliu iš šių iššūkių, kadangi jis paprastai pašalina tiesioginio koordinavimo tarp aktyvių komponentų poreikį.
 
