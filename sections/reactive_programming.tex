@@ -1,3 +1,5 @@
+Šiame skyriuje trumpai aprašomas deklaratyvus programavimas, pateikiami faktai, kodėl toliau nebus kalbama apie funkcinį reaktyvų programavimą. Toliau seka įvadas į reaktyvų programavimą, parodantis paprastą reaktyvaus programavimo pavyzdį, aprašomos išskirtinės reaktyviojo programavimo kalbos ypatybės, tada seka platesnis reaktyvaus programavimo aprašymas, minintis būdingus reaktyvaus programavimo bibliotekų bruožus. Skaitytojas supažindinamas su įvykių ir pranešimų valdomais programavimo stiliais, kuriuos aprašo reaktyvumo manifestas, ko pasekoje aprašomos dokymente apibūdinamos reaktyvios sistemos, jų bruožai ir sąvybės, reaktyvaus programavimo sąsaja su reaktyviomis sistemomis. Galiausiai skyrius konkretizuoja reaktyvaus programavimo pranašumus bei parodo jo svarbą šio metu.
+
 \subsection{Deklaratyvus programavimas}
 
 Deklaratyvusis programavimas siekia paaiškinti, kokias reikšmes reikėtų apdoroti, o ne tai, kaip jas reikėtų apdoroti. Tiksliau tariant, jis apibūdina apdorojimo duomenų srautą, neapibūdindamas jo kontrolės srauto. Laikoma, kad deklaratyvusis stilius yra iš esmės pranašesnis už lygiavertį imperatyvųjį kodą \cite{DeclarativeProgramming}.
@@ -6,13 +8,58 @@ Deklaratyvusis programavimas siekia paaiškinti, kokias reikšmes reikėtų apdo
 
 Funkcinis reaktyvus programavimas, neretai vadinamas tiesiog FRP, dažnai yra nesuprastas. Prieš 20 metų Conal Elliott labai aiškiai apibrėžė FRP \cite{ElliottHudak97:Fran}. Daugiau šio mokslų daktaro darbų susijusių su FRP galima rasti jo asmeninėje svetainėje\footnote{http://conal.net/papers/frp.html}. FRP terminas neseniai buvo neteisingai panaudotas aprašant technologijas, tokias kaip Elm, Bacon.js, reaktyvius plėtinius (RxJava, Rx.NET, RxJS, RxRuby) bei kitas\footnote{https://begriffs.com/posts/2015-07-22-essence-of-frp.html}. Tai patvirtina ir pats Conal Elliott savo Twitter paskyroje (\ref{img:not_frp1}, \ref{img:not_frp2}, \ref{img:not_frp3}, \ref{img:not_frp4}, \ref{img:not_frp5}, \ref{img:not_frp6}, \ref{img:not_frp7} paveikslėliai prieduose). Dauguma bibliotekų, kurios teigia jog palaiko FRP, beveik vienareikšmiškai aprašo reaktyvų programavimą. Dėl šios priežasties, šiame darbe toliau bus kalbama tik apie reaktyvųjį programavimą.
 
-\subsection{Reaktyvus programavimas}
+\subsection{Įvadas į reaktyvųjį programavimą}
 
-Reaktyvųjį programavimą galima laikyti tam tikra deklaratyviojo programavimo atmaina. Pagrindinė jo idėja – reaktyviųjų reikšmių samprata. Tokios reikšmės priklauso viena nuo kitos, jos dinamiškai keičiasi ir yra skaidriai atnaujinamos. RP tikslas – apibrėžti statinius arba dinaminius reikšmių ryšius, kai jų nereikia atnaujinti ar sinchronizuoti rankomis. Kodas tiesiogiai apibrėžia duomenų srautą, o kalba netiesiogiai apdoroja platinamus pakeitimus. 4 pav. pavaizduota reaktyviojo programavimo idėja imperatyvioje nuoseklių komandų aplinkoje. Reikšmė „sum“ nurodo skaičiavimą a + b. Kai kuri nors iš šių reikšmių pasikeičia, „sum“ reikšmė išlieka teisinga.
+Reaktyvųjį programavimą galima laikyti tam tikra deklaratyviojo programavimo atmaina. Pagrindinė jo idėja – reaktyviųjų reikšmių samprata. Tokios reikšmės priklauso viena nuo kitos, jos dinamiškai keičiasi ir yra skaidriai atnaujinamos. RP tikslas – apibrėžti statinius arba dinaminius reikšmių ryšius, kai jų nereikia atnaujinti ar sinchronizuoti rankomis. Kodas tiesiogiai apibrėžia duomenų srautą, o kalba netiesiogiai apdoroja platinamus pakeitimus. \ref{reactive_pseudocode} kodo pavyzdyje pavaizduota reaktyviojo programavimo idėja imperatyvioje nuoseklių komandų aplinkoje. Reikšmė \lstinline|sum| nurodo skaičiavimą \lstinline|a + b|. Kai kuri nors iš šių reikšmių pasikeičia, \lstinline|sum| reikšmė išlieka teisinga.
 
-Dinaminių kalbų atžvilgiu, RP galima apibrėžti kaip asinchroninį, kadangi visos reikšmės yra uždariniai visoje aplinkoje. Pavyzdžiui, programavimo kalboje „Python“ anksčiau pateiktą elgseną galima būtų sumodeliuoti naudojant lambda funkciją be argumentų: sum = lambda: a + b. „sum“ pasiekiama ne kaip apskaičiuota sveikoji reikšmė, apibrėžianti išraiška įvertinama per kiekvieną prieigą.
+\begin{lstlisting}[caption=Reaktyvaus programavimo pseudokodas, label=reactive_pseudocode]
+a <- 0
+b <- 5
+sum <- a + b
+a <- 40
+print(sum) # Prints 45
+\end{lstlisting}
+
+Dinaminių kalbų atžvilgiu, RP galima apibrėžti kaip asinchroninį, kadangi visos reikšmės yra uždariniai visoje aplinkoje. Pavyzdžiui, programavimo kalboje „Ruby“ anksčiau pateiktą elgseną galima būtų sumodeliuoti naudojant \lstinline|lambda| funkciją be argumentų: \lstinline|sum =  -> { a + b }|. Pilnas pseudokodo realizacijos Ruby kalboje iliustracija pateikta \ref{reactive_ruby} kodo pavyzdyje.
+
+\begin{lstlisting}[caption=Reaktyvaus programavimo pavyzdys Ruby kalboje, label=reactive_ruby]
+a = 0
+b = 5
+sum = -> { a + b }
+a <- 40
+p sum.call # Prints 45
+\end{lstlisting}
 
 Reaktyvumo koncepcija leidžia programuotojui reikšmes apibrėžti tik kartą ir nereikia iš naujo įvertinti išraiškos, kai pasikeičia dešinė aprašo pusė. Kai yra kompleksinių reikšmių, programuotojams nereikia tiesiogiai paskelbti funkcijos jai apskaičiuoti, taip pat nereikia perduoti teisingų argumentų iškvietimo metu.
+
+\subsection{Išskirtinės reaktyviojo programavimo kalbos ypatybės}
+
+Reaktyviojo programavimo kalbos suteikia (reaktyviąsias) reikšmes ir (reaktyviuosius) operatorius.
+
+\subsubsection{Reaktyviosios reikšmės}
+
+Reaktyviosios reikšmės yra įvykiai ir elgsenos.
+
+\begin{itemize}
+  \item Įvykiai – reikšmė, kuri teikia begalinį keitimų srautą. Reikšmė pateikia keitimų įvykius, kurie gali turėti reikšmę kaskart, kai įvyksta keitimas. Kitaip nei elgsena (paaiškinta toliau), įvykių srautas neturi reikšmės.
+  \item Elgsena – tai reikšmė, kuri keičiasi laike \cite{ElliottHudak97:Fran}. Apskritai ji reiškia funkcinę priklausomybę (elgsenos išraiška) nuo kitų elgsenų. Jos reikšmė gaunama vertinant elgsenos išraišką. Kai kuriose reaktyviojo programavimo kalbose elgsena dar vadinama signalu.
+\end{itemize}
+
+Daugelyje reaktyviojo programavimo kalbų galima naudoti įvykius ir elgsenas. Kai kuriose kalbose galima naudoti tik elgsenas, nes jas galima realizuoti kaip įvykių apibendrinimą \cite{Wan2002:EventDrivenFRP, CzaplickiC13:FRPGUI}. Šiose kalbose kūrėjas elgseną gali laikyti reikšmę turinčiu įvykiu.
+
+Aprašant reaktyvųjį programavimą, daugelis elgsenos ir įvykių koncepcijų veikia vienodai. Be to, kalbos, kurios palaiko abi šias koncepcijas, leidžia operatoriams keisti įvykį į elgseną ir atvirkščiai. Todėl šiame darbe terminą „elgsena“ naudosime elgsenoms ir įvykiams aprašyti.
+
+\subsubsection{Reaktyvieji operatoriai}
+
+Reaktyviojo programavimo kalbos operatoriai veikia su įvykiais ir elgsenomis. Šie operatoriai gali transformuoti arba jungti elgsenas į naują elgseną. Reaktyviojo programavimo kalbos teikiami operatoriai skirtingose kalbose yra skirtingi. Tačiau paprastai yra operatorius, skirtas transformuoti elgseną (map), operatorius, skirtas sujungti elgsenas į vieną elgseną (merge), ir operatorius, kuris veikia esant būsenai (fold). Tai yra tipiniai daugelio reaktyviojo programavimo kalbų operatoriai, todėl toliau jie yra plačiau paaiškinami.
+
+\begin{itemize}
+  \item \textbf{map} - „map“ operatorius taiko funkciją \lstinline|f| elgsenai \lstinline|b|. Šio proceso metu sukuriama nauja elgsena ir šios naujos elgsenos reikšmė yra funkcija \lstinline|f|, taikoma elgsenos \lstinline|b| reikšmei.
+  \item \textbf{merge} - „merge“ operatorius sujungia dvi elgsenas į naują elgseną. Naujos elgsenos reikšmė yra naujausios pakeistos elgsenos reikšmė.
+  \item \textbf{fold} - „fold“ operatorius elgsenoje \lstinline|b| apima funkciją \lstinline|f| ir reikšmę \lstinline|v|. Jis sukuria naują elgseną \lstinline|b_new|. Pradinė \lstinline|b_new| reikšmė yra \lstinline|v|. Kai \lstinline|b| reikšmė pasikeičia, \lstinline|b_new| reikšmė pasikeičia į \lstinline|f| (sena \lstinline|b_new| reikšmė, \lstinline|b| reikšmė). Aprašant laisvai, \lstinline|b_new| reikšmė \lstinline|f| taikoma senai \lstinline|b_new| reikšmei ir \lstinline|b| reikšmei.
+\end{itemize}
+
+\subsection{Reaktyvus programavimas}
 
 Reaktyvusis programavimas, kurio nereikėtų painioti su funkciniu reaktyviuoju programavimu, tai asinchroninio programavimo porūšis ir paradigma, kai logiką valdo atsiradusi nauja informacija, o ne kontrolės srautą valdo vykdymo gija.
 
@@ -39,16 +86,6 @@ Reaktyviojo programavimo programų sąsajos (API) bibliotekos paprastai yra:
 
 Populiarios bibliotekos, JVM palaikančios reaktyviojo programavimo metodus, apima, bet neapsiriboja, „Akka Streams“\footnote{http://doc.akka.io/docs/akka/2.4.3/scala/stream/index.html}, „Ratpack“\footnote{https://ratpack.io/}, „Reactor“\footnote{https://projectreactor.io/}, „RxJava“\footnote{https://github.com/ReactiveX/RxJava} ir „Vert.x“\footnote{http://vertx.io/}. Šios bibliotekos realizuoja reaktyviųjų srautų specifikaciją, kuri yra reaktyviojo programavimo bibliotekų JVM funkcinio suderinamumo standartas ir pagal aprašymą yra „...iniciatyva pateikti asinchroninio srauto apdorojimo su neblokuojančiu apkrovos kompensavimu standartą.“
 
-\subsection{Reaktyviojo programavimo pranašumai}
-
-Pagrindiniai reaktyviojo programavimo pranašumai: didesnis skaičiavimo išteklių naudojimas kelių branduolių ir kelių CPU aparatūroje ir didesnis našumas sumažinant nuoseklinimo taškus pagal Amdalo dėsnį \cite{Rodgers:1985:IMS:327070.327215} ir, žiūrint plačiau, pagal Giunterio universaliojo išplečiamumo dėsnį \cite{opac-b1118020}.
-
-Papildomas pranašumas yra programų kūrėjo produktyvumas, kadangi tradicinėms paradigmoms sunkiai sekėsi pateikti paprastą ir įgyvendinamą metodą asinchroniniam ir neblokuojančiam skaičiavimui ir I/O apdoroti. Reaktyvusis programavimas susitvarko su daugeliu iš šių iššūkių, kadangi jis paprastai pašalina tiesioginio koordinavimo tarp aktyvių komponentų poreikį.
-
-Reaktyvusis programavimas ypač sėkmingai taikomas komponentų kūrimo ir darbo eigų komponavimo srityse. Norint išnaudoti visas asinchroninio vykdymo galimybes ir išvengti perteklinio naudojimo arba begalinio išteklių naudojimo, būtina įtraukti apkrovos kompensavimą.
-
-Nors reaktyvusis programavimas yra labai naudingas kuriant modernią programinę įrangą, galvojant apie sistemą aukštesniu lygmeniu, reikia naudoti kitą įrankį – reaktyviąją architektūrą – reaktyviųjų sistemų kūrimo procesą. Taip pat svarbu prisiminti, kad yra daugybė programavimo paradigmų ir reaktyvusis programavimas yra tik viena iš jų. Kaip ir bet koks kitas įrankis, jis nėra skirtas visiems galimiems atvejams.
-
 \subsection{Įvykių valdomas ir pranešimų valdomas programavimas}
 
 Kaip jau minėta, reaktyvusis programavimas (pagrįstas skaičiavimu naudojant efemeriškas duomenų srauto grandines) paprastai valdomas įvykių, o reaktyviosios sistemos (pagrįstos paskirstytųjų sistemų komunikacijos ir koordinavimo atsparumu ir lankstumu) yra valdomos pranešimų (dar vadinama duomenų siuntomis).
@@ -71,7 +108,7 @@ Reaktyviojoje sistemoje, ypač tokioje, kurioje naudojamas reaktyvusis programav
 
 Kaip apibrėžiama Reaktyvumo manifeste, reaktyviosios sistemos – tai architektūrinių kūrimo principų rinkinys, skirtas modernioms sistemoms, galinčioms patenkinti augančius šiuolaikinių sistemų poreikius, kurti.
 
-Reaktyviųjų sistemų principai toli gražu nėra nauji ir juos galima aptikti jau 8-ajame ir 9-ajame dešimtmetyje, reikšmingame Jim Gray bei Pat Helland darbe apie „Tandem“ sistemą ir Joe Armstrong bei Robert Virding darbe apie „Erlang“. Vis dėlto šie žmonės pralenkė laiką, kadangi tik per pastaruosius 5–10 metų technologijų pramonė buvo priversta peržiūrėti esamas įmonių sistemų kūrimo geriausias praktikas ir išmoko reaktyvumo principų žinias pritaikyti šiuolaikiniame pasaulyje, kurį apibrėžia daug branduolių, debesų kompiuterija ir internetu sąveikaujantys įrenginiai (angl. „Internet of Things“).
+Reaktyviųjų sistemų principai toli gražu nėra nauji ir juos galima aptikti jau 8-ajame ir 9-ajame dešimtmetyje, reikšmingame Jim Gray darbe apie „Tandem“ sistemą \cite{Gray85whydo} ir Joe Armstrong darbuose apie „Erlang“ \cite{Armstrong:1997:DE:258948.258967}. Vis dėlto šie žmonės pralenkė laiką, kadangi tik per pastaruosius 5–10 metų technologijų pramonė buvo priversta peržiūrėti esamas įmonių sistemų kūrimo geriausias praktikas ir išmoko reaktyvumo principų žinias pritaikyti šiuolaikiniame pasaulyje, kurį apibrėžia daug branduolių, debesų kompiuterija ir internetu sąveikaujantys įrenginiai (angl. „Internet of Things“).
 
 Reaktyviosios sistemos pagrindą sudaro pranešimų perdavimas, sukuriantis laikiną ribą tarp komponentų, leidžiančią juos atskirti laike (tai įgalina vienalaikiškumą) ir erdvėje (tai įgalina paskirstymą ir mobilumą). Toks atskyrimas būtinas norint visiškai izoliuoti komponentus ir užtikrina atsparumą bei lankstumą.
 
@@ -108,58 +145,28 @@ Apskritai reaktyvusis programavimas yra labai naudingas realizavimo metodas, kur
 
 Todėl norėdami maksimaliai padidinti reaktyviojo programavimo reikšmę, jis naudojamas kaip vienas iš įrankių reaktyviajai sistemai kurti. Kuriant reaktyviąją sistemą reikia ne tik išgauti OS būdingus išteklius, šiek tiek asinchroninių API ir grandinių pertraukiklių ant esamos, senstelėjusios programinės įrangos paketo viršaus. Reikia nuolat prisiminti faktą, kad kuriate paskirstytąją sistemą, kurią sudaro kelios tarnybos, turinčios veikti kartu, užtikrinant nuoseklią ir atsakomąją patirtį, ne tik tuomet, kai viskas veikia taip, kaip numatyta, bet ir įvykus trikčiai ir esant nenuspėjamai apkrovai.
 
+\subsection{Reaktyviojo programavimo pranašumai}
+
+Pagrindiniai reaktyviojo programavimo pranašumai: didesnis skaičiavimo išteklių naudojimas kelių branduolių ir kelių CPU aparatūroje ir didesnis našumas sumažinant nuoseklinimo taškus pagal Amdalo dėsnį \cite{Rodgers:1985:IMS:327070.327215} ir, žiūrint plačiau, pagal Giunterio universaliojo išplečiamumo dėsnį \cite{opac-b1118020}.
+
+Papildomas pranašumas yra programų kūrėjo produktyvumas, kadangi tradicinėms paradigmoms sunkiai sekėsi pateikti paprastą ir įgyvendinamą metodą asinchroniniam ir neblokuojančiam skaičiavimui ir I/O apdoroti. Reaktyvusis programavimas susitvarko su daugeliu iš šių iššūkių, kadangi jis paprastai pašalina tiesioginio koordinavimo tarp aktyvių komponentų poreikį.
+
+Reaktyvusis programavimas ypač sėkmingai taikomas komponentų kūrimo ir darbo eigų komponavimo srityse. Norint išnaudoti visas asinchroninio vykdymo galimybes ir išvengti perteklinio naudojimo arba begalinio išteklių naudojimo, būtina įtraukti apkrovos kompensavimą.
+
+Nors reaktyvusis programavimas yra labai naudingas kuriant modernią programinę įrangą, galvojant apie sistemą aukštesniu lygmeniu, reikia naudoti kitą įrankį – reaktyviąją architektūrą – reaktyviųjų sistemų kūrimo procesą. Taip pat svarbu prisiminti, kad yra daugybė programavimo paradigmų ir reaktyvusis programavimas yra tik viena iš jų. Kaip ir bet koks kitas įrankis, jis nėra skirtas visiems galimiems atvejams.
+
 \subsection{Reaktyviojo programavimo svarba šiais laikais}
 
-Paskelbus Reaktyvumo manifestą, „Scala“ kūrėjas Martin Odersky, reaktyviųjų plėtinių kūrėjas Erik Meijer ir „Akka“ techninis vadovas Roland Kuhn „Coursera“ paskelbė nemokamą kursą „Principles of Reactive Programming“ (Reaktyviojo programavimo principai):
+Paskelbus Reaktyvumo manifestą, „Scala“ kūrėjas Martin Odersky, reaktyviųjų plėtinių kūrėjas Erik Meijer ir „Akka“ techninis vadovas Roland Kuhn „Coursera“ paskelbė nemokamą kursą „Principles of Reactive Programming“\footnote{https://www.lightbend.com/blog/principle-of-reactive-programming-coursera} (Reaktyviojo programavimo principai):
 
 „Antrojo kurso tikslas – išmokti reaktyviojo programavimo principus. Reaktyvusis programavimas yra naujai atsirandantis mokymo dalykas, apimantis vienalaikiškumą ir įvykiais pagrįstas bei asinchronines sistemas. Jis būtinas rašant bet kokio tipo žiniatinklio paslaugą arba paskirstytąją sistemą ir taip pat sudaro daugelio didelio našumo vienalaikių sistemų pagrindą. Reaktyvųjį programavimą galima vertinti kaip aukštesnio lygmens funkcinio programavimo vienalaikių sistemų natūralų plėtinį, kuris tvarko paskirstytąją būseną, koordinuodamas ir organizuodamas asinchroninių duomenų srautus, kuriais keičiasi veikėjai.“
 
-RP plačiai naudoja „Netflix“, ji netgi skyrė „Rx“ „Java“ prievadą:
+RP plačiai naudoja „Netflix“ \cite{Netflix}, ji netgi skyrė „Rx“ „Java“ prievadą:
 
-„Funkcinis reaktyvusis programavimas su „RxJava“ leido „Netflix“ kūrėjams panaudoti serverio vienalaikiškumą, nepatiriant įprastų su gijomis susijusių ir sinchronizavimo problemų. API paslaugos lygmens realizavimas kontroliuoja vienalaikiškumo primityvus, kurie leidžia mums gerinti sistemos našumą, nesibaiminant sugadinti kliento kodo. „RxJava“ efektyviai veikia mums serveryje ir kuo daugiau naudojame, tuo giliau įsiskverbia į mūsų kodą.“
+„Reaktyvusis programavimas su „RxJava“ leido „Netflix“ kūrėjams panaudoti serverio vienalaikiškumą, nepatiriant įprastų su gijomis susijusių ir sinchronizavimo problemų. API paslaugos lygmens realizavimas kontroliuoja vienalaikiškumo primityvus, kurie leidžia mums gerinti sistemos našumą, nesibaiminant sugadinti kliento kodo. „RxJava“ efektyviai veikia mums serveryje ir kuo daugiau naudojame, tuo giliau įsiskverbia į mūsų kodą.“
 
-Neseniai „Facebook“ taip pat išleido „React JavaScript“ biblioteką, skirtą kitos kartos vartotojo sąsajoms kurti. „Facebook“ inžinierius Stoyan Stefanov aprašo pagrindinę „React“ koncepciją:
+2013 metais „Facebook“ taip pat išleido „React JavaScript“ biblioteką, skirtą kitos kartos vartotojo sąsajoms kurti. „Facebook“ inžinierius Stoyan Stefanov aprašo pagrindinę „React“ koncepciją \cite{React}:
 
 „React“ leidžia kurti programą naudojant komponentus, kurie gali atvaizduoti kai kuriuos duomenis. Kai duomenys pasikeičia, komponentai labai efektyviai ir tik tuomet, kai reikia, automatiškai atnaujinami. O visomis įvykių doroklių prijungimo ir atjungimo užduotimis pasirūpinama už jus. Taip pat efektyvu naudoti ir perdavimą.“
 
-Verta pastebėti, kad RP jau plačiai naudoja sąsajos serverio kūrėjų bendruomenė, kurie maždaug 2009 m. pradėjo naudoti originalų „Flapjax“ dokumentą ir toliau naudojo kelias bibliotekas, kuriose buvo realizuoti RP principai, pvz., „Bacon.js“, „Knockout“, „Meteor“, „React.js“, „Reactive.coffee“ ir „RxJS“.
-
-\subsection{(Functional) Reactive programming}
-
-Reactive programming provides the developer with abstractions to develop reactive applications in a declarative style. For that reactive programming languages automatically handle how changes are propagated through the applications: the developer only needs to define what happens when a value changes.
-
-\begin{lstlisting}[caption=Programa demonstruojanti reaktyvaus ir imperatyvaus programavimo skirtumus, label=reactive_vs_non_reactive]
-a = 1
-b = 2
-c = a + b
-a = 2
-\end{lstlisting}
-
-In a traditional programming language like Java, the value of c is 3 at the end of the execution. However, in a reactive programming language the value of c is 4. When the last instruction assigns the value 2 to a the reactive programming language will automatically recompute the value of c since it depends on the variables a and b.
-
-In the example \ref{reactive_vs_non_reactive}, the developer defines that c should be the sum of a and b. He does not need to write the code to ensure that. The language ensures that c is always the sum of a and b for the developer. This has the advantage of not having to write the propagation logic, for the developer. To conclude the example one can argue that the code is more legible and the reactive code is written declaratively.
-
-\subsection{Išskirtinės reaktyviojo programavimo kalbos ypatybės}
-
-Reaktyviojo programavimo kalbos suteikia (reaktyviąsias) reikšmes ir (reaktyviuosius) operatorius. Reaktyviosios reikšmės yra įvykiai ir elgsenos.
-
-\begin{itemize}
-  \item Įvykiai – reikšmė, kuri teikia begalinį keitimų srautą. Reikšmė pateikia keitimų įvykius, kurie gali turėti reikšmę kaskart, kai įvyksta keitimas. Kitaip nei elgsena (paaiškinta toliau), įvykių srautas neturi reikšmės.
-  \item Elgsena – tai reikšmė, kuri keičiasi laike \ref{ElliottHudak97:Fran}. Apskritai ji reiškia funkcinę priklausomybę (elgsenos išraiška) nuo kitų elgsenų. Jos reikšmė gaunama vertinant elgsenos išraišką. Kai kuriose reaktyviojo programavimo kalbose elgsena dar vadinama signalu.
-\end{itemize}
-
-Daugelyje reaktyviojo programavimo kalbų galima naudoti įvykius ir elgsenas. Kai kuriose kalbose galima naudoti tik elgsenas, nes jas galima realizuoti kaip įvykių apibendrinimą \cite{Wan2002:EventDrivenFRP, CzaplickiC13:FRPGUI}. Šiose kalbose kūrėjas elgseną gali laikyti reikšmę turinčiu įvykiu.
-
-Aprašant reaktyvųjį programavimą, daugelis elgsenos ir įvykių koncepcijų veikia vienodai. Be to, kalbos, kurios palaiko abi šias koncepcijas, leidžia operatoriams keisti įvykį į elgseną ir atvirkščiai. Todėl šioje tezėje terminą „elgsena“ naudosime elgsenoms ir įvykiams aprašyti.
-
-\subsection{Reaktyvieji operatoriai}
-
-Reaktyviojo programavimo kalbos operatoriai veikia su įvykiais ir elgsenomis. Šie operatoriai gali transformuoti arba jungti elgsenas į naują elgseną. Reaktyviojo programavimo kalbos teikiami operatoriai skirtingose kalbose yra skirtingi. Tačiau paprastai yra operatorius, skirtas transformuoti elgseną (map), operatorius, skirtas sujungti elgsenas į vieną elgseną (merge), ir operatorius, kuris veikia esant būsenai (fold). Tai yra tipiniai daugelio reaktyviojo programavimo kalbų operatoriai, todėl toliau jie yra plačiau paaiškinami.
-
-\begin{itemize}
-  \item map - „map“ operatorius taiko funkciją f elgsenai b. Šio proceso metu sukuriama nauja elgsena ir šios naujos elgsenos reikšmė yra funkcija f, taikoma elgsenos b reikšmei.
-  \item merge - „merge“ operatorius sujungia dvi elgsenas į naują elgseną. Naujos elgsenos reikšmė yra naujausios pakeistos elgsenos reikšmė.
-  \item fold - „fold“ operatorius elgsenoje b apima funkciją f ir reikšmę v. Jis sukuria naują elgseną „bnew“. Pradinė „bnew“ reikšmė yra v. Kai b reikšmė pasikeičia, „bnew“ reikšmė pasikeičia į f (sena „bnew“ reikšmė, b reikšmė). Aprašant laisvai, „bnew“ reikšmė f taikoma senai „bnew“ reikšmei ir b reikšmei.
-\end{itemize}
-
-
+Verta pastebėti, kad RP jau plačiai naudoja vartojo sąsajos kūrėjų bendruomenė, kurie maždaug 2009 m. pradėjo naudoti originalų „Flapjax“ dokumentą \cite{Meyerovich:2009:FPL:1639949.1640091} ir toliau naudojo kelias bibliotekas, kuriose buvo realizuoti RP principai, pvz., „Bacon.js“\footnote{https://baconjs.github.io/}, „Knockout“\footnote{http://knockoutjs.com/}, „Meteor“\footnote{https://www.meteor.com/}, „React.js“\footnote{https://facebook.github.io/react/}, „Reactive.coffee“\footnote{http://yang.github.io/reactive-coffee/} ir „RxJS“\footnote{http://reactivex.io/}.
