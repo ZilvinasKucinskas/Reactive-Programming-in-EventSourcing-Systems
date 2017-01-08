@@ -20,9 +20,9 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
 \subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
 
 \begin{enumerate}
-  \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/items/add-to-cart/1|.
+  \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart/add/1|.
 
-  \item Saityno serveris gauna užklausą. Maršrutizatorius naudoja maršrutų failą \lstinline|config/routes.rb| ir identifikuoja kur reikia nusiųsti užklausą. Mūsų atveju \lstinline|items| yra kontrolierius, \lstinline|add-to-cart| yra norimas atlikti veiksmas, o \lstinline|1| yra parametras, nurodantis konkretų/unikalų pirkinį.
+  \item Saityno serveris gauna užklausą. Maršrutizatorius naudoja maršrutų failą \lstinline|config/routes.rb| ir identifikuoja kur reikia nusiųsti užklausą. Mūsų atveju \lstinline|cart| yra kontrolierius, \lstinline|add| yra norimas atlikti veiksmas, o \lstinline|1| yra parametras, nurodantis konkretų/unikalų pirkinį.
 
   \item Kontrolierius iškviečia komandą.
 
@@ -33,9 +33,19 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
   \item Kai tik įvykis jau įrašytas į įvykių žurnalą, galima vartotojui pranešti apie sėkmingą rezultatą.
 \end{enumerate}
 
-\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
+\subsubsection{Pavyzdinis procesas - vartotojas peržiūri savo pirkinių krepšelį}
 
+\begin{enumerate}
+  \item Vartotojas pateikia užklausą programai peržiūrėti savo pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart|.
 
+  \item Saityno serveris gauna užklausą. Maršrutizatorius naudojo maršrutų failą \lstinline|config/routes.rb| ir identifikuoka kuris kontrolierius atsakys į užklausą.
+
+  \item Kontrolierius iškviečia skaitymo modelį, kuris naudojant Ruby on Rails karkasą įprastai būna supaprastintas (naudojant aktyvų įrašą nereikia rašyti SQL, jis yra sugenerupjamas). Pavyzdinė užklausa \lstinline|@cart = current_user.cart.all|.
+
+  \item Dabartinis vartotojo pirkinių krepšelis yra nuskaitomas iš duomenų saugyklos. Čia reikia prisiminti galutinės darnos sąvybę. Esant didelei apkrovai, egzistuoja galimybė, jog bus nuskaitoma krepšelio būsena kai pirkinys dar nepridėtas į krepšelį. Todėl toks sistemos projektavimas verčia labiau mąstyti apie pačią sistemą. Įprastiniu atveju, pirkinių krepšelis įvykdžius daikto pridėjimo scenarijų, aprašytą aukščiau, galėtų būti pridedamas vartotojo sąsajoje. Vartotojas matytų, jog pirkinys pridėtas į krepšelį, tačiau įvykių kaupimo programavimo programos sąsaja (API) dar galbūt nebūtų baigusi darbo. Įprastiniu atveju, kai vartotojas norėtų pirkti visus krepšelio pirkinius, reaktyviojo programavimo programos sąsaja (API) jau būtų baigusi darbą. Įprastiniu atveju tai trunka keliasdešimt milisekundžių.
+
+  \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
+\end{enumerate}
 
 \subsection{Reaktyvus programavimas Ruby kalboje}
 
@@ -45,7 +55,7 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
 
 Pagrindinė šio šablono (iteratoriaus) idėja – atsakomybė už sąrašo objekto prieigą ir perėjimą ir jo įdėjimas į iteratoriaus objektą. Iteratoriaus klasė apibrėžia prieigos prie sąrašo elementų sąsają. Iteratoriaus objektas atsakingas už esamo elemento stebėjimą; t. y. jis žino, kurie elementai jau buvo pereiti.
 
-„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas Enumerable modulis, egzempliorius. Kuris yra beveik bet koks rinkinys.
+„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas \lstinline|Enumerable| modulis, egzempliorius. Kuris yra beveik bet koks rinkinys.
 
 \subsubsection{Stebėtojas}
 
@@ -53,7 +63,7 @@ Stebėtojo šablonas yra kūrimo šablonas, kuriame objektas (vadinamas tema) tv
 
 Iš esmės temos yra objektai, kurie siunčia pranešimus į objektus, stebinčius tokias temas. Temos priverstinai įkelia pranešimus stebėtojams, todėl tai ir vadinama stebėtojo šablonu.
 
-„Ruby“ pateikiama su Observable moduliu standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
+„Ruby“ pateikiama su \lstinline|Observable| moduliu standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
 
 \subsubsection{Reactive programming}
 
@@ -61,51 +71,71 @@ Dabar, kai turime supratimą ir apie iteratoriaus, ir apie stebėtojo šablonus,
 
 Pagal Reaktyvumo manifestą reaktyviosios sistemos yra: reaguojančios, atkuriamos, lanksčios ir valdomos pranešimais. Tokio tipo apibrėžimai labai glumina. Tai, kaip aš suprantu Reaktyvumo manifestą, reaktyviosios sistemos yra asinchroninės, toleruojančios triktis, išplečiamos ir palaikančios ryšį su neblokuojamu pranešimų perdavimu.
 
-Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio?
+Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio? Toliau bus nagrinėjamos reaktyviojo programavimo bibliotekos ``Ruby'' kalboje.
+
+\subsubsection{Reaktyviojo programavimo bibliotekos}
+
+Darbo autoriui pavyko rasti 2 reaktyviojo programavimo bibliotekas ruby kalboje. Todėl jas plačiau aptarsime.
+
+\begin{itemize}
+  \item ``RxRuby''\footnote{https://github.com/ReactiveX/RxRuby} - 595 žvaigždučių bei 52 išsišakojimai, paskutinis atnaujinimas įvyko 2017 metų sausį. (Žiūrėta 2017-01-08)
+
+  \item ``Frappuccino''\footnote{https://github.com/steveklabnik/frappuccino} - 370 žvaigždučių bei 32 išsišakojimai, paskutinis atnaujinimas įvyko 2016 metų vasarį. (Žiūrėta 2017-01-08)
+\end{itemize}
+
+``RxRuby'' biblioteka turi labiau apribojančią ``Apache'' licenziją (2 versija) lyginant ``Frappuccino'' MIT licenziją. Bibliotekų peržiūros Github platformoje pateiktos priedų \ref{img:rxruby}, \ref{img:frappuccino} paveikslėliuose.
 
 \subsubsection{RxRuby}
 
-Let’s see how RxRuby works, in it’s simplest form.
+Pirmiausia pažiūrėkime kaip veikia ``RxRuby'' paprasčiausioje formoje:
 
 \begin{lstlisting}[]
   RxRuby::Observable.just(7)
 \end{lstlisting}
 
-A RxRuby::Observable is just a stream. A stream is a subject (or, an object) that you can subscribe to (or, observe). Now, the RxRuby:Observable module itself doesn’t do anything, unless we invoke a method on it. Let’s carry on with the example:
+\lstinline|RxRuby::Observable| yra srautas. Srautas yra tema (arba objektas), kurį galima prenumeruoti (arba stebėti). \lstinline|RxRuby::Observable| modulis pats nedaro nieko, nebent kuris nors jo metodas bus iškviestas. Tęskime pavyzdį:
 
 \begin{lstlisting}[]
   stream = RxRuby::Observable.just(7)
-  stream.subscribe {|num| puts "Gautas skaičius #{num}" }
+  stream.subscribe {|num| puts "Gautas skaicius #{num}" }
 \end{lstlisting}
 
-The object that we receive is a just the number 7, wrapped as an observable. Since the observable implements (most of) the Enumerable methods, we can do anything with it. But, to avoid any complication in this example, we will just subscribe to the observable and pass in a lambda. The lambda will be invoked on every time the stream pushes any data (or, in this case, just once).
+Objektas, kurį gauname yra tiesiog skaičius 7, apgaubtas kaip tema. Kadangi tema realizuoja daugumą \lstinline|Enumerable| modulio metodų, galima su juo daryti praktiškai bet ką. Tačiau kad išvengtume sudėtingumo šiame pavyzdyje, tiesiog prenumeruokime temą ir perduokime \lstinline|lambda| konstrukciją. \lstinline|Lambda| bus iškviesta kiekvieną kartą kai srautas gaus informaciją (šiuo atveju tik kartą).
 
-The output of the example will be:
+Šio pavyzdinio atvejo išvestis bus:
 
 \begin{lstlisting}[]
-  Gautas skaičius 7
+  Gautas skaicius 7
 \end{lstlisting}
 
-Now, since we have a lot of the methods from the Enumerable mixin available, let’s do something with an array. There’s two ways of working with arrays in RxRuby: via ranges and via plain arrays.
+Kadangi turime daug \lstinline|Enumerable| modulio metodų, kuriuos galime naudoti, galime kažką nuveikti su masyvu. Yra 2 būdai dirbti su masyvais ``RxRuby'' bibliotekoje: naudojant rėžį ir paprastus masyvus.
 
 \begin{lstlisting}[]
   RxRuby::Observable.range(1,10)
     .select {|num| num.even? }
     .sum
-   .subscribe {|s| puts "Suma lyginių skaičių tarp 1 ir 10 yra: #{s}" }
+    .subscribe {|s| puts "Suma lyginiu skaiciu tarp 1 ir 10 yra: #{s}" }
 \end{lstlisting}
 
-This will return:
+Gražins:
 
 \begin{lstlisting}[]
-  Suma lyginių skaičių tarp 1 ir 10 yra: 30
+  Suma lyginiu skaiciu tarp 1 ir 10 yra: 30
 \end{lstlisting}
 
-Let’s break it down. First, we create an observable range, with the numbers from 1 to 10. Then, we invoke select on the observable, with a lambda as a parameter. The lambda takes each number of the range as a parameter, and filters all even numbers from the observable, returning a new observable. Then, we invoke sum on it, which sums all of the even numbers.
+Paanalizuokime šį pavyzdį. Pirmiausia sukuriame temos rėžis, su skaičiais tarp 1 ir 10. Tada iškviečiamas filtravimo operatorius \lstinline|select| temai, perduodant \lstinline|lambda| kaip parametrą. \lstinline|lambda| priima kiekvieną rėžio skaičių kaip parametrą ir filtruoja visus lyginius temos skaičius, grąžindama naują temą. Iškvietus \lstinline|sum| operatorių, susumuojami visi lyginiai skaičiai.
 
-At the end, we subscribe on the observable that sum returns. By subscribing we basically “watch over” the observable (or, the stream of data) and invoke the lambda that we pass as an argument to the subscribe. Any time the observable pushes any data, it will go through this “funnel” and invoke the last lambda at the end, which will print out the message.
+Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Prenumeruojant tema (arba duomenų srautas) tiesiog stebima ir \lstinline|lambda| iškviečiama. Kiekvieną kartą kai tema gauna naują informaciją, duomenys bus perduodami lyg per ``piltuvėlį'' ir paskutinė \lstinline|lambda| atspausdints rezultatą.
 
 \subsubsection{Frapuccino}
+
+Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro kodo projektus\footnote{https://github.com/steveklabnik}, 2013 metais pristatė reaktyvaus programavimo idėjas Ruby kalboje įvairiose konferencijose, tarp jų Euruko2013 \cite{klabnik:euruko}, RubyConf India 2013 \cite{klabnik:india} ir kitos.
+
+Panagrinėkime šios bibliotekos pavyzdį:\tabularnewline
+\tabularnewline
+\begin{lstlisting}[]
+
+\end{lstlisting}
 
 \subsection{Įvykių kaupimas Ruby kalboje}
 
@@ -119,7 +149,7 @@ At the end, we subscribe on the observable that sum returns. By subscribing we b
   \item ``Event Sourced Record''\footnote{https://github.com/fhwang/event\_sourced\_record} - 31 žvaigždutė bei 5 išsišakojimai, paskutinis atnaujinimas įvyko 2015 metų balandį. (Žiūrėta 2017-01-07)
 \end{itemize}
 
-Visos bibliotekos turi MIT licenziją. Verta paminėti, jog ``RailsEventStore'' anksčiau turėjo labiau apribojančią LGPLv3\footnote{https://github.com/arkency/rails\_event\_store/commit/212b202f227a98f131dc3e8711e431e1f126b475} licenziją (iki 2016 metų birželio).
+Visos bibliotekos turi MIT licenziją. Verta paminėti, jog ``RailsEventStore'' anksčiau turėjo labiau apribojančią LGPLv3\footnote{https://github.com/arkency/rails\_event\_store/commit/212b202f227a98f131dc3e8711e431e1f126b475} licenziją (iki 2016 metų birželio). Bibliotekų peržiūros Github platformoje pateiktos priedų \ref{img:rails_event_store}, \ref{img:sandthorn}, \ref{img:event_sourced_record} paveikslėliuose.
 
 Kadangi ``RailsEventStore'' yra aktyviai atnaujinima, populiariausia iš trijų, atviro kodo, įvykių kaupimą įgyvendinanti biblioteką, ją ir nagrinėsime.
 
@@ -130,3 +160,21 @@ Kadangi ``RailsEventStore'' yra aktyviai atnaujinima, populiariausia iš trijų,
 \subsection{Iššūkiai}
 
 \subsection{Tolimesni darbai}
+
+\subsection{Darbai numatomi 4-ame semestre}
+
+\begin{itemize}
+  \item Pabaigti visus nepabaigtus skyrius (santraukos, išvados, realizacija).
+
+  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore.
+
+  \item Pabandyti gauti įžvalgų iš RailsEventStore kūrėjų apie mano inovatyvų sprendimą RailsEventStore programavimo bibliotekoje. Įsivaizduoju tai kaip atviro kodo papildinį, kurį viešai gali peržiūrėti, ar privatus susirašinėjimas.
+
+  \item Paanalizuoti kaip galima įvykius atkartoti naudojant reaktyvius operatorius, kadangi analizuojant teoriją buvo minėta, jog tai gali būti keblumas.
+
+  \item Norėtųsi darbo teorinę dalį įžvalgomis apie reaktyvaus programavimo teikiamus pranašumus, tokius kaip kodo suprantamumas, programuotojo produktyvumas remiantis Guido Salvaneschi darbu \cite{Salvaneschi:2014:ESP:2635868.2635895}.
+
+  \item Norėtųsi darbo teorinę dalį papildyti apie reaktyvaus programavimo trūkumus remiantis \cite{Bainomugisha:2013:SRP:2501654.2501666} darbu.
+
+  \item Darbo formatavimas ir teksto klaidų patikrinimas (pavyzdžiui kabučių naudojimas) priklauso darbui 4-ame semestre pagal MIF reikalavimus.
+\end{itemize}
