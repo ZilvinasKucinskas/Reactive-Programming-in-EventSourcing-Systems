@@ -1,5 +1,11 @@
   Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Kad būtų galima susidaryti bendrą vaizdą ir suvokti panaudojimo atvejį, pirmiausia reikia suprojektuoti aukštesnį sistemos vaizdą, tai yra suprojektuoti kuriamos sistemos architektūrą. CQRS ir įvykių kaupimo principas dažniausiai naudojami kartu, pritaikant šiuos principus apibrėžtose, sudėtingose, bei verslo logiką apimančiose sistemos srityse. Šiuo atveju pritaikomos ir turimos DDD žinios. Toliau nagrinėjami jau esantys reaktyvaus programavimo įvykių kaupimo programavimo karkasai/bibliotekos. Sekančiame skyriuje seka jų suderinamumo analizė. Aprašomi kilę iššūkiai ir galimi tolimesni darbai.
 
+\subsection{Programavimo kalba ir programavimo karkasas}
+
+Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką. \cite{Krasner:1988:CUM:50757.50759} Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+
+Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
+
 \subsection{Kuriamos sistemos architektūra}
 
 \subsection{Reaktyvus programavimas Ruby kalboje}
