@@ -2,11 +2,40 @@
 
 \subsection{Programavimo kalba ir programavimo karkasas}
 
-Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką. \cite{Krasner:1988:CUM:50757.50759} Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
 
 Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
 
-\subsection{Kuriamos sistemos architektūra}
+\subsection{Įvykių kaupimo sistemos architektūra}
+
+\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tekmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{img/mvc_cqrs}
+    \caption{MVC paremtas architektūros modelis, apjungiantis CQRS, ES bei reaktyvaus programavimo principus}
+    \label{img:mvc_cqrs}
+\end{figure}
+
+\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
+
+\begin{enumerate}
+  \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/items/add-to-cart/1|.
+
+  \item Saityno serveris gauna užklausą. Maršrutizatorius naudoja maršrutų failą \lstinline|config/routes.rb| ir identifikuoja kur reikia nusiųsti užklausą. Mūsų atveju \lstinline|items| yra kontrolierius, \lstinline|add-to-cart| yra norimas atlikti veiksmas, o \lstinline|1| yra parametras, nurodantis konkretų/unikalų pirkinį.
+
+  \item Kontrolierius iškviečia komandą.
+
+  \item Komanda gali patikrinti ar užklausa buvo validi. Jei užklausa buvo validi, kontrolierius įrašo sėkmingą arba nesėkmingą įvykį į įvykių kaupimo žurnalą. Taipogi komanda gali atlikti tam tikrus šalutinius efekus, tokius kaip elektronių žinučių siuntimas vartotojui.
+
+  \item Kai įvykis įrašomas į įvykių kaupimo žurnalą, reaktyvaus programavimo programos sąsaja (API) reaguoja į įvykį pagal aprašytas taisykles. Taisyklės aprašo ką su tuo įvykiu reikia padaryti, bendru atveju tai dažniausiai yra dabartinės būsenos atnaujinimas tam tikroje kitoje duomenų saugykloje.
+
+  \item Kai tik įvykis jau įrašytas į įvykių žurnalą, galima vartotojui pranešti apie sėkmingą rezultatą.
+\end{enumerate}
+
+\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
+
+
 
 \subsection{Reaktyvus programavimas Ruby kalboje}
 
