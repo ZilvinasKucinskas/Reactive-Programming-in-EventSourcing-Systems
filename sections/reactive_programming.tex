@@ -38,7 +38,7 @@ Reaktyviojo programavimo kalbos suteikia (reaktyviąsias) reikšmes ir (reaktyvi
 
 \subsubsection{Reaktyviosios reikšmės}
 
-Reaktyviosios reikšmės yra įvykiai ir elgsenos.
+Reaktyviosios reikšmės yra įvykiai ir elgsenos \cite{Bainomugisha:2013:SRP:2501654.2501666}.
 
 \begin{itemize}
   \item Įvykiai – reikšmė, kuri teikia begalinį keitimų srautą. Reikšmė pateikia keitimų įvykius, kurie gali turėti reikšmę kaskart, kai įvyksta keitimas. Kitaip nei elgsena (paaiškinta toliau), įvykių srautas neturi reikšmės.
@@ -51,7 +51,7 @@ Aprašant reaktyvųjį programavimą, daugelis elgsenos ir įvykių koncepcijų 
 
 \subsubsection{Reaktyvieji operatoriai}
 
-Reaktyviojo programavimo kalbos operatoriai veikia su įvykiais ir elgsenomis. Šie operatoriai gali transformuoti arba jungti elgsenas į naują elgseną. Reaktyviojo programavimo kalbos teikiami operatoriai skirtingose kalbose yra skirtingi. Tačiau paprastai yra operatorius, skirtas transformuoti elgseną (map), operatorius, skirtas sujungti elgsenas į vieną elgseną (merge), ir operatorius, kuris veikia esant būsenai (fold). Tai yra tipiniai daugelio reaktyviojo programavimo kalbų operatoriai, todėl toliau jie yra plačiau paaiškinami.
+M.Viering išskiria reaktyvius operatorius kaip išskirtinę reaktyviojo programavimo ypatybę \cite{RubyReactiveMaster}. Reaktyviojo programavimo kalbos operatoriai veikia su įvykiais ir elgsenomis. Šie operatoriai gali transformuoti arba jungti elgsenas į naują elgseną. Reaktyviojo programavimo kalbos teikiami operatoriai skirtingose kalbose yra skirtingi. Tačiau paprastai yra operatorius, skirtas transformuoti elgseną (map), operatorius, skirtas sujungti elgsenas į vieną elgseną (merge), ir operatorius, kuris veikia esant būsenai (fold). Tai yra tipiniai daugelio reaktyviojo programavimo kalbų operatoriai, todėl toliau jie yra plačiau paaiškinami.
 
 \begin{itemize}
   \item \textbf{map} - „map“ operatorius taiko funkciją \lstinline|f| elgsenai \lstinline|b|. Šio proceso metu sukuriama nauja elgsena ir šios naujos elgsenos reikšmė yra funkcija \lstinline|f|, taikoma elgsenos \lstinline|b| reikšmei.
@@ -79,7 +79,7 @@ Reaktyviojo programavimo programų sąsajos (API) bibliotekos paprastai yra:
 Šį programavimo metodą palaikančių programavimo abstrakcijų pavyzdžiai:
 
 \begin{itemize}
-  \item Ateitis / pažadai (angl.: Futures / Promises) – atskiros reikšmės konteineriai, semantika „daugelis skaito / vienas rašo“, kai galima įtraukti asinchronines reikšmės transformacijas, net jei ji dar neprieinama.
+  \item Ateitis / pažadai (angl.: Futures / Promises) – atskiros reikšmės konteineriai, semantika „daugelis skaito / vienas rašo“, kai galima įtraukti asinchronines reikšmės transformacijas, net jei ji dar neprieinama. \cite{Jef15:FRPPromises}
   \item Srautai – reaktyvieji srautai: begaliniai duomenų apdorojimo srautai, įgalinantys asinchronines, neblokuojančias, kompensuojančias apkrovą transformacijos komandų grandines tarp daugybės šaltinių ir paskirties vietų.
   \item Duomenų srauto kintamieji – atskirai priskiriami kintamieji (atminties elementai), kurie gali būti priklausomi nuo įvesties, procedūrų ir kitų elementų, kad jie būtų automatiškai atnaujinami po pakeitimų. Praktinis to pavyzdys yra skaičiuoklės, kuriose pasikeitus langelio reikšmei, tai paveikia visas priklausomas funkcijas ir dėl to sukuriamos naujos reikšmės.
 \end{itemize}
