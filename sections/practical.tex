@@ -134,8 +134,52 @@ Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro ko
 Panagrinėkime šios bibliotekos pavyzdį:
 
 \begin{lstlisting}[]
+class Button
+  def push
+    emit(:pushed) # emit sends a value into the stream
+  end
+end
 
+button = Button.new
+stream = Frappuccino::Stream.new(button)
+
+counter = stream
+            .map {|event| event == :pushed ? 1 : 0 } # convert events to ints
+            .inject(0) {|sum, n| sum + n } # add them up
+
+counter.now # => 0
+
+button.push
+button.push
+button.push
+
+counter.now # => 3
+
+button.push
+
+counter.now # => 4
 \end{lstlisting}
+
+Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų yra dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
+
+Reaktyvus operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| obejektą, kuris taipogi yra stebėtojas.
+
+Šiame pavyzdyje yra sukuriamas mygtukas. Kiekvieną kartą kai jis paspaudžiamas vistiem temos stebėtojams yra perduodamas pranešimas apie naują reikšmę. \lstinline|counter| kintamasis parodo kiek kartų buvo paspaustas mygtukas. Nereikia kaskart iš naujo pritaikyti skaičiavimų, biblioteka įgalina apsirašyti elgseną vieną kartą deklaratyviai. \lstinline|map| reaktyvus operatorius transformuoja įvykio reikšmę - jeigu gautas simbolis \lstinline|:pushed| - reikšmė tampa 1, o priešingu atveju 0. Kitas operatorius \lstinline|inject| priima parametrą - pradinę reikšmę (šiuo atveju 0). Kiekvieną kartą kai yra gaunama reikšmė, perduodamas kodo blokas (lambda) yra iškviečiama ir rezultatas atnaujinamas.
+
+Rezultatas yra saugomas atmintyje, todėl programai baigus darbą, reikšmės yra prarandamos. Kaip Steve Klabnik pasakojo savo prezentacijose, tokią biblioteką būtų galima naudoti vartotojo sąsajos programose. Jis teigia, jog pati idėja yra pasiskolinta iš funkcinių programavimo kalbų, ir įdomu pritaikyti naujus principus Ruby programavimo kalboje.
+
+Kadangi reaktyvūs operatoriai grąžina naują stebėtoją - galima programuoti labai deklaratyviai:
+
+\begin{lstlisting}
+  merged_stream = Frappuccino::Stream.merge(one_stream , other_stream)
+  filtered_stream = merged_stream.select{|event| event == :pushed }
+
+  filtered_stream.on_value do |event|
+  # event will only ever be :pushed
+  end
+\end{lstlisting}
+
+Biblioteka leidžia tiek apjungti, tiek filtruoti, tiek perduoti bloką kodo, kuris bus įvykdomas, kai tik srautas gaus naują informaciją.
 
 \subsection{Įvykių kaupimas Ruby kalboje}
 
