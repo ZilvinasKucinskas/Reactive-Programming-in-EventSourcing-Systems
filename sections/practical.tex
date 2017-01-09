@@ -160,7 +160,7 @@ button.push
 counter.now # => 4
 \end{lstlisting}
 
-Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų yra dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
+Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų yra dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
 
 Reaktyvus operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| obejektą, kuris taipogi yra stebėtojas.
 
@@ -454,7 +454,38 @@ Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima p
 
 \textbf{Filtravimo operatorius}
 
+Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius, ir leistų apdoroti tik tuos įvykius kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti vartotojus, kurie priklauso tam tikrai A/B testo grupei, ir tik tada pritaikyti tam tikrus veiksmus.
+
+\begin{lstlisting}
+  event_store.subscribe([ProductPurchase])
+             .filter { |event| User.find(event.user.id).ab_active? }
+             .each { |event| ApplyTestCaseScenario.execute(event) }
+\end{lstlisting}
+
+Tam tikras testinis atvejis yra pritaikomas tik tiems vartotojams, kurie priklauso A/B testo grupei.
+
 \textbf{Transformavimo operatorius}
+
+Konstrukcija \lstinline|map| leistų transformuoti įvykius bei galėtų būti naudinga eksperimentavimo tikslais. Turint visą sistemos verslo logikos įvykių istoriją galima būtų iš naujo pritaikyti visus įvykius ir stebėti sistemos elgseną kaitaliojant įvairius parametrus. Pavyzdžiui elektroninės komercijos sistemoje gali būti poreikis įsivesti tam tikrą pirkėjų lojalumo sistemą. Iš pradžių neaišku kiek kam kreditų skirti, kokį procentą nuo produkto sumos. Neaišku kurie vartotojai kiek kreditų sukaups ateityje. Tačiau turint istoriją galima šį atvejį paprastai sumodeliuoti lokaliai. Pažvelkime į pseudokodą:
+
+\begin{lstlisting}[]
+module Transformers
+  class StoreCreditsMapper
+    CREDITS_PERCENTAGE_FOR_PURCHASE = 0.3
+
+    def self.execute(event)
+      event.user.store_credits = event.product.price * CREDITS_PERCENTAGE_FOR_PURCHASE
+    end
+  end
+end
+
+event_store.subscribe([ProductPurchase])
+           .filter { |event| Filters::EligibleForBuyerLoyaltyProgram.execute(event) }
+           .map { |event| Transformers::StoreCreditsMapper.execute(event) }
+           .each { |event| ReadModels::User.call(event) }
+\end{lstlisting}
+
+Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
 
 \textbf{Imties mažinimo operatorius}
 
@@ -472,6 +503,8 @@ Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuri
 
 \textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
 
+Reaktoriaus projektavimo šablonas yra naudojamas ``RailsEventStore'' bibliotekoje. Dėl to reikėtų detaliau paanalizuoti jo vidinę realizaciją.
+
 \subsubsection{Realizacija}
 
 \textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
@@ -482,9 +515,15 @@ Nagrinėtose Ruby reaktyvaus programavimo bibliotekose buvo panaudotas stebėtoj
 
 \subsubsection{Atkuriamumas}
 
+\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
+
+Bus aprašyta kaip įvykius atkartoti. Pritaikant reaktyvius operatorius, įvykius atkurti gali būti kebliau, kaip nagrinėta literatūroje, tačiau įmanoma. Šia tema literatūros tikrai trūksta, ir detalios instrukcijos labai praverstų.
+
 \subsubsection{Našumas}
 
 \textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
+
+Reikia įvertinti realizacijos našumą.
 
 \subsubsection{Apribojimai}
 
