@@ -127,7 +127,7 @@ Paanalizuokime šį pavyzdį. Pirmiausia sukuriame temos rėžis, su skaičiais 
 
 Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Prenumeruojant tema (arba duomenų srautas) tiesiog stebima ir \lstinline|lambda| iškviečiama. Kiekvieną kartą kai tema gauna naują informaciją, duomenys bus perduodami lyg per ``piltuvėlį'' ir paskutinė \lstinline|lambda| atspausdints rezultatą.
 
-\subsubsection{Frapuccino}
+\subsubsection{Frappuccino}
 
 Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro kodo projektus\footnote{https://github.com/steveklabnik}, 2013 metais pristatė reaktyvaus programavimo idėjas Ruby kalboje įvairiose konferencijose, tarp jų Euruko2013 \cite{klabnik:euruko}, RubyConf India 2013 \cite{klabnik:india} ir kitos.
 
@@ -308,13 +308,13 @@ client.delete_stream(stream_name)
 
 \subsubsection{Prenumeratų mechanizmas}
 
-Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|handle_event(event)| metodą.
+Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
 
 Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Kuris bus aprašytas vėliau. Pavyzdys pateiktas žemiau:
 
 \begin{lstlisting}
 class CartReadModel
-    def handle_event(event)
+    def call(event)
         if event.event_type == 'AddToCart'
             add_to_cart(event.data)
         end
@@ -332,20 +332,141 @@ class CartReadModel
 end
  
 cart = CartReadModel.new
-client.subscribe(cart, ['AddToCart', 'RemoveFromCart']) 
+client.subscribe(cart, [AddToCart, RemoveFromCart]) 
 \end{lstlisting}
 
 Galima pastebėti įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
 \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
-\subsubsection{Idėja}
+Pirmiausia reikėtų peržvelgti norimo pasiekti tikslo reikalavimus ir kiek iš jų ``RailsEventStore'' biblioteka atitinka:
 
-TODO:
+\begin{itemize}
+  \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų - sąlyga yra išpildoma, kadangi klientui galima perduoti lambda funkciją, kuri bus iškviečiama įvykus tam tikram įvykiui. Pavyzdys:
 
-Privalumai:
+  \begin{lstlisting}[]
+    in_memory_cart_processing = -> (event) { # do something }
+    client.subscribe(in_memory_cart_processing, [AddToCart, RemoveFromCart])
+  \end{lstlisting}
 
-* Lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti.
+  \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius - ši sąlyga nėra išpildoma, yra tik vienas metodas, kuris priima 2 parametrus ir įgalina prenumeruoti tam tikrus srautus bei įvykdyti atgalinius iškvietimus įvykus pasikeitimui.
+
+  \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API) - ši biblioteka yra skirta būtent tam tikslui pasiekti.
+
+  \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai arba reagavimas į apkrovą (Reaktyvumo manifestas). Iš tiesų biblioteka nesuteikia tokio funkcionalumo, tačiau jis yra pasiekiamas papildomų bibliotekų pagalba. Tai bus aprašyta vėliau.
+
+  \item Atkuriamumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius.
+
+  \item Našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
+\end{itemize}
+
+Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia pereikime prie reaktyviųjų operatorių idėjos.
+
+\subsubsection{Idėja - reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
+
+Steve Klabnik idėjos, atėjusios iš funkcinio programavimo bendruomenės, sudomino ir Ruby bendruomenę. Deklaratyviai parašytas kodas dažnai yra lengviau skaitomas, suprantamas, galima labiau moduliarizuoti kodą, skaidyti į daug smulkesnius komponentus. Galėtų būti naudinga išplėsti ``RailsEventStore'' biblioteką reaktyviais operatoriais tokiais kaip filtravimo \lstinline|filter|, transformavimo \lstinline|map| bei pavyzdžiui imties mažinimo \lstinline|sample|.
+
+\textbf{Maršrutizatoriaus paskirtis}
+
+Dabartinis ``RailsEventStore'' įvykių ir jų apdorojų apibrėžimas atrodo labai paprastas. Jis panašus į MVC projektavimo šablono maršrutizatoriaus veikimą. Kai gaunama nauja informacija, pažiūrima į tos informacijos tipą bei priskiriamas reikiamas kontrolierius.
+
+Tačiau Ruby on Rails programavimo karkaso maršrutizatorius \lstinline|config/routes.rb| turi ir sudėtingesnių kalbos konstrukcijų, tokių kaip maršrutizatoriaus suvaržymai\footnote{http://guides.rubyonrails.org/routing.html}. Jie dažnai įveda saugumo ir švarumo į bendrą kuriomos sistemos kodą. Jie gali išvalyti bei validuoti informaciją, kuri bus perduodama kontrolieriui.
+
+Pačiu paprasčiausiu atveju validatorius gali atrodyti kaip:
+
+\begin{lstlisting}[]
+get   'user/:id'   => 'user#show', constraint: { id: /\d+/ }
+\end{lstlisting}
+
+Šis validatorius filtruoja tik tas užklausos, kur parametras id yra perduodamas kaip sveikasis skaičius. Jei jis toks nėra, užklausa net nepasiekia kontrolieriaus.
+
+Kitas maršrutizatoriaus apribojimų panaudojimo atvejis yra kontrolieriaus veiksmų supaprastinimas (ir jį palaikančio kodo). Tarkime turime kontrolierių:
+
+\begin{lstlisting}[]
+  def action
+    if params['sort']    == 'best_match'
+      #execute
+    elsif params['sort'] == 'trending'
+      #execute
+    elsif params['sort'] == 'new'
+      #execute
+    end
+  end
+\end{lstlisting}
+
+o tuo tarpu maršrutizatorius atrodo kaip:
+
+\begin{lstlisting}[]
+  get    'sample/url' => 'my#action'
+\end{lstlisting}
+
+Panaudojant maršrutizatoriaus apribojimus galime išskaidyti atsakomybes ir padalinti veiksmus priklausomai nuo to kokie yra užklausos parametrai. Po pakeitimų \lstinline{config/routes.rb} gali atrodyti:
+
+\begin{lstlisting}[]
+  get    'sample/search' => 'search#best_match',  constraints: BestMatchConstraint
+  get    'sample/search' => 'search#trending',    constraints: TrendingSearchConstraint
+  get    'sample/search' => 'search#new',         constraints: NewSearchConstraint
+
+  class BestMatchConstraint
+    def self.matches?(request)
+      request.query_parameters['sort'] == 'best_match'
+    end
+  end
+
+  class TrendingSearchConstraint
+    def self.matches?(request)
+      request.query_parameters['sort'] == 'trending'
+    end
+  end
+
+  class NewSearchConstraint
+    def self.matches?(request)
+      request.query_parameters['sort'] == 'new'
+    end
+  end
+\end{lstlisting}
+
+Po tokio išskaidymo kontrolieriaus metodai atrodytų daug švariau ir gražiau:
+
+\begin{lstlisting}
+  def best_match
+    # execute
+  end
+
+  def trending
+    # execute
+  end
+
+  def new
+    # execute
+  end
+\end{lstlisting}
+
+Toliau pateikiu kartais praktikoje pasitaikantį duomenų transformavimo pavyzdį maršrutizatoriuje, kai yra pridedami nauji duomenys:
+
+\begin{lstlisting}
+get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
+\end{lstlisting}
+
+Jeigu užklausos parametras \lstinline|format| nebuvo nurodytas, numatytatasis parametras \lstinline|params[:format] = `jpg'| bus perduotas.
+
+Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
+
+\textbf{Filtravimo operatorius}
+
+\textbf{Transformavimo operatorius}
+
+\textbf{Imties mažinimo operatorius}
+
+Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuriant analitines aplikacijas, , kur n būtų išreikštas kaip procentas, kurio reikšmė būtų nuo 0 iki 100. Kai į įvykių žurnalą yra įrašoma labai daug įvykių, tik tam tikras procentas įvykių būtų toliau apdorojami. Bendru atveju šis operatorius galėtų būti išreikštas per \lstinline|filter| operatorių:
+
+\begin{lstlisting}[]
+  es.subscribe([RealtimeTimeEventAdded])
+     .filter { |event| rand(100) < 20 }
+     .each { |event| EventProcessor.call(event) }
+\end{lstlisting}
+
+Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruoja reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
 
 \subsubsection{Reaktoriaus projektavimo šablonas}
 
@@ -358,6 +479,12 @@ Privalumai:
 Skyrius aprašys iššūkius ir realizacijos detales apjungiant nagrinėtų reaktyvių programavimo bibliotekų idėjas kartu su ``RalsEventStore'' biblioteka.
 
 Nagrinėtose Ruby reaktyvaus programavimo bibliotekose buvo panaudotas stebėtojo ir iteratoriaus projektavimo šablonai, o RailsEventStore bibliotekoje naudojamas reaktoriaus projektavimo šablonas. Todėl bus gilinamąsi į būdą juos sujungti.
+
+\subsubsection{Atkuriamumas}
+
+\subsubsection{Našumas}
+
+\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
 
 \subsubsection{Apribojimai}
 
