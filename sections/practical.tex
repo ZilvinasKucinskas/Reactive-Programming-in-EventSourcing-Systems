@@ -131,8 +131,8 @@ Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Pre
 
 Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro kodo projektus\footnote{https://github.com/steveklabnik}, 2013 metais pristatė reaktyvaus programavimo idėjas Ruby kalboje įvairiose konferencijose, tarp jų Euruko2013 \cite{klabnik:euruko}, RubyConf India 2013 \cite{klabnik:india} ir kitos.
 
-Panagrinėkime šios bibliotekos pavyzdį:\tabularnewline
-\tabularnewline
+Panagrinėkime šios bibliotekos pavyzdį:
+
 \begin{lstlisting}[]
 
 \end{lstlisting}
@@ -155,9 +155,149 @@ Kadangi ``RailsEventStore'' yra aktyviai atnaujinima, populiariausia iš trijų,
 
 \subsubsection{RailsEventStore}
 
+Įvykių kaupimo biblioteka ``RailsEventStore'' naudoja atskirą biblioteką darbui su įvykiais pavadinimu ``rails\_event\_store\_active\_record''\footnote{https://github.com/arkency/rails\_event\_store\_active\_record}. Pagal nutylėjimą ji yra numatytoji, tačiau esant reikalui lengvai pakeičiama (pavyzdžiui norint naudoti Greg Young ``GetEventStore''\footnote{https://geteventstore.com/} duomenų saugyklą). Taipogi yra galimybė naudoti duomenų saugyklą atmintyje.
 
+\subsubsection{Naudojimas}
+
+Jeigu į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lstinline|rails_event_store| modulis, reikia sugeneruoti aktyvaus įrašo migraciją:
+
+\begin{lstlisting}[]
+  rails generate rails_event_store:migrate
+  rake db:migrate
+\end{lstlisting}
+
+Ši migracija iš tikrųjų tokią lentelę:
+
+\begin{lstlisting}
+    create_table(:event_store_events) do |t|
+      t.string      :stream,      null: false
+      t.string      :event_type,  null: false
+      t.string      :event_id,    null: false
+      t.text        :metadata
+      t.text        :data,        null: false
+      t.datetime    :created_at,  null: false
+    end
+    add_index :event_store_events, :stream
+    add_index :event_store_events, :created_at
+    add_index :event_store_events, :event_type
+    add_index :event_store_events, :event_id, unique: true
+\end{lstlisting}
+
+Matome, jog kiekvienas įvykis turi srauto pavadinimą, įvykio tipą, unikalų identifikatorių, tam tikrus meta duomenis (čia gali būti tokia informacija kaip kliento IP, šalis iš kurios buvo atlikta užklausa ir t.t.), duomenų laukas, kuris aktyvaus įrašo pagalba serializuojamas į maišos duomenų struktūrą (angl. hash) bei sukūrimo laiką. Taipogi sukuriami reikalingi indeksai, kurie reikalingi greitesnėms užklausoms filtruojant pagal indeksuojamus lentelės stulpelius.
+
+Norint naudoti bibliotekos funkcionalumą, tereikia sukurti \lstinline|RailsEventStore::Client| klasės egzempliorių:
+
+\begin{lstlisting}[]
+    client = RailsEventStore::Client.new
+\end{lstlisting}
+
+\subsubsection{Įvykių kūrimas}
+
+Kurti įvykius naudojantis šia biblioteka yra tikrai paprasta. Tereikia apibrėžti įvykio modelį išplečiant \lstinline{RailsEventStore::Event} klasę:
+
+\begin{lstlisting}[]
+   class ProductAdded < RailsEventStore::Event 
+  end
+\end{lstlisting}
+
+Dabar galima sukurti įvykio egzempliorių ir išsaugoti į duomenų bazę:
+
+\begin{lstlisting}[]
+   stream_name = "product_1" 
+  event_data = {data: { name: "Product" }}
+  event = ProductAdded.new(event_data)
+  # publishing event for specific stream
+  client.publish_event(event, stream_name)
+  # publishing global event with stream_name == 'all'
+  client.publish_event(event)
+\end{lstlisting}
+
+Biblioteka suteikia galimybę kurti ne tik specifinius įvykius bet ir globalius. \lstinline|event_id| yra neprivaloma reikšmė. Jeigu ji neperduodama, biblioteka pati sugeneruoja unikalų identifikatorių.
+
+``RailsEventStore'' biblioteka taip pat turi optimistinę lygiagretumo kontrolę. Galima iš anksto apibrėžti laukiamą srauto versiją bekuriant įvykį. Šiuo atveju tai paskutinio įvykio reikšmė:
+
+\begin{lstlisting}[]
+ stream_name = "product_1" 
+  event_data = { 
+      data: { name: "Product" }, 
+      event_id: "b2e526fd-609d-4ds7-b2df-c624575c8edd" 
+  }
+ event = ProductAdded.new(event_data) 
+  expected_version = "951d352a-a53v-42a1-a5zz-as24chuf5b2l"
+ client.publish_event(event, stream_name, expected_version)
+\end{lstlisting}
+
+\subsubsection{Įvykių skaitymas}
+
+Biblioteka pateikia kelis būdus skaityti įvykius iš duomenų bazės. Visais atvejais įvykiai yra išrūšiuoti didėjančiai.
+
+Galime skaityti tam tikrą skaičių įvykių pradedant tam tikru įvykiu:
+
+\begin{lstlisting}[]
+stream_name = "product_1" 
+start_event = "b2d506fd-409d-4ec7-b02f-c6d2295c7edd"
+count = 40
+client.read_all_events(stream_name, start_event, count)
+\end{lstlisting}
+
+Galime skaityti visus įvykius:
+
+\begin{lstlisting}[]
+stream_name = "product_1" 
+client.read_all_events(stream_name)
+\end{lstlisting}
+
+Galime skaityti apskritai visus įvykius
+
+\begin{lstlisting}[]
+client.read_all_streams
+\end{lstlisting}
+
+\subsubsection{Įvykių trinimas}
+
+Įvykių kaupimo principas teigia, jog įvykių žurnalas yra visa sistemos istorija ir įvykiai netrinami. Tačiau gali atsirasti tokia situacija, jog programuotojas dirba lokaliai ir tiesiog testuojasi sistemą ir bando funkcionalumą, nenori užteršti istorijos. Dėl šios priežasties biblioteka palieka galimybę trinti įvykius. Tačiau reiktų gerai pagalvoti prieš naudojant šią komandą.
+
+\begin{lstlisting}
+stream_name = "product_1"
+client.delete_stream(stream_name)
+\end{lstlisting}
+
+\subsubsection{Prenumeratų mechanizmas}
+
+Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|handle_event(event)| metodą.
+
+Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Kuris bus aprašytas vėliau. Pavyzdys pateiktas žemiau:
+
+\begin{lstlisting}
+class CartReadModel
+    def handle_event(event)
+        if event.event_type == 'AddToCart'
+            add_to_cart(event.data)
+        end
+        if event.event_type == 'RemoveFromCart'
+            remove_from_cart(event.data)
+        end
+    end
+    private
+    def add_to_cart(event_data)
+        #Implementation here
+    end
+    def remove_from_cart(event_data)
+        #Implementation here
+    end 
+end
+ 
+cart = CartReadModel.new
+client.subscribe(cart, ['AddToCart', 'RemoveFromCart']) 
+\end{lstlisting}
+
+Galima pastebėti įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
 \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
+
+\subsubsection{Reaktoriaus projektavimo šablonas}
+
+\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
 
 \subsection{Apribojimai}
 
