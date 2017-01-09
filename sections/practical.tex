@@ -370,7 +370,7 @@ Steve Klabnik idėjos, atėjusios iš funkcinio programavimo bendruomenės, sudo
 
 Dabartinis ``RailsEventStore'' įvykių ir jų apdorojų apibrėžimas atrodo labai paprastas. Jis panašus į MVC projektavimo šablono maršrutizatoriaus veikimą. Kai gaunama nauja informacija, pažiūrima į tos informacijos tipą bei priskiriamas reikiamas kontrolierius.
 
-Tačiau Ruby on Rails programavimo karkaso maršrutizatorius \lstinline|config/routes.rb| turi ir sudėtingesnių kalbos konstrukcijų, tokių kaip maršrutizatoriaus suvaržymai\footnote{http://guides.rubyonrails.org/routing.html}. Jie dažnai įveda saugumo ir švarumo į bendrą kuriomos sistemos kodą. Jie gali išvalyti bei validuoti informaciją, kuri bus perduodama kontrolieriui.
+Tačiau Ruby on Rails programavimo karkaso maršrutizatorius \lstinline|config/routes.rb| turi ir sudėtingesnių kalbos konstrukcijų, tokių kaip maršrutizatoriaus suvaržymai\footnote{http://guides.rubyonrails.org/routing.html}. Jie dažnai įveda saugumo ir švarumo į bendrą kuriamos sistemos kodą. Jie gali išvalyti bei validuoti informaciją, kuri bus perduodama kontrolieriui.
 
 Pačiu paprasčiausiu atveju validatorius gali atrodyti kaip:
 
@@ -378,12 +378,12 @@ Pačiu paprasčiausiu atveju validatorius gali atrodyti kaip:
 get   'user/:id'   => 'user#show', constraint: { id: /\d+/ }
 \end{lstlisting}
 
-Šis validatorius filtruoja tik tas užklausos, kur parametras id yra perduodamas kaip sveikasis skaičius. Jei jis toks nėra, užklausa net nepasiekia kontrolieriaus.
+Šis validatorius filtruoja tik tas užklausas, kur parametras \lstinline|id|| yra perduodamas kaip sveikasis skaičius. Jei jis toks nėra, užklausa net nepasiekia kontrolieriaus.
 
 Kitas maršrutizatoriaus apribojimų panaudojimo atvejis yra kontrolieriaus veiksmų supaprastinimas (ir jį palaikančio kodo). Tarkime turime kontrolierių:
 
 \begin{lstlisting}[]
-  def action
+  def search_by
     if params['sort']    == 'best_match'
       #execute
     elsif params['sort'] == 'trending'
@@ -397,15 +397,15 @@ Kitas maršrutizatoriaus apribojimų panaudojimo atvejis yra kontrolieriaus veik
 o tuo tarpu maršrutizatorius atrodo kaip:
 
 \begin{lstlisting}[]
-  get    'sample/url' => 'my#action'
+  get    'product/search' => 'search#search_by'
 \end{lstlisting}
 
 Panaudojant maršrutizatoriaus apribojimus galime išskaidyti atsakomybes ir padalinti veiksmus priklausomai nuo to kokie yra užklausos parametrai. Po pakeitimų \lstinline{config/routes.rb} gali atrodyti:
 
 \begin{lstlisting}[]
-  get    'sample/search' => 'search#best_match',  constraints: BestMatchConstraint
-  get    'sample/search' => 'search#trending',    constraints: TrendingSearchConstraint
-  get    'sample/search' => 'search#new',         constraints: NewSearchConstraint
+  get    'product/search' => 'search#best_match',  constraints: BestMatchConstraint
+  get    'product/search' => 'search#trending',    constraints: TrendingSearchConstraint
+  get    'product/search' => 'search#new',         constraints: NewSearchConstraint
 
   class BestMatchConstraint
     def self.matches?(request)
@@ -448,7 +448,7 @@ Toliau pateikiu kartais praktikoje pasitaikantį duomenų transformavimo pavyzd�
 get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
 \end{lstlisting}
 
-Jeigu užklausos parametras \lstinline|format| nebuvo nurodytas, numatytatasis parametras \lstinline|params[:format] = `jpg'| bus perduotas.
+Jeigu užklausos parametras \lstinline|format| buvo nenurodytas, numatytatasis parametras \lstinline|params[:format] = `jpg'| bus perduotas kontrolieriui.
 
 Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
 
