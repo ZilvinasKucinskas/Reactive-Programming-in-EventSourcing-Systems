@@ -2,11 +2,11 @@
 
     Tyrimo objektas yra reaktyvaus programavimo bei įvykių kaupimo principai. Reaktyvus programavimas yra susijęs su reaktyviomis sistemomis, o kalbant apie įvykių kaupimo sistemas, įvykių kaupimo principas yra dažniausiai neatsiejamas nuo komandų-užklausų atsakomybių atskyrimo principo. Dėl to reikia apžvelgti ir pačią sistemą, įkomponuojančią šiuos principus, jog būtų galima susidaryti sistemos architektūros (aukštesnės abstrakcijos) vaizdą bei analizuoti panaudojimo atvejus.
 
-\subsection{Darbo tikslai ir uždaviniai}
+\subsection{Darbo tikslas}
 
-    Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog būtų išpildyti šie reikalavimai:
+  Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog būtų išpildyti šie reikalavimai:
 
-\begin{itemize}
+  \begin{itemize}
 
     \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų.
 
@@ -20,7 +20,9 @@
 
 \end{itemize}
 
-    Siekiant šio tikslo, turi būti išspręsti šie uždaviniai:
+\subsection{Darbo uždaviniai}
+
+  Siekiant tikslo, turi būti išspręsti šie uždaviniai:
 
 \begin{itemize}
         \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus.
@@ -30,9 +32,13 @@
         \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
 \end{itemize}
 
+\subsection{Darbo nauda įgyvendinus tikslą}
+
+Kadangi reaktyvus programavimas leidžia kurti sistemas komponavimo būdu, deklaratyviai, pasiekus tikslą būtų galima supaprastinti įvykių kaupimu pagrįstų sistemų kūrimą, struktūrizuoti kodą į smulkesnius, lengviau suprantamus ir palaikomus komponentus. Toks atskyrimas leistų atlikti panašią paskirtį kaip modelio-kontrolieriaus-vaizdo projektavimo šablono maršrutizatorius. Būtų galima apsirašyti kas ir kokius įvykius apdoroja su papildoma galimybe filtruoti ir transformuoti gautus įvykius prieš perduodant valdymą įvykio apdorotojui.
+
 \subsection{Tyrimo aktualumas}
 
-Reaktyvusis programavimas (RP) yra nauja programavimo kalbos paradigma, konkrečiai taikoma reaktyviosioms programoms. Per pastaruosius keletą metų vis daugiau įmonių ir programų kūrėjų pradėjo naudoti RP žiniatinklio programoms, vartotojo sąsajoms ir asinchroninei įvykių valdomai programinei įrangai kurti. RP tapo ypač populiarus „JavaScript“ bendruomenėje, kur tokios bibliotekos kaip „Angular.js“ ir „Bacon.js“ priėmė reaktyviąją paradigmą, palaikančią automatinį keitimų platinimą.
+Reaktyvusis programavimas (RP) yra nauja programavimo kalbos paradigma, konkrečiai taikoma reaktyviosioms programoms kurti. Per pastaruosius keletą metų vis daugiau įmonių ir programų kūrėjų pradėjo naudoti RP žiniatinklio programoms, vartotojo sąsajoms ir asinchroninei įvykių valdomai programinei įrangai kurti. RP tapo ypač populiarus „JavaScript“ bendruomenėje, kur tokios bibliotekos kaip „Angular.js“ ir „Bacon.js“ priėmė reaktyviąją paradigmą, palaikančią automatinį keitimų platinimą.
 
 Įrodyta, kad RP leidžia programų kūrėjui realizuoti reaktyviąsias programas komponavimo būdu, paverčiant abstrakcija tokias detales kaip duomenų priklausomybės aptikimas, dėl ko reaktyviąją programinę įrangą tampa lengviau suprasti.
 
