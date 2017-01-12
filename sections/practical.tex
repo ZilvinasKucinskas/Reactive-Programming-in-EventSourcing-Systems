@@ -1,14 +1,14 @@
-  Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Kad būtų galima susidaryti bendrą vaizdą ir suvokti panaudojimo atvejį, pirmiausia reikia suprojektuoti aukštesnį sistemos vaizdą, tai yra suprojektuoti kuriamos sistemos architektūrą. CQRS ir įvykių kaupimo principas dažniausiai naudojami kartu, pritaikant šiuos principus apibrėžtose, sudėtingose, bei verslo logiką apimančiose sistemos srityse. Šiuo atveju pritaikomos ir turimos DDD žinios. Toliau nagrinėjami jau esantys reaktyvaus programavimo įvykių kaupimo programavimo karkasai/bibliotekos. Sekančiame skyriuje seka jų suderinamumo analizė. Aprašomi kilę iššūkiai ir galimi tolimesni darbai.
+  Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Kad būtų galima susidaryti bendrą vaizdą ir suvokti panaudojimo atvejį, pirmiausia reikia suprojektuoti aukštesnį sistemos vaizdą, tai yra suprojektuoti kuriamos sistemos architektūrą. CQRS ir įvykių kaupimo principas dažniausiai naudojami kartu, pritaikant šiuos principus apibrėžtose, sudėtingose bei verslo logiką apimančiose sistemos srityse. Šiuo atveju pritaikomos ir turimos DDD žinios. Toliau nagrinėjami jau esantys reaktyvaus programavimo įvykių kaupimo programavimo karkasai/bibliotekos. Sekančiame skyriuje seka jų suderinamumo analizė, aprašomi kilę iššūkiai ir galimi tolimesni darbai.
 
 \subsection{Programavimo kalba ir programavimo karkasas}
 
-Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
 
 Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
 
 \subsection{Įvykių kaupimo sistemos architektūra}
 
-\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tekmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
+\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
 
 \begin{figure}[H]
     \centering
@@ -26,7 +26,7 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
 
   \item Kontrolierius iškviečia komandą.
 
-  \item Komanda gali patikrinti ar užklausa buvo validi. Jei užklausa buvo validi, kontrolierius įrašo sėkmingą arba nesėkmingą įvykį į įvykių kaupimo žurnalą. Taipogi komanda gali atlikti tam tikrus šalutinius efekus, tokius kaip elektronių žinučių siuntimas vartotojui.
+  \item Komanda gali patikrinti ar užklausa buvo teisinga. Jei užklausa buvo teisinga, kontrolierius įrašo sėkmingą arba nesėkmingą įvykį į įvykių kaupimo žurnalą. Taipogi komanda gali atlikti tam tikrus šalutinius efekus, tokius kaip elektronių žinučių siuntimas vartotojui.
 
   \item Kai įvykis įrašomas į įvykių kaupimo žurnalą, reaktyvaus programavimo programos sąsaja (API) reaguoja į įvykį pagal aprašytas taisykles. Taisyklės aprašo ką su tuo įvykiu reikia padaryti, bendru atveju tai dažniausiai yra dabartinės būsenos atnaujinimas tam tikroje kitoje duomenų saugykloje.
 
@@ -40,9 +40,9 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
 
   \item Saityno serveris gauna užklausą. Maršrutizatorius naudojo maršrutų failą \lstinline|config/routes.rb| ir identifikuoka kuris kontrolierius atsakys į užklausą.
 
-  \item Kontrolierius iškviečia skaitymo modelį, kuris naudojant Ruby on Rails karkasą įprastai būna supaprastintas (naudojant aktyvų įrašą nereikia rašyti SQL, jis yra sugenerupjamas). Pavyzdinė užklausa \lstinline|@cart = current_user.cart.all|.
+  \item Kontrolierius iškviečia skaitymo modelį, kuris naudojant Ruby on Rails karkasą įprastai būna supaprastintas (naudojant aktyvų įrašą nereikia rašyti SQL, jis yra sugeneruojamas). Pavyzdinė užklausa \lstinline|@cart = current_user.cart.all|.
 
-  \item Dabartinis vartotojo pirkinių krepšelis yra nuskaitomas iš duomenų saugyklos. Čia reikia prisiminti galutinės darnos sąvybę. Esant didelei apkrovai, egzistuoja galimybė, jog bus nuskaitoma krepšelio būsena kai pirkinys dar nepridėtas į krepšelį. Todėl toks sistemos projektavimas verčia labiau mąstyti apie pačią sistemą. Įprastiniu atveju, pirkinių krepšelis įvykdžius daikto pridėjimo scenarijų, aprašytą aukščiau, galėtų būti pridedamas vartotojo sąsajoje. Vartotojas matytų, jog pirkinys pridėtas į krepšelį, tačiau įvykių kaupimo programavimo programos sąsaja (API) dar galbūt nebūtų baigusi darbo. Įprastiniu atveju, kai vartotojas norėtų pirkti visus krepšelio pirkinius, reaktyviojo programavimo programos sąsaja (API) jau būtų baigusi darbą. Įprastiniu atveju tai trunka keliasdešimt milisekundžių.
+  \item Dabartinis vartotojo pirkinių krepšelis yra nuskaitomas iš duomenų saugyklos. Čia reikia prisiminti galutinės darnos sąvybę. Esant didelei apkrovai, egzistuoja galimybė, jog bus nuskaitoma krepšelio būsena, kai pirkinys dar nepridėtas į krepšelį. Todėl toks sistemos projektavimas verčia labiau mąstyti apie pačią sistemą. Įprastiniu atveju, pirkinių krepšelis įvykdžius daikto pridėjimo scenarijų, aprašytą aukščiau, galėtų būti pridedamas vartotojo sąsajoje. Vartotojas matytų, jog pirkinys pridėtas į krepšelį, tačiau įvykių kaupimo programavimo programos sąsaja (API) dar galbūt nebūtų baigusi darbo. Kai vartotojas norėtų pirkti visus krepšelio pirkinius, reaktyviojo programavimo programos sąsaja (API) jau būtų baigusi darbą. Įprastiniu atveju tai trunka keliasdešimt milisekundžių.
 
   \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
 \end{enumerate}
@@ -55,7 +55,7 @@ Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomi
 
 Pagrindinė šio šablono (iteratoriaus) idėja – atsakomybė už sąrašo objekto prieigą ir perėjimą ir jo įdėjimas į iteratoriaus objektą. Iteratoriaus klasė apibrėžia prieigos prie sąrašo elementų sąsają. Iteratoriaus objektas atsakingas už esamo elemento stebėjimą; t. y. jis žino, kurie elementai jau buvo pereiti.
 
-„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas \lstinline|Enumerable| modulis, egzempliorius. Kuris yra beveik bet koks rinkinys.
+„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas \lstinline|Enumerable| modulis, egzempliorius, kuris yra beveik bet koks rinkinys.
 
 \subsubsection{Stebėtojas}
 
@@ -75,15 +75,15 @@ Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, j
 
 \subsubsection{Reaktyviojo programavimo bibliotekos}
 
-Darbo autoriui pavyko rasti 2 reaktyviojo programavimo bibliotekas ruby kalboje. Todėl jas plačiau aptarsime.
+Darbo autoriui pavyko rasti 2 reaktyviojo programavimo bibliotekas ``Ruby'' kalboje, todėl jas plačiau aptarsime.
 
 \begin{itemize}
-  \item ``RxRuby''\footnote{https://github.com/ReactiveX/RxRuby} - 595 žvaigždučių bei 52 išsišakojimai, paskutinis atnaujinimas įvyko 2017 metų sausį. (Žiūrėta 2017-01-08)
+  \item ``RxRuby''\footnote{https://github.com/ReactiveX/RxRuby} - 595 žvaigždutės bei 52 išsišakojimai, paskutinis atnaujinimas įvyko 2017 metų sausį. (Žiūrėta 2017-01-08)
 
   \item ``Frappuccino''\footnote{https://github.com/steveklabnik/frappuccino} - 370 žvaigždučių bei 32 išsišakojimai, paskutinis atnaujinimas įvyko 2016 metų vasarį. (Žiūrėta 2017-01-08)
 \end{itemize}
 
-``RxRuby'' biblioteka turi labiau apribojančią ``Apache'' licenziją (2 versija) lyginant ``Frappuccino'' MIT licenziją. Bibliotekų peržiūros Github platformoje pateiktos priedų \ref{img:rxruby}, \ref{img:frappuccino} paveikslėliuose.
+``RxRuby'' biblioteka turi labiau apribojančią ``Apache'' licenziją (2 versija) lyginant su ``Frappuccino'' MIT licenzija. Bibliotekų peržiūros Github platformoje pateiktos priedų \ref{img:rxruby}, \ref{img:frappuccino} paveikslėliuose.
 
 \subsubsection{RxRuby}
 
@@ -100,7 +100,7 @@ Pirmiausia pažiūrėkime kaip veikia ``RxRuby'' paprasčiausioje formoje:
   stream.subscribe {|num| puts "Gautas skaicius #{num}" }
 \end{lstlisting}
 
-Objektas, kurį gauname yra tiesiog skaičius 7, apgaubtas kaip tema. Kadangi tema realizuoja daugumą \lstinline|Enumerable| modulio metodų, galima su juo daryti praktiškai bet ką. Tačiau kad išvengtume sudėtingumo šiame pavyzdyje, tiesiog prenumeruokime temą ir perduokime \lstinline|lambda| konstrukciją. \lstinline|Lambda| bus iškviesta kiekvieną kartą kai srautas gaus informaciją (šiuo atveju tik kartą).
+Objektas, kurį gauname yra tiesiog skaičius 7, apgaubtas kaip tema. Kadangi tema realizuoja daugumą \lstinline|Enumerable| modulio metodų, galima su juo daryti praktiškai bet ką. Tačiau, kad išvengtume sudėtingumo šiame pavyzdyje, tiesiog prenumeruokime temą ir perduokime \lstinline|lambda| konstrukciją. \lstinline|Lambda| bus iškviesta kiekvieną kartą kai srautas gaus informaciją (šiuo atveju tik kartą).
 
 Šio pavyzdinio atvejo išvestis bus:
 
@@ -117,13 +117,13 @@ Kadangi turime daug \lstinline|Enumerable| modulio metodų, kuriuos galime naudo
     .subscribe {|s| puts "Suma lyginiu skaiciu tarp 1 ir 10 yra: #{s}" }
 \end{lstlisting}
 
-Gražins:
+Grąžins:
 
 \begin{lstlisting}[]
   Suma lyginiu skaiciu tarp 1 ir 10 yra: 30
 \end{lstlisting}
 
-Paanalizuokime šį pavyzdį. Pirmiausia sukuriame temos rėžis, su skaičiais tarp 1 ir 10. Tada iškviečiamas filtravimo operatorius \lstinline|select| temai, perduodant \lstinline|lambda| kaip parametrą. \lstinline|lambda| priima kiekvieną rėžio skaičių kaip parametrą ir filtruoja visus lyginius temos skaičius, grąžindama naują temą. Iškvietus \lstinline|sum| operatorių, susumuojami visi lyginiai skaičiai.
+Paanalizuokime šį pavyzdį. Pirmiausia sukuriamas temos rėžis, su skaičiais tarp 1 ir 10. Tada iškviečiamas filtravimo operatorius \lstinline|select| temai, perduodant \lstinline|lambda| kaip parametrą. \lstinline|lambda| priima kiekvieną rėžio skaičių kaip parametrą ir filtruoja visus lyginius temos skaičius, grąžindama naują temą. Iškvietus \lstinline|sum| operatorių, susumuojami visi lyginiai skaičiai.
 
 Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Prenumeruojant tema (arba duomenų srautas) tiesiog stebima ir \lstinline|lambda| iškviečiama. Kiekvieną kartą kai tema gauna naują informaciją, duomenys bus perduodami lyg per ``piltuvėlį'' ir paskutinė \lstinline|lambda| atspausdints rezultatą.
 
@@ -160,11 +160,11 @@ button.push
 counter.now # => 4
 \end{lstlisting}
 
-Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų yra dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
+Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
 
-Reaktyvus operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| obejektą, kuris taipogi yra stebėtojas.
+Reaktyūs operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| objektą, kuris taip pat yra stebėtojas.
 
-Šiame pavyzdyje yra sukuriamas mygtukas. Kiekvieną kartą kai jis paspaudžiamas vistiem temos stebėtojams yra perduodamas pranešimas apie naują reikšmę. \lstinline|counter| kintamasis parodo kiek kartų buvo paspaustas mygtukas. Nereikia kaskart iš naujo pritaikyti skaičiavimų, biblioteka įgalina apsirašyti elgseną vieną kartą deklaratyviai. \lstinline|map| reaktyvus operatorius transformuoja įvykio reikšmę - jeigu gautas simbolis \lstinline|:pushed| - reikšmė tampa 1, o priešingu atveju 0. Kitas operatorius \lstinline|inject| priima parametrą - pradinę reikšmę (šiuo atveju 0). Kiekvieną kartą kai yra gaunama reikšmė, perduodamas kodo blokas (lambda) yra iškviečiama ir rezultatas atnaujinamas.
+Šiame pavyzdyje yra sukuriamas mygtukas. Kiekvieną kartą kai jis paspaudžiamas visiems temos stebėtojams yra perduodamas pranešimas apie naują reikšmę. \lstinline|counter| kintamasis parodo, kiek kartų buvo paspaustas mygtukas. Nereikia kaskart iš naujo pritaikyti skaičiavimų, biblioteka leidžia apsirašyti elgseną vieną kartą deklaratyviai. \lstinline|map| reaktyvus operatorius transformuoja įvykio reikšmę - jeigu gautas simbolis \lstinline|:pushed| - reikšmė tampa 1, o priešingu atveju 0. Kitas operatorius \lstinline|inject| priima parametrą - pradinę reikšmę (šiuo atveju 0). Kiekvieną kartą kai yra gaunama reikšmė, perduodamas kodo blokas (\lstinline|lambda|) yra iškviečiamas ir rezultatas atnaujinamas.
 
 Rezultatas yra saugomas atmintyje, todėl programai baigus darbą, reikšmės yra prarandamos. Kaip Steve Klabnik pasakojo savo prezentacijose, tokią biblioteką būtų galima naudoti vartotojo sąsajos programose. Jis teigia, jog pati idėja yra pasiskolinta iš funkcinių programavimo kalbų, ir įdomu pritaikyti naujus principus Ruby programavimo kalboje.
 
@@ -183,7 +183,7 @@ Biblioteka leidžia tiek apjungti, tiek filtruoti, tiek perduoti bloką kodo, ku
 
 \subsection{Įvykių kaupimas Ruby kalboje}
 
-Įvykių kaupimą principą taikančių bibliotekų Ruby kalboje nėra daug. Galima būtų išskirti 3 žinomiausius:
+Įvykių kaupimo principą taikančių bibliotekų Ruby kalboje nėra daug. Galima būtų išskirti 3 žinomiausias:
 
 \begin{itemize}
   \item ``RailsEventStore''\footnote{https://github.com/arkency/rails\_event\_store} - 212 žvaigždučių bei 18 išsišakojimų, paskutinis atnaujinimas įvyko 2016 metų gruodį. (Žiūrėta 2017-01-07)
@@ -210,7 +210,7 @@ Jeigu į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \l
   rake db:migrate
 \end{lstlisting}
 
-Ši migracija iš tikrųjų tokią lentelę:
+Ši migracija iš tikrųjų sukuria tokią lentelę:
 
 \begin{lstlisting}
     create_table(:event_store_events) do |t|
@@ -256,7 +256,7 @@ Dabar galima sukurti įvykio egzempliorių ir išsaugoti į duomenų bazę:
   client.publish_event(event)
 \end{lstlisting}
 
-Biblioteka suteikia galimybę kurti ne tik specifinius įvykius bet ir globalius. \lstinline|event_id| yra neprivaloma reikšmė. Jeigu ji neperduodama, biblioteka pati sugeneruoja unikalų identifikatorių.
+Biblioteka suteikia galimybę kurti ne tik specifinius įvykius, bet ir globalius. \lstinline|event_id| yra neprivaloma reikšmė. Jeigu ji neperduodama, biblioteka pati sugeneruoja unikalų identifikatorių.
 
 ``RailsEventStore'' biblioteka taip pat turi optimistinę lygiagretumo kontrolę. Galima iš anksto apibrėžti laukiamą srauto versiją bekuriant įvykį. Šiuo atveju tai paskutinio įvykio reikšmė:
 
@@ -273,7 +273,7 @@ Biblioteka suteikia galimybę kurti ne tik specifinius įvykius bet ir globalius
 
 \subsubsection{Įvykių skaitymas}
 
-Biblioteka pateikia kelis būdus skaityti įvykius iš duomenų bazės. Visais atvejais įvykiai yra išrūšiuoti didėjančiai.
+Biblioteka pateikia kelis būdus skaityti įvykius iš duomenų bazės. Visais atvejais įvykiai yra išrūšiuoti didėjančia tvarka.
 
 Galime skaityti tam tikrą skaičių įvykių pradedant tam tikru įvykiu:
 
@@ -284,7 +284,7 @@ count = 40
 client.read_all_events(stream_name, start_event, count)
 \end{lstlisting}
 
-Galime skaityti visus įvykius:
+Galime skaityti visus konkretaus srauto įvykius:
 
 \begin{lstlisting}[]
 stream_name = "product_1" 
@@ -297,7 +297,7 @@ Galime skaityti apskritai visus įvykius
 client.read_all_streams
 \end{lstlisting}
 
-\subsubsection{Įvykių trinimas}
+\subsubsection{Įvykių trynimas}
 
 Įvykių kaupimo principas teigia, jog įvykių žurnalas yra visa sistemos istorija ir įvykiai netrinami. Tačiau gali atsirasti tokia situacija, jog programuotojas dirba lokaliai ir tiesiog testuojasi sistemą ir bando funkcionalumą, nenori užteršti istorijos. Dėl šios priežasties biblioteka palieka galimybę trinti įvykius. Tačiau reiktų gerai pagalvoti prieš naudojant šią komandą.
 
@@ -310,7 +310,7 @@ client.delete_stream(stream_name)
 
 Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
 
-Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Kuris bus aprašytas vėliau. Pavyzdys pateiktas žemiau:
+Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern), kuris bus aprašytas vėliau. Pavyzdys pateiktas žemiau:
 
 \begin{lstlisting}
 class CartReadModel
@@ -335,7 +335,7 @@ cart = CartReadModel.new
 client.subscribe(cart, [AddToCart, RemoveFromCart]) 
 \end{lstlisting}
 
-Galima pastebėti įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
+Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
 \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
@@ -355,9 +355,9 @@ Pirmiausia reikėtų peržvelgti norimo pasiekti tikslo reikalavimus ir kiek iš
 
   \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai arba reagavimas į apkrovą (Reaktyvumo manifestas). Iš tiesų biblioteka nesuteikia tokio funkcionalumo, tačiau jis yra pasiekiamas papildomų bibliotekų pagalba. Tai bus aprašyta vėliau.
 
-  \item Atkuriamumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius.
+  \item atkuriamumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius.
 
-  \item Našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
+  \item našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
 \end{itemize}
 
 Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia pereikime prie reaktyviųjų operatorių idėjos.
@@ -448,13 +448,13 @@ Toliau pateikiu kartais praktikoje pasitaikantį duomenų transformavimo pavyzd�
 get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
 \end{lstlisting}
 
-Jeigu užklausos parametras \lstinline|format| buvo nenurodytas, numatytatasis parametras \lstinline|params[:format] = `jpg'| bus perduotas kontrolieriui.
+Jeigu užklausos parametras \lstinline|format| buvo nenurodytas, numatytatasis parametras \lstinline|params[:format] = 'jpg'| bus perduotas kontrolieriui.
 
-Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
+Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime, kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
 
 \textbf{Filtravimo operatorius}
 
-Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius, ir leistų apdoroti tik tuos įvykius kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti vartotojus, kurie priklauso tam tikrai A/B testo grupei, ir tik tada pritaikyti tam tikrus veiksmus.
+Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius ir leistų apdoroti tik tuos įvykius, kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti vartotojus, kurie priklauso tam tikrai A/B testo grupei, ir tik tada pritaikyti tam tikrus veiksmus.
 
 \begin{lstlisting}
   event_store.subscribe([ProductPurchase])
@@ -489,7 +489,7 @@ Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCEN
 
 \textbf{Imties mažinimo operatorius}
 
-Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuriant analitines aplikacijas, , kur n būtų išreikštas kaip procentas, kurio reikšmė būtų nuo 0 iki 100. Kai į įvykių žurnalą yra įrašoma labai daug įvykių, tik tam tikras procentas įvykių būtų toliau apdorojami. Bendru atveju šis operatorius galėtų būti išreikštas per \lstinline|filter| operatorių:
+Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuriant analitines aplikacijas, kur \lstinline|n| būtų išreikštas kaip procentas, kurio reikšmė būtų nuo 0 iki 100. Kai į įvykių žurnalą yra įrašoma labai daug įvykių, tik tam tikras procentas įvykių būtų toliau apdorojami. Bendru atveju šis operatorius galėtų būti išreikštas per \lstinline|filter| operatorių:
 
 \begin{lstlisting}[]
   es.subscribe([RealtimeTimeEventAdded])
@@ -497,7 +497,7 @@ Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuri
      .each { |event| EventProcessor.call(event) }
 \end{lstlisting}
 
-Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruoja reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
+Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruota reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
 
 \subsubsection{Reaktoriaus projektavimo šablonas}
 
