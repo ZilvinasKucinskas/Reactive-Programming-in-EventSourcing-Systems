@@ -6,47 +6,6 @@ Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį 
 
 Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
 
-\subsection{Įvykių kaupimo sistemos architektūra}
-
-\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.6]{img/mvc_cqrs}
-    \caption{MVC paremtas architektūros modelis, apjungiantis CQRS, ES bei reaktyvaus programavimo principus}
-    \label{img:mvc_cqrs}
-\end{figure}
-
-\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
-
-\begin{enumerate}
-  \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart/add/1|.
-
-  \item Saityno serveris gauna užklausą. Maršrutizatorius naudoja maršrutų failą \lstinline|config/routes.rb| ir identifikuoja kur reikia nusiųsti užklausą. Mūsų atveju \lstinline|cart| yra kontrolierius, \lstinline|add| yra norimas atlikti veiksmas, o \lstinline|1| yra parametras, nurodantis konkretų/unikalų pirkinį.
-
-  \item Kontrolierius iškviečia komandą.
-
-  \item Komanda gali patikrinti ar užklausa buvo teisinga. Jei užklausa buvo teisinga, kontrolierius įrašo sėkmingą arba nesėkmingą įvykį į įvykių kaupimo žurnalą. Taipogi komanda gali atlikti tam tikrus šalutinius efekus, tokius kaip elektronių žinučių siuntimas vartotojui.
-
-  \item Kai įvykis įrašomas į įvykių kaupimo žurnalą, reaktyvaus programavimo programos sąsaja (API) reaguoja į įvykį pagal aprašytas taisykles. Taisyklės aprašo ką su tuo įvykiu reikia padaryti, bendru atveju tai dažniausiai yra dabartinės būsenos atnaujinimas tam tikroje kitoje duomenų saugykloje.
-
-  \item Kai tik įvykis jau įrašytas į įvykių žurnalą, galima vartotojui pranešti apie sėkmingą rezultatą.
-\end{enumerate}
-
-\subsubsection{Pavyzdinis procesas - vartotojas peržiūri savo pirkinių krepšelį}
-
-\begin{enumerate}
-  \item Vartotojas pateikia užklausą programai peržiūrėti savo pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart|.
-
-  \item Saityno serveris gauna užklausą. Maršrutizatorius naudojo maršrutų failą \lstinline|config/routes.rb| ir identifikuoka kuris kontrolierius atsakys į užklausą.
-
-  \item Kontrolierius iškviečia skaitymo modelį, kuris naudojant Ruby on Rails karkasą įprastai būna supaprastintas (naudojant aktyvų įrašą nereikia rašyti SQL, jis yra sugeneruojamas). Pavyzdinė užklausa \lstinline|@cart = current_user.cart.all|.
-
-  \item Dabartinis vartotojo pirkinių krepšelis yra nuskaitomas iš duomenų saugyklos. Čia reikia prisiminti galutinės darnos sąvybę. Esant didelei apkrovai, egzistuoja galimybė, jog bus nuskaitoma krepšelio būsena, kai pirkinys dar nepridėtas į krepšelį. Todėl toks sistemos projektavimas verčia labiau mąstyti apie pačią sistemą. Įprastiniu atveju, pirkinių krepšelis įvykdžius daikto pridėjimo scenarijų, aprašytą aukščiau, galėtų būti pridedamas vartotojo sąsajoje. Vartotojas matytų, jog pirkinys pridėtas į krepšelį, tačiau įvykių kaupimo programavimo programos sąsaja (API) dar galbūt nebūtų baigusi darbo. Kai vartotojas norėtų pirkti visus krepšelio pirkinius, reaktyviojo programavimo programos sąsaja (API) jau būtų baigusi darbą. Įprastiniu atveju tai trunka keliasdešimt milisekundžių.
-
-  \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
-\end{enumerate}
-
 \subsection{Reaktyvus programavimas Ruby kalboje}
 
 Žemesniame lygyje paradigma iš esmės yra dviejų kūrimo šablonų konstrukcija, naudojama jau daugiau nei 20 metų. Faktiškai viena iš populiariausių kūrimo šablonų knygų yra „Gang of Four“, kurioje aprašyti šie du kūrimo šablonai: iteratoriaus ir stebėtojo šablonai \cite{GOF:DesignPattern}. Tai yra du elgsenos kūrimo šablonai, charakterizuojantys objektų ir klasių sąveiką ir atsakomybę.
@@ -360,7 +319,153 @@ Pirmiausia reikėtų peržvelgti norimo pasiekti tikslo reikalavimus ir kiek iš
   \item našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
 \end{itemize}
 
-Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia pereikime prie reaktyviųjų operatorių idėjos.
+Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia apžvelgime kaip atrodytų sistemos architektūra, pritaikanti tiek CQRS, tiek ES, tiek RP principus.
+
+\subsection{Įvykių kaupimo sistemos architektūra}
+
+\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.6]{img/mvc_cqrs}
+    \caption{MVC paremtas architektūros modelis, apjungiantis CQRS, ES bei reaktyvaus programavimo principus}
+    \label{img:mvc_cqrs}
+\end{figure}
+
+\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
+
+\begin{enumerate}
+  \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart/add/1|.
+
+  \item Saityno serveris gauna užklausą. Maršrutizatorius naudoja maršrutų failą \lstinline|config/routes.rb| ir identifikuoja kur reikia nusiųsti užklausą. Mūsų atveju \lstinline|cart| yra kontrolierius, \lstinline|add| yra norimas atlikti veiksmas, o \lstinline|1| yra parametras, nurodantis konkretų/unikalų pirkinį.
+
+  \item Kontrolierius iškviečia komandą.
+
+  \item Komanda gali patikrinti ar užklausa buvo teisinga. Jei užklausa buvo teisinga, kontrolierius įrašo sėkmingą arba nesėkmingą įvykį į įvykių kaupimo žurnalą. Taipogi komanda gali atlikti tam tikrus šalutinius efekus, tokius kaip elektronių žinučių siuntimas vartotojui.
+
+  \item Kai įvykis įrašomas į įvykių kaupimo žurnalą, reaktyvaus programavimo programos sąsaja (API) reaguoja į įvykį pagal aprašytas taisykles. Taisyklės aprašo ką su tuo įvykiu reikia padaryti, bendru atveju tai dažniausiai yra dabartinės būsenos atnaujinimas tam tikroje kitoje duomenų saugykloje.
+
+  \item Kai tik įvykis jau įrašytas į įvykių žurnalą, galima vartotojui pranešti apie sėkmingą rezultatą.
+\end{enumerate}
+
+\subsubsection{Pavyzdinis procesas - vartotojas peržiūri savo pirkinių krepšelį}
+
+\begin{enumerate}
+  \item Vartotojas pateikia užklausą programai peržiūrėti savo pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart|.
+
+  \item Saityno serveris gauna užklausą. Maršrutizatorius naudojo maršrutų failą \lstinline|config/routes.rb| ir identifikuoka kuris kontrolierius atsakys į užklausą.
+
+  \item Kontrolierius iškviečia skaitymo modelį, kuris naudojant Ruby on Rails karkasą įprastai būna supaprastintas (naudojant aktyvų įrašą nereikia rašyti SQL, jis yra sugeneruojamas). Pavyzdinė užklausa \lstinline|@cart = current_user.cart.all|.
+
+  \item Dabartinis vartotojo pirkinių krepšelis yra nuskaitomas iš duomenų saugyklos. Čia reikia prisiminti galutinės darnos sąvybę. Esant didelei apkrovai, egzistuoja galimybė, jog bus nuskaitoma krepšelio būsena, kai pirkinys dar nepridėtas į krepšelį. Todėl toks sistemos projektavimas verčia labiau mąstyti apie pačią sistemą. Įprastiniu atveju, pirkinių krepšelis įvykdžius daikto pridėjimo scenarijų, aprašytą aukščiau, galėtų būti pridedamas vartotojo sąsajoje. Vartotojas matytų, jog pirkinys pridėtas į krepšelį, tačiau įvykių kaupimo programavimo programos sąsaja (API) dar galbūt nebūtų baigusi darbo. Kai vartotojas norėtų pirkti visus krepšelio pirkinius, reaktyviojo programavimo programos sąsaja (API) jau būtų baigusi darbą. Įprastiniu atveju tai trunka keliasdešimt milisekundžių.
+
+  \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
+\end{enumerate}
+
+\subsection{Įvykių kaupimo sistemos realizacija}
+
+Praeitame skyriuje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame skyriuje bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
+
+\subsubsection{Nagrinėjamas sistemos scenarijus}
+
+Nagrinėsime architektūros tekmės procese minėtus atvejus kai vartotojas gali įsidėti bei išimti prekes iš pirkinių krepšelio bei padaryti užsakymą.
+
+\subsubsection{Domeno modelis}
+
+Remiantis literatūros analizėje aptartu domenu pagrįstu projektavimu - pradedant kurti įvykių kaupimo sistemą, pirmiausia reikia apsibrėžti domeno modelį, arba tiksliau agregatus, kuriuos aprašo Martin Fowler \cite{Fowler:Aggregate}. Naudojant įvykių kaupimą, domeno modelis yra sukuriamas remiantis domeno įvykiais. Duomenų struktūra nesaugo dabartinės būsenos, o saugo eilę domeno įvykių, kurie buvo pritaikyti agregatui nuo sistemos gyvavimo pradžios. Tai leidžia konstruoti agregatą, neatskleidžiant jo būsenos ir taip apsaugant jo invariantus.
+
+Agregatas gali būti naujų domeno įvykių šaltinis - kiekvienas agregato metodo kvietimas gali publikuoti naują domeno įvykį. Kiekvienas agregato vidinės būsenos pasikeitimas privalo būti realizuotas publikuojant arba pritaikant domeno įvykį. Tik taip galima užtikrinti, jog taikant įvykius agregatas visada bus atkurtas į tą pačią būseną.
+
+Pirmiausia apsibrėžkime domeno įvykius:
+
+\begin{lstlisting}[]
+module Events
+  ProductAddedToCart = Class.new(RailsEventStore::Event)
+  ProductRemovedFromCart = Class.new(RailsEventStore::Event)
+  OrderCreated = Class.new(RailsEventStore::Event)
+end
+\end{lstlisting}
+
+Pagal nagrinėjamą scenarijų minėti įvykiai apibrėžia šiuos veiksmus:
+
+\begin{itemize}
+  \item \lstinline|ProductAddedToCart| - pirkinys pridėtas į krepšelį.
+  \item \lstinline|ProductRemovedFromCart| - pirkinys išimtas iš krepšelio.
+  \item \lstinline|OrderCreated| - įvykdytas užsakymas.
+\end{itemize}
+
+Kai turime apsibrėžtus domeno įvykius, galime juos pritaikyti domeno objektui:
+
+\begin{lstlisting}
+module Domain
+  class Order
+    include AggregateRoot::Base
+
+    AlreadyCreated    = Class.new(StandardError)
+    MissingCustomer   = Class.new(StandardError)
+
+    def initialize(id = SecureRandom.uuid)
+      @id = id
+      @state = :draft
+    end
+
+    def create(order_number, customer_id)
+      raise AlreadyCreated unless state == :draft
+      raise MissingCustomer unless customer_id
+      apply Events::OrderCreated.create(@id, order_number, customer_id)
+    end
+
+    # ...
+
+    def apply_order_created(event)
+      @customer_id = event.customer_id
+      @number = event.order_number
+      @state = :created
+    end
+
+    private
+    attr_accessor :id, :customer_id, :order_number, :state
+
+    # ...
+  end
+end
+\end{lstlisting}
+
+Panagrinėkime šį atvejį išsamiau. \lstinline|Domain::Order| klasė turi metodą \lstinline|initialize|, kuris sukuria pradinę agregato būseną. Taip pat, klasė turi \lstinline|create| metodą. Pastarasis turėtų būti naudojamas kitų objektų, iškviečiant agregato funkcijas. Čia turėtų būti apsaugomi invariantai, tikrinama verslo logika, teisingumo taisyklės. Remiantis CQRS principu, šis metodas neturėtų grąžinti reikšmės - jis privalo būti tik įvykdomas arba nutraukti vykdymą iškeliant išimtinę situaciją. Taipogi šiame metode agregato būsena niekada nėra keičiama. Vietoje to yra sukonstruojamas ir pritaikomas naujas domeno įvykis (kurį apsirašėme anksčiau).
+
+Reiktų detaliau panagrinėti iš kur įtraukiamas \lstinline|AggregateRoot::Base| modulis. Tai yra ``aggregate\_root''\footnote{https://github.com/arkency/aggregate\_root} biblioteka, kuri atkeliauja kartu su ``RailsEventStore biblioteka''. Ji įterpia metodą \lstinline|apply|:
+
+\begin{lstlisting}
+module AggregateRoot
+  class DefaultApplyStrategy
+    def call(aggregate, event)
+      event_name_processed = event.class.name.demodulize.underscore
+      aggregate.method("apply_#{event_name_processed}").call(event)
+    end
+  end
+end
+
+module AggregateRoot
+  def apply(event)
+    apply_strategy.(self, event)
+    unpublished_events << event
+  end
+
+  private
+
+  def unpublished_events
+    @unpublished_events ||= []
+  end
+
+  def apply_strategy
+    DefaultApplyStrategy.new
+  end
+end
+\end{lstlisting}
+
+Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, customer_id)} yra sukuriamas naujas domeno įvykis ir pritaikomas agregatui - būsena pasikeičia ir \lstinline|@unpublished_events| kintamasis saugo pakeitimus. Jis saugo visus agregato sukurtus domeno įvykius, kol metodas yra vykdomas.
+
+Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastarasis atnaujina agregato būseną priklausomai nuo įvykusio domeno įvykio. Nesvarbu ar pats agregatas publikavo įvykį, ar įvykis buvo nuskaitytas iš įvykių žurnalo ir pritaikytas atkuriant dabartinę agregato būseną, šioje vietoje negali būti verslo logikos ar teisingumo taisyklių. Tai tik būsenos atkūrimas, o istorijos keisti negalima, kaip buvo nagrinėta literatūroje.
 
 \subsubsection{Idėja - reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
 
@@ -499,12 +604,6 @@ Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuri
 
 Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruota reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
 
-\subsubsection{Reaktoriaus projektavimo šablonas}
-
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
-
-Reaktoriaus projektavimo šablonas yra naudojamas ``RailsEventStore'' bibliotekoje. Dėl to reikėtų detaliau paanalizuoti jo vidinę realizaciją.
-
 \subsubsection{Realizacija}
 
 \textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
@@ -513,36 +612,10 @@ Skyrius aprašys iššūkius ir realizacijos detales apjungiant nagrinėtų reak
 
 Nagrinėtose Ruby reaktyvaus programavimo bibliotekose buvo panaudotas stebėtojo ir iteratoriaus projektavimo šablonai, o RailsEventStore bibliotekoje naudojamas reaktoriaus projektavimo šablonas. Todėl bus gilinamąsi į būdą juos sujungti.
 
-\subsubsection{Atkuriamumas}
-
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
-
-Bus aprašyta kaip įvykius atkartoti. Pritaikant reaktyvius operatorius, įvykius atkurti gali būti kebliau, kaip nagrinėta literatūroje, tačiau įmanoma. Šia tema literatūros tikrai trūksta, ir detalios instrukcijos labai praverstų.
-
-\subsubsection{Našumas}
-
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
-
-Reikia įvertinti realizacijos našumą.
-
-\subsubsection{Apribojimai}
-
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
-
-Čia bus pateikti ``RailsEventStore'' bibliotekos apribojimai. Pavyzdžiui įvykiai yra apdorojami sinchroniškai, tai turi ir privalumų ir minusų (našumas).
-
-\subsection{Tolimesni darbai}
-
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
-
-Bus pateiktos temos ir idėjos, kurias galima analizuoti ir kurios praverstų tobulinant šį darbą bei pačią RailsEventStore biblioteką.
-
 \subsection{Darbai numatomi 4-ame semestre}
 
 \begin{itemize}
-  \item Pabaigti visus nepabaigtus skyrius (santraukos, išvados, realizacija).
-
-  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore.
+  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore. Ši biblioteka naudoja reaktoriaus projektavimo šabloną, kurį vertėtų detaliau aprašyti - privalumai, trūkumai).
 
   \item Pabandyti gauti įžvalgų iš RailsEventStore kūrėjų apie mano inovatyvų sprendimą RailsEventStore programavimo bibliotekoje. Įsivaizduoju tai kaip atviro kodo papildinį, kurį viešai gali peržiūrėti, ar privatus susirašinėjimas.
 
@@ -552,7 +625,11 @@ Bus pateiktos temos ir idėjos, kurias galima analizuoti ir kurios praverstų to
 
   \item Norėtųsi darbo teorinę dalį papildyti apie reaktyvaus programavimo trūkumus remiantis \cite{Bainomugisha:2013:SRP:2501654.2501666} darbu.
 
-  \item Darbo formatavimas ir teksto klaidų patikrinimas (pavyzdžiui kabučių naudojimas) priklauso darbui 4-ame semestre pagal MIF reikalavimus.
+  \item Pritaikant reaktyvius operatorius, įvykius atkurti gali būti kebliau, kaip nagrinėta literatūroje, tačiau įmanoma. Šia tema literatūros tikrai trūksta, ir detalios instrukcijos labai praverstų.
+
+  \item Pateikti temas ir idėjas, kurias galima analizuoti ir kurios praverstų tobulinant šį darbą bei pačią RailsEventStore biblioteką.
+
+  \item Baigtą darbą dar kartą redaguoti, pasirūpinti formatavimo neskalndumais (jei tokių yra).
 
   \item Papildyti santrumpas ir paaiškinimus.
 \end{itemize}
