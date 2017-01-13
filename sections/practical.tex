@@ -467,7 +467,212 @@ Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, custo
 
 Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastarasis atnaujina agregato būseną priklausomai nuo įvykusio domeno įvykio. Nesvarbu ar pats agregatas publikavo įvykį, ar įvykis buvo nuskaitytas iš įvykių žurnalo ir pritaikytas atkuriant dabartinę agregato būseną, šioje vietoje negali būti verslo logikos ar teisingumo taisyklių. Tai tik būsenos atkūrimas, o istorijos keisti negalima, kaip buvo nagrinėta literatūroje.
 
-\subsubsection{Idėja - reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
+\subsubsection{Komandos}
+
+Komanda yra paprastas objektas, kuris apibrėžia parametrus veiksmo vykdymui. Remiantis domenu paremtu projektavimu, komanda turėtų būti pavadinta bendrąja verslo kalba (skvarbiąja kalba) ir išreikšti vartotojo ketinimą. Prieš komandos vykdymą turėtų būti užtikrintos teisingumo taisyklės. Teisingumo taisyklės turėtų būti paprastos, pagrįstos pačiais duomenimis, bet ne verslo logika (Kaip jau minėjome praeitame skyriuje, domeno objektas tikrina verslo logiką).
+
+Pažvelkime į komandos pavyzdį:
+
+\begin{lstlisting}
+module Command
+  class CreateOrder < Base
+    attr_accessor :order_id
+    attr_accessor :customer_id
+
+    validates :order_id, presence: true
+    validates :customer_id, presence: true
+
+    alias :aggregate_id :order_id
+  end
+end
+\end{lstlisting}
+
+``Ruby'' programavimo kalboje tai dar žinoma kaip formos objektai (angl. Form Objects)\footnote{https://webuild.envato.com/blog/creating-form-objects-with-activemodel-and-virtus/}. Iš esmės, norint leisti patikrinti teisingumo taisykles, tėvinė klasė \lstinline|Base| naudoja dalį \lstinline|ActiveModel| funkcijų:
+
+\begin{lstlisting}
+module Command
+  class Base
+    include ActiveModel::Model
+    include ActiveModel::Validations
+    include ActiveModel::Conversion
+
+    def initialize(attributes={})
+      super
+    end
+
+    def validate!
+      raise ValidationError, errors unless valid?
+    end
+
+    def persisted?
+      false
+    end
+  end
+end
+\end{lstlisting}
+
+\subsection{Komandų apdorojimas}
+
+Komandų doroklė yra pradinis domeno taškas, turintis instrumentuoti domeno objektus ir domeno tarnybas bei vykdyti domeno objektų metodus. Komandų doroklę galima apsirašyti:
+
+\begin{lstlisting}
+module Command
+  class Handler
+    def initialize(repository:, **_)
+      @repository = repository
+    end
+
+    protected
+    def with_aggregate(aggregate_id)
+      aggregate = build(aggregate_id)
+      yield aggregate
+      repository.store(aggregate)
+    end
+
+    private
+    attr_accessor :repository
+
+    def build(aggregate_id)
+      aggregate_class.new(aggregate_id).tap do |aggregate|
+        repository.load(aggregate)
+      end
+    end
+  end
+end
+\end{lstlisting}
+
+Metodas \lstinline|build| ištraukia įvykius iš įvykių saugyklos, naudodamasis agregato unikaliu identifikatoriumi ir paduodamas įvykių srauto vardą. Komandų doroklė iš pradžių atkuria agregato būseną ir tada išsaugo pakeitimus įvykių žurnale. Prisiminkime praeitame skyriuje aprašytą \lstinline|unpublished_events| kintamąjį. Štai čia atsiskleidžia tikroji jo paskirtis, visi dar nepublikuoti įvykiai yra išsaugomi. Kai įvykis yra išsaugomas, visi prenumeratoriai, kurie stebi ši įvykį (arba temą) yra informuojami apie pasikeitimus.
+
+Taigi išplečiant šį atvejį, galime pavaizduoti užsakymo komandų doroklę:
+
+\begin{lstlisting}
+module CommandHandlers
+  class CreateOrder < Command::Handler
+    def call(command)
+      with_aggregate(command.aggregate_id) do |order|
+        order.create(command.customer_id)
+      end
+    end
+
+    private
+
+    def aggregate_class
+      Domain::Order
+    end
+  end
+end
+\end{lstlisting}
+
+Čia \lstinline|with_aggregate(command.aggregate_id)| metodas grąžina domeno objektą \lstinline|Domain::Order|, atkurtą iš anksčiau sistemoje įvykusių įvykių, kurie skaitomi iš įvykių žurnalo. Tada komandų doroklė iškviečia \lstinline|create| metodą perduodama parametrus, kuriuos gavo iš komandos.
+
+Supratus domeno įvykius, komandas bei komandų doroklę iškyla klausimas: o kaip kontrolierius iškviečia komandą?
+
+Paprastesniam naudojimui galima sukurti atskirą modulį, kurį galima labai paprastai įtraukti į \lstinline|ApplicationController|, jame prirašius \lstinline|include Command::Execute|:
+
+\begin{lstlisting}
+module Command
+  module Execute
+    def execute(command, **args)
+      command.validate!
+      args = AggregateRoot::Repository.new(event_store) if args.empty?
+      handler_for(command).new(**args).call(command)
+    end
+
+    private
+    def handler_for(command)
+      {
+        Command::CreateOrder          => CommandHandlers::CreateOrder,
+        Command::AddItemToBasket      => CommandHandlers::AddItemToBasket,
+        Command::RemoveItemFromBasket => CommandHandlers::RemoveItemFromBasket,
+      }.fetch(command.class)
+    end
+  end
+end
+\end{lstlisting}
+
+Šiuo atveju iš pradžių yra tikrinamos komandos teisingumo taisyklės. Sukuriamas objektas prieigai prie įvykių žurnalo skaitymo. \lstinline|handler_for| metodas tiesiog aprašo taisykles kuriomis komandos yra priskiriamos jų doroklėms.
+
+Galiausiai iš kontrolieriaus galime sukurti užsakymą:
+
+\begin{lstlisting}
+def create
+  cmd = Command::CreateOrder.new(order_params)
+  execute(cmd)
+
+  redirect_to Order.find_by_uid(cmd.order_id), notice: 'Order was successfully created.'
+end
+\end{lstlisting}
+
+\subsection{Skaitymo modelio kūrimas}
+
+Iki šiol aprašėme kaip vartotojas vykdo komandas, kaip jos apdorojamos, kur įvykdoma domeno logika, kaip publikuojami ir saugomi domeno įvykiai. Prisiminkime, jog domeno objektai neleidžia paimti (arba nerodo) dabartinės būsenos, todėl reikia kito kelio konstruoti duomenis pateikimui vartotojui (vaize), tai yra skaitymo pusei. Čia verta pažymėti, jog duomenys yra denormalizuoti, jie yra būtent tokie, kokių reikia tam vaizdui paruošti. Šis sprendimas turi didelį našumo privalumą, kai reikalingos labai greitos užklausos, nes nereikia vykdyti sudėtingų užklausų (pvz.: sujungimo). Duomenų saugykla šiuo atveju gali būti bet kokia duomenų bazė tiek reliacinė, tiek grafų ar NoSQL.
+
+Kad galėtume naudotis šiomis greitomis užklausomis, pirmiausia reikia paruošti skaitymo pusės duomenis. Reikia apdoroti įrašytus įvykius ir juos transformuoti į norimą vaizdą.
+
+Taigi galime apsirašyti įvykių kaupimo sistemos maršrutizatorių:
+
+\begin{lstlisting}
+module EventStoreSetup
+  def event_store
+    @event_store ||= RailsEventStore::Client.new.tap do |es|
+      es.subscribe(Denormalizers::OrderCreated.new, [Events::OrderCreated])
+      es.subscribe(Denormalizers::ProductAddedToCart.new, [Events::ProductAddedToCart])
+      es.subscribe(Denormalizers::ProductRemovedFromCart.new, [Events::ProductRemovedFromCart])
+    end
+  end
+end
+\end{lstlisting}
+
+Įvykių maršrutizatorius aprašo koks duomenų denormalizatorius apdoroja domeno įvykį arba aibę domeno įvykių. Iš tikrųjų tai ta pati pagrindinė paskirtis kaip ir maršrutizatoriaus MVC projektavimo šablone, kuris pasako kokią užklausą kuris kontrolierius apdoros.
+
+Pažiūrėkime į užsakymo denormalizatoriaus kodą:
+
+\begin{lstlisting}
+module Denormalizers
+  class OrderCreated
+    def call(event)
+      return if Order.where(uid: event.data.order_id).exists?
+      order = ::Order.new.tap do |o|
+        o.uid = event.data.order_id
+        o.number = event.data.order_number
+        o.customer = Customer.find(event.data.customer_id).name
+        o.state = "Created"
+      end
+      order.save!
+    end
+  end
+end
+\end{lstlisting}
+
+Pagrindinė jo paskirtis išsaugoti gautus duomenis į tam tikrus skaitymo duomenų saugyklos stulpelius (ar įrašus - priklausomai nuo duomenų saugyklos tipo). Tačiau atidžiau pažvelkime į šią eilutę - \lstinline|return if Order.where(uid: event.data.order_id).exists?|. Jeigu įvykis jau egzistuoja - jis nėra atnaujinamas. Tai jau tam tikra teisingumo taisyklė, kuri yra patikrinama prieš įrašant duomenis į duomenų saugyklą. Taigi denormalizatorius šiuo atveju turi dvi atsakomybes - filtruoti duomenis ir išsaugoti duomenis į pasirinktą duomenų saugyklą.
+
+Šią atsakomybę būtų galima padalinti panaudojant reaktyvaus programavimo išskirtinę sąvybę - reaktyvius operatorius. Juk įvykiai, kurie nebus apdoroti galėtų ir nepasiekti denormalizatoriaus. MVC projektavimo šablone maršrutizatorius turi galimybę filtruoti užklausas. Daugiau bus parodyta sekančiame skyriuje, o dabar pažvelkime į sutrumpintą įvykių maršrutizatoriaus kodą šiuo atveju:
+
+\begin{lstlisting}
+module Filters
+  clas OrderExists
+    def self.execute(event)
+      Order.where(uid: event.data.order_id).exists?
+    end
+  end
+end
+
+module EventStoreSetup
+  def event_store
+    @event_store ||= RailsEventStore::Client.new.tap do |es|
+      es.subscribe([Events::OrderCreated])
+        .filter { |event| Filters::OrderExists.execute(event) }
+        .each { |event| Denormalizers::OrderCreated.call(event) }
+    end
+  end
+end
+\end{lstlisting}
+
+Šiuo atveju kodas tikrinantis ar užsakymas egzistuoja yra atskirtas ir iškeltas į atskirą filtrų modelį. \lstinline|es.subscribe([Events::OrderCreated])| iš tikrųjų yra srautas. Srautams aprašyti galima naudoti reaktyvius operatorius, juos jungti paduodant daugiau stebimų domeno įvykių kaip masyvą ar, šiuo atveju, iškviesti \lstinline|filter| metodą, paduodant jam \lstinline|lambda| bloką, kuris bus įvykdytas ateityje. Jeigu filtras grąžina \lstinline|false|, tai yra neigiamą reikšmę, jis neperduodamas toliau. Tolesnis blokas įvykdomas tik tada, kai filtras grąžina teigiamą reikšmę.
+
+Kaip buvo nagrinėta literatūros analizėje, įrodyta, jog deklaratyvus stilius yra pranašesnis už imperatyvųjį kodą. Sekančiame skyriuje panagrinėsime kokius privalumus toks atsakomybių atskyrimas suteikia.
+
+\subsubsection{Reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
 
 Steve Klabnik idėjos, atėjusios iš funkcinio programavimo bendruomenės, sudomino ir Ruby bendruomenę. Deklaratyviai parašytas kodas dažnai yra lengviau skaitomas, suprantamas, galima labiau moduliarizuoti kodą, skaidyti į daug smulkesnius komponentus. Galėtų būti naudinga išplėsti ``RailsEventStore'' biblioteką reaktyviais operatoriais tokiais kaip filtravimo \lstinline|filter|, transformavimo \lstinline|map| bei pavyzdžiui imties mažinimo \lstinline|sample|.
 
@@ -604,13 +809,36 @@ Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuri
 
 Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruota reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
 
-\subsubsection{Realizacija}
+\subsubsection{Skaitymo pusės asinchroninis kūrimas}
 
-\textbf{Skyrius bus pateiktas ketvirtojo semestro metu}
+Iš tiesų ``RailsEventStore'' biblioteka veikia sinchroniškai, tačiau skaitymo pusę generuoti galima ir asinchroniškai pasitelkiant papildomas bibliotekas tokias kaip ``Sidekiq''\footnote{https://github.com/mperham/sidekiq} ar ``https://github.com/resque/resque''. Šios bibliotekos pasižymi bendru bruožu - naudoja gijas apdoroti daugybę darbų tuo pačiu metu. Parametrai perduodami šiems darbams dažniausiai saugomi duomenų saugyklose atmintyje, tokiose kaip ``Redis''\footnote{https://redis.io/} ar ``Memcached''\footnote{https://memcached.org/} našumui užtikrinti.
 
-Skyrius aprašys iššūkius ir realizacijos detales apjungiant nagrinėtų reaktyvių programavimo bibliotekų idėjas kartu su ``RalsEventStore'' biblioteka.
+Parodysime kodo pavyzdį kaip atrodytų asinchroninis užsakymo kūrimas panaudojant ``Sidekiq'':
 
-Nagrinėtose Ruby reaktyvaus programavimo bibliotekose buvo panaudotas stebėtojo ir iteratoriaus projektavimo šablonai, o RailsEventStore bibliotekoje naudojamas reaktoriaus projektavimo šablonas. Todėl bus gilinamąsi į būdą juos sujungti.
+\begin{lstlisting}
+module Workers
+  class OrderExists
+    include Sidekiq::Worker
+
+    def perform(order_id)
+      Order.where(uid: order_id).exists?
+    end
+end
+
+module Filters
+  class OrderExists
+    def self.execute(event)
+      Workers::OrderExists.perform_async(event.data.order_id)
+    end
+  end
+end
+\end{lstlisting}
+
+Čia matome, jog darbininko klasėje tereikia pridėti \lstinline|include Sidekiq::Worker| modulį ir įgyvendinti \lstinline|perform| metodą. Įvykdžius \lstinline|Workers::OrderExists.perform_async(event.data.order_id)|, parametrai (unikalus darbo identifikatorius, perduoti parametrai) yra išsaugomi atskiroje duomenų saugykloje (skirtoje būtent tam) į eilę. ``Sidekiq'' procesas tikrina atsiradusius naujus darbus šioje duomenų saugykloje, ir bendru atveju ima juos iš eilės ir priskiria laisvai gijai, kuri apdoroja rezultatą. Esant didesniai sistemos apkrovai yra ganėtinai nesunku pridėti dar vieną serverį, apdorojantį tokius asinchroninius darbus.
+
+Toks asinchroninis darbų apdorojimas padidina sistemos našumą, padaro ją labiau išplečiama, tačiau kaip buvo minėta literatūroje, priverčia atidžiau mąstyti apie pačią sistemą dėl galutinės darnos principo.
+
+Toks būdas gali būti naudingas darbams, kurie užtrunka ilgiau. Pavyzdžiui, sistemoje yra galimybė įkelti prekes ir jų paveikslėlius. Paveikslėlius reikia sumažinti, sukarpyti, suprastinti kokybę ar dar kitaip apdoroti. Toks procesas trunka ilgiau nei paprastas įrašymas į duomenų bazę, todėl iškėlimas būtų labai naudingas didinant sistemos našumą.
 
 \subsection{Darbai numatomi 4-ame semestre}
 
