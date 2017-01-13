@@ -511,7 +511,7 @@ module Command
 end
 \end{lstlisting}
 
-\subsection{Komandų apdorojimas}
+\subsubsection{Komandų apdorojimas}
 
 Komandų doroklė yra pradinis domeno taškas, turintis instrumentuoti domeno objektus ir domeno tarnybas bei vykdyti domeno objektų metodus. Komandų doroklę galima apsirašyti:
 
@@ -603,9 +603,9 @@ def create
 end
 \end{lstlisting}
 
-\subsection{Skaitymo modelio kūrimas}
+\subsubsection{Skaitymo modelio kūrimas}
 
-Iki šiol aprašėme kaip vartotojas vykdo komandas, kaip jos apdorojamos, kur įvykdoma domeno logika, kaip publikuojami ir saugomi domeno įvykiai. Prisiminkime, jog domeno objektai neleidžia paimti (arba nerodo) dabartinės būsenos, todėl reikia kito kelio konstruoti duomenis pateikimui vartotojui (vaize), tai yra skaitymo pusei. Čia verta pažymėti, jog duomenys yra denormalizuoti, jie yra būtent tokie, kokių reikia tam vaizdui paruošti. Šis sprendimas turi didelį našumo privalumą, kai reikalingos labai greitos užklausos, nes nereikia vykdyti sudėtingų užklausų (pvz.: sujungimo). Duomenų saugykla šiuo atveju gali būti bet kokia duomenų bazė tiek reliacinė, tiek grafų ar NoSQL.
+Iki šiol aprašėme kaip vartotojas vykdo komandas, kaip jos apdorojamos, kur įvykdoma domeno logika, kaip publikuojami ir saugomi domeno įvykiai. Prisiminkime, jog domeno objektai neleidžia paimti (arba nerodo) dabartinės būsenos, todėl reikia kito kelio konstruoti duomenis pateikimui vartotojui (vaizde), tai yra skaitymo pusei. Čia verta pažymėti, jog duomenys yra denormalizuoti, jie yra būtent tokie, kokių reikia tam vaizdui paruošti. Šis sprendimas turi didelį našumo privalumą, kai reikalingos labai greitos užklausos, nes nereikia vykdyti sudėtingų užklausų (pvz.: sujungimo). Duomenų saugykla šiuo atveju gali būti bet kokia duomenų bazė tiek reliacinė, tiek grafų ar NoSQL.
 
 Kad galėtume naudotis šiomis greitomis užklausomis, pirmiausia reikia paruošti skaitymo pusės duomenis. Reikia apdoroti įrašytus įvykius ir juos transformuoti į norimą vaizdą.
 
