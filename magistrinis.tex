@@ -95,24 +95,23 @@ III semestro metu buvo atsisakyta funkcinio reaktyvaus programavimo (FRP) termin
 III semestro metu buvo pasiekti šie principiniai \textbf{darbo rezultatai}:
 
 \begin{itemize}
-  \item Pasirinkta ``Ruby'' programavimo kalba ir ``Ruby on Rails'' programavimo karkasas kodo pavyzdžiams pateikti.
   \item Išnagrinėtos reaktyvaus programavimo bibliotekų ``RxRuby'' bei ``frapuccino'' realizacija.
   \item Išnagrinėta įvykių kaupimo bibliotekos ``RailsEventStore'' realizacija.
-  \item Aprašyta kaip atrodytų įvykių kaupimo sistemos architektūra ``Ruby on Rails'' programavimo karkase, ``Ruby'' kalboje, apjungianti CQRS, ES, reaktyvaus programavimo principus.
-  \item Nuspręsta praplėsti ``RailsEventStore'' projektą deklaratyviais operatoriais (įkvėpimas Steve Klabnik ``frappuccino'' biblioteka).
+  \item Aprašyta kaip atrodytų įvykių kaupimo sistemos architektūra ``Ruby on Rails'' programavimo karkase, ``Ruby'' kalboje, apjungianti MVC projektavimo šabloną CQRS, ES, reaktyvaus programavimo principus.
+  \item Nuspręsta praplėsti ``RailsEventStore'' projektą srautų sujungimo, filtravimo, transformavimo bei duomenų lango deklaratyviais operatoriais (įkvėpimas Steve Klabnik ``frappuccino'' biblioteka), įgalinant skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
   \item Įvestas įvykių maršrutizatoriaus terminas, aprašyti galimi panaudojimo atvejai ir teikiama nauda pritaikant reaktyvius operatorius.
-  \item Išnagrinėtas asinchroninis skaitymo modelio kūrimas.
-  \item Užmegztas kontaktas su Pierre-Louis\footnote{https://github.com/gottfrois} - vienas iš pagalbininkų kuriant ``RailsEventStore''. Idėja praplėsti biblioteką galėtų būti gana įdomi.
 \end{itemize}
 
 III semestro metu buvo pasiektos šios \textbf{išvados}:
 
 \begin{itemize}
+  \item Siekiant realizuoti magistro baigiamojo darbo tikslą buvo pasirinktas esamos bibliotekos praplėtimas griežtai tipizuotoje ``Ruby'' programavimo kalboje, sukurtas panaudojimo pseudokodas, aptartos realizacijos detalės bei apribojimai.
   \item Reaktyvaus programavimo paradigma ``Ruby'' programavimo kalboje iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio.
-  \item Įvykių kaupimo biblioteka ``RailsEventStore'' yra aktyviai kuriama ir palaikoma.
-  \item Įvykių kaupimo biblioteka įgyvendina dalį išsikeltų tikslų, tačiau jai trūksta deklaratyvumo, ko pasekoje šiai bibliotekai pritaikomi reaktyvūs operatoriai, taip leidžiantys atskirti dabartines įvykių denormalizatoriaus atsakomybes į smulkesnius, lengviau suprantamus ir palaikomus komponentus.
-  \item Įvykių maršrutizatoriuje ir modelio-vaizdo-kontrolieriaus projektavimo šablono maršrutizatoriuje atsakomybės labai panašios ir jas galima palyginti. Reaktyvūs operatoriai leidžia pasiekti sudėtingesnio ``Ruby on Rails'' maršrutizatoriaus galimybes.
-  \item Norint kurti skaitymo modelį asinchroniškai, reikia panaudoti papildomas bibliotekas, kurios leidžia vykdyti darbus atskirose gijose tuo pačiu metu, tačiau tada atsiranda apribojimai, kuriuos lemia galutinės darnos principas.
+  \item Sukurtos ir aprašytos reaktyvios sistemos, apjungiančios įvykių kaupimo, komandų-užklausų atsakomybių atskyrimo bei reaktyvaus programavimo principus, kūrimo gairės.
+
+  % \item Įvykių kaupimo biblioteka įgyvendina dalį išsikeltų tikslų, tačiau jai trūksta deklaratyvumo, ko pasekoje šiai bibliotekai pritaikomi reaktyvūs operatoriai, taip leidžiantys atskirti dabartines įvykių denormalizatoriaus atsakomybes į smulkesnius, lengviau suprantamus ir palaikomus komponentus.
+  % \item Įvykių maršrutizatoriuje ir modelio-vaizdo-kontrolieriaus projektavimo šablono maršrutizatoriuje atsakomybės labai panašios ir jas galima palyginti. Reaktyvūs operatoriai leidžia pasiekti sudėtingesnio ``Ruby on Rails'' maršrutizatoriaus galimybes.
+  % \item Norint kurti skaitymo modelį asinchroniškai, reikia panaudoti papildomas bibliotekas, kurios leidžia vykdyti darbus atskirose gijose tuo pačiu metu, tačiau tada atsiranda apribojimai, kuriuos lemia galutinės darnos principas.
 \end{itemize}
 
 \printbibliography[heading=bibintoc]  % Šaltinių sąraše nurodoma panaudota

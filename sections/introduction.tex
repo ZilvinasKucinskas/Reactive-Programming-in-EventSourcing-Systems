@@ -1,40 +1,58 @@
 \subsection{Tyrimo objektas}
 
-    Tyrimo objektas yra reaktyvaus programavimo bei įvykių kaupimo principai. Reaktyvus programavimas yra susijęs su reaktyviomis sistemomis, o kalbant apie įvykių kaupimo sistemas, įvykių kaupimo principas yra dažniausiai neatsiejamas nuo komandų-užklausų atsakomybių atskyrimo principo. Dėl to reikia apžvelgti ir pačią sistemą, įkomponuojančią šiuos principus, jog būtų galima susidaryti sistemos architektūros (aukštesnės abstrakcijos) vaizdą bei analizuoti panaudojimo atvejus.
+    Tyrimo objektas yra reaktyvaus programavimo bei įvykių kaupimo principai. Reaktyvus programavimas yra susijęs su reaktyviomis sistemomis, o kalbant apie įvykių kaupimo sistemas, įvykių kaupimo principas yra dažniausiai neatsiejamas nuo komandų-užklausų atsakomybių atskyrimo principo. Dėl to reikia apžvelgti ir pačią sistemą, įkomponuojančią šiuos principus, jog būtų galima susidaryti sistemos architektūros (aukštesnės abstrakcijos) vaizdą, analizuoti panaudojimo atvejus bei aprašyti tokių sistemų kūrimo gaires.
 
 \subsection{Darbo tikslas}
 
-  Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog būtų išpildyti šie reikalavimai:
+  Darbo tikslas yra sukurti įvykių kaupimo sistemų kūrimo gaires bei pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, neturėtų būsenos, tai yra visos operacijos su duomenų baze būtų paslėptos, o programinis kodas - griežtai tipizuotas.
 
-  \begin{itemize}
+  % Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog būtų išpildyti šie reikalavimai:
 
-    \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų.
+  % \begin{itemize}
 
-    \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius.
+  %   \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų.
 
-    \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API).
+  %   \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius.
 
-    \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai.
+  %   \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API).
 
-    \item naudojant reaktyviojo programavimo programos sąsają (API) būtų galima kurti Reaktyvumo manifeste aprašytas reaktyvias sistemas, tai yra būtini bruožai būtų išpildomi (atkuriamumas, reagavimas į įvykius, našumas).
+  %   \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai.
 
-\end{itemize}
+  %   \item naudojant reaktyviojo programavimo programos sąsają (API) būtų galima kurti Reaktyvumo manifeste aprašytas reaktyvias sistemas, tai yra būtini bruožai būtų išpildomi (atkuriamumas, reagavimas į įvykius, našumas).
+
+% \end{itemize}
 
 \subsection{Darbo uždaviniai}
 
   Siekiant tikslo, turi būti išspręsti šie uždaviniai:
 
 \begin{itemize}
-        \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus.
-        \item išnagrinėti egzistuojančią (-ias) reaktyvaus programavimo biblioteką (-as).
-        \item išnagrinėti egzistuojančią (-ias) įvykių kaupimo biblioteką (-as) ar programavimo karkasą (-us).
-        \item sukurti arba praplėsti esamą konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus.
-        \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
+  \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus.
+  \item išnagrinėti egzistuojančią (-ias) reaktyvaus programavimo biblioteką (-as).
+  \item išnagrinėti egzistuojančią (-ias) įvykių kaupimo biblioteką (-as) ar programavimo karkasą (-us).
+  \item sukurti arba praplėsti esamą konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus.
+  \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
+  \item sukurti pavyzdinę programą bei įvertinti alternatyvius būdus kurti skaitymo modelį.
 \end{itemize}
 
 \subsection{Darbo nauda įgyvendinus tikslą}
 
-Kadangi reaktyvus programavimas leidžia kurti sistemas komponavimo būdu, deklaratyviai, pasiekus tikslą būtų galima supaprastinti įvykių kaupimu pagrįstų sistemų kūrimą, struktūrizuoti kodą į smulkesnius, lengviau suprantamus ir palaikomus komponentus. Toks atskyrimas leistų atlikti panašią paskirtį kaip modelio-kontrolieriaus-vaizdo projektavimo šablono maršrutizatorius. Būtų galima apsirašyti kas ir kokius įvykius apdoroja su papildoma galimybe filtruoti ir transformuoti gautus įvykius prieš perduodant valdymą įvykio apdorotojui.
+\textbf{Akademinė}:
+
+\begin{itemize}
+  \item sukurtas inovatyvus arba alternatyvus būdas kurti skaitymo modelį įvykių kaupimo sistemose deklaratyviai paslėpiant veiksmus su duomenų saugykla.
+  \item medžiagą būtų galima naudoti dėstant apie įvykių sistemas, turėti  tokių reaktyvių sistemų kūrimo gaires, pritaikomas praktinių užsiėmimų metu.
+\end{itemize}
+
+\textbf{Verslo}:
+
+\begin{itemize}
+  \item Sukurtas pavyzdinis projektas, paruoštas naudoti produkcijos gamybos aplinkoje - sutaupytų daug laiko, nes nereikėtų konfigūruoti aplinkos nuo nulio.
+\end{itemize}
+
+Kadangi reaktyvus programavimas leidžia kurti sistemas komponavimo būdu, deklaratyviai, pasiekus tikslą būtų galima supaprastinti įvykių kaupimu pagrįstų sistemų kūrimą, struktūrizuoti kodą į smulkesnius, lengviau suprantamus ir palaikomus komponentus.
+
+% Toks atskyrimas leistų atlikti panašią paskirtį kaip modelio-kontrolieriaus-vaizdo projektavimo šablono maršrutizatorius. Būtų galima apsirašyti kas ir kokius įvykius apdoroja su papildoma galimybe filtruoti ir transformuoti gautus įvykius.
 
 \subsection{Tyrimo aktualumas}
 

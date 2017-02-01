@@ -2,7 +2,7 @@
 
 \subsection{Programavimo kalba ir programavimo karkasas}
 
-Pasirinkta dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. ``Ruby on Rails''\footnote{http://rubyonrails.org/} yra atviro kodo serverio pusės saityno programų programavimo karkasas, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. Reaktyvių įvykių sistemų kūrimo gairėms aprašyti yra pasirinkta atviro kodo serverio pusės saityno programų programavimo karkasas ``Ruby on Rails''\footnote{http://rubyonrails.org/}, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
 
 Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
 
@@ -269,7 +269,7 @@ client.delete_stream(stream_name)
 
 Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
 
-Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern), kuris bus aprašytas vėliau. Pavyzdys pateiktas žemiau:
+Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Pavyzdys pateiktas žemiau:
 
 \begin{lstlisting}
 class CartReadModel
@@ -296,30 +296,30 @@ client.subscribe(cart, [AddToCart, RemoveFromCart]) 
 
 Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
-\subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
+% \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
-Pirmiausia reikėtų peržvelgti norimo pasiekti tikslo reikalavimus ir kiek iš jų ``RailsEventStore'' biblioteka atitinka:
+% Pirmiausia reikėtų peržvelgti norimo pasiekti tikslo reikalavimus ir kiek iš jų ``RailsEventStore'' biblioteka atitinka:
 
-\begin{itemize}
-  \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų - sąlyga yra išpildoma, kadangi klientui galima perduoti lambda funkciją, kuri bus iškviečiama įvykus tam tikram įvykiui. Pavyzdys:
+% \begin{itemize}
+%   \item reaktyviojo programavimo programos sąsaja (API) būtų valdoma atgalinių iškvietimų - sąlyga yra išpildoma, kadangi klientui galima perduoti lambda funkciją, kuri bus iškviečiama įvykus tam tikram įvykiui. Pavyzdys:
 
-  \begin{lstlisting}[]
-    in_memory_cart_processing = -> (event) { # do something }
-    client.subscribe(in_memory_cart_processing, [AddToCart, RemoveFromCart])
-  \end{lstlisting}
+%   \begin{lstlisting}[]
+%     in_memory_cart_processing = -> (event) { # do something }
+%     client.subscribe(in_memory_cart_processing, [AddToCart, RemoveFromCart])
+%   \end{lstlisting}
 
-  \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius - ši sąlyga nėra išpildoma, yra tik vienas metodas, kuris priima 2 parametrus ir įgalina prenumeruoti tam tikrus srautus bei įvykdyti atgalinius iškvietimus įvykus pasikeitimui.
+%   \item reaktyviojo programavimo programos sąsaja (API) būtų deklaratyvi, tai yra leistų naudoti reaktyvius operatorius - ši sąlyga nėra išpildoma, yra tik vienas metodas, kuris priima 2 parametrus ir įgalina prenumeruoti tam tikrus srautus bei įvykdyti atgalinius iškvietimus įvykus pasikeitimui.
 
-  \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API) - ši biblioteka yra skirta būtent tam tikslui pasiekti.
+%   \item įvykių kaupimo sistemos skaitymo modelis būtų kuriamas naudojant reaktyviojo programavimo programos sąsają (API) - ši biblioteka yra skirta būtent tam tikslui pasiekti.
 
-  \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai arba reagavimas į apkrovą (Reaktyvumo manifestas). Iš tiesų biblioteka nesuteikia tokio funkcionalumo, tačiau jis yra pasiekiamas papildomų bibliotekų pagalba. Tai bus aprašyta vėliau.
+%   \item įvykių kaupimo sistemos skaitymo modelį būtų galima kurti asinchroniškai arba reagavimas į apkrovą (Reaktyvumo manifestas). Iš tiesų biblioteka nesuteikia tokio funkcionalumo, tačiau jis yra pasiekiamas papildomų bibliotekų pagalba. Tai bus aprašyta vėliau.
 
-  \item atkuriamumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius.
+%   \item atkuriamumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius.
 
-  \item našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
-\end{itemize}
+%   \item našumas (Reaktyvumo manifestas) - šiai temai toliau bus skirtas skyrius
+% \end{itemize}
 
-Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia apžvelgime kaip atrodytų sistemos architektūra, pritaikanti tiek CQRS, tiek ES, tiek RP principus.
+% Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia apžvelgime kaip atrodytų sistemos architektūra, pritaikanti tiek CQRS, tiek ES, tiek RP principus.
 
 \subsection{Įvykių kaupimo sistemos architektūra}
 
@@ -362,7 +362,7 @@ Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įro
   \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
 \end{enumerate}
 
-\subsection{Įvykių kaupimo sistemos realizacija}
+\subsection{Įvykių kaupimo sistemos kūrimo gairės}
 
 Praeitame skyriuje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame skyriuje bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
 
@@ -670,144 +670,144 @@ end
 
 Šiuo atveju kodas tikrinantis ar užsakymas egzistuoja yra atskirtas ir iškeltas į atskirą filtrų modelį. \lstinline|es.subscribe([Events::OrderCreated])| iš tikrųjų yra srautas. Srautams aprašyti galima naudoti reaktyvius operatorius, juos jungti paduodant daugiau stebimų domeno įvykių kaip masyvą ar, šiuo atveju, iškviesti \lstinline|filter| metodą, paduodant jam \lstinline|lambda| bloką, kuris bus įvykdytas ateityje. Jeigu filtras grąžina \lstinline|false|, tai yra neigiamą reikšmę, jis neperduodamas toliau. Tolesnis blokas įvykdomas tik tada, kai filtras grąžina teigiamą reikšmę.
 
-Kaip buvo nagrinėta literatūros analizėje, įrodyta, jog deklaratyvus stilius yra pranašesnis už imperatyvųjį kodą. Sekančiame skyriuje panagrinėsime kokius privalumus toks atsakomybių atskyrimas suteikia.
+% Kaip buvo nagrinėta literatūros analizėje, įrodyta, jog deklaratyvus stilius yra pranašesnis už imperatyvųjį kodą. Sekančiame skyriuje panagrinėsime kokius privalumus toks atsakomybių atskyrimas suteikia.
 
-\subsubsection{Reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
+% \subsubsection{Reaktyvūs operatoriai ``RailsEventStore'' bibliotekoje}
 
-Steve Klabnik idėjos, atėjusios iš funkcinio programavimo bendruomenės, sudomino ir Ruby bendruomenę. Deklaratyviai parašytas kodas dažnai yra lengviau skaitomas, suprantamas, galima labiau moduliarizuoti kodą, skaidyti į daug smulkesnius komponentus. Galėtų būti naudinga išplėsti ``RailsEventStore'' biblioteką reaktyviais operatoriais tokiais kaip filtravimo \lstinline|filter|, transformavimo \lstinline|map| bei pavyzdžiui imties mažinimo \lstinline|sample|.
+% Steve Klabnik idėjos, atėjusios iš funkcinio programavimo bendruomenės, sudomino ir Ruby bendruomenę. Deklaratyviai parašytas kodas dažnai yra lengviau skaitomas, suprantamas, galima labiau moduliarizuoti kodą, skaidyti į daug smulkesnius komponentus. Galėtų būti naudinga išplėsti ``RailsEventStore'' biblioteką reaktyviais operatoriais tokiais kaip filtravimo \lstinline|filter|, transformavimo \lstinline|map| bei pavyzdžiui imties mažinimo \lstinline|sample|.
 
-\textbf{Maršrutizatoriaus paskirtis}
+% \textbf{Maršrutizatoriaus paskirtis}
 
-Dabartinis ``RailsEventStore'' įvykių ir jų apdorojų apibrėžimas atrodo labai paprastas. Jis panašus į MVC projektavimo šablono maršrutizatoriaus veikimą. Kai gaunama nauja informacija, pažiūrima į tos informacijos tipą bei priskiriamas reikiamas kontrolierius.
+% Dabartinis ``RailsEventStore'' įvykių ir jų apdorojų apibrėžimas atrodo labai paprastas. Jis panašus į MVC projektavimo šablono maršrutizatoriaus veikimą. Kai gaunama nauja informacija, pažiūrima į tos informacijos tipą bei priskiriamas reikiamas kontrolierius.
 
-Tačiau Ruby on Rails programavimo karkaso maršrutizatorius \lstinline|config/routes.rb| turi ir sudėtingesnių kalbos konstrukcijų, tokių kaip maršrutizatoriaus suvaržymai\footnote{http://guides.rubyonrails.org/routing.html}. Jie dažnai įveda saugumo ir švarumo į bendrą kuriamos sistemos kodą. Jie gali išvalyti bei validuoti informaciją, kuri bus perduodama kontrolieriui.
+% Tačiau Ruby on Rails programavimo karkaso maršrutizatorius \lstinline|config/routes.rb| turi ir sudėtingesnių kalbos konstrukcijų, tokių kaip maršrutizatoriaus suvaržymai\footnote{http://guides.rubyonrails.org/routing.html}. Jie dažnai įveda saugumo ir švarumo į bendrą kuriamos sistemos kodą. Jie gali išvalyti bei validuoti informaciją, kuri bus perduodama kontrolieriui.
 
-Pačiu paprasčiausiu atveju validatorius gali atrodyti kaip:
+% Pačiu paprasčiausiu atveju validatorius gali atrodyti kaip:
 
-\begin{lstlisting}[]
-get   'user/:id'   => 'user#show', constraint: { id: /\d+/ }
-\end{lstlisting}
+% \begin{lstlisting}[]
+% get   'user/:id'   => 'user#show', constraint: { id: /\d+/ }
+% \end{lstlisting}
 
-Šis validatorius filtruoja tik tas užklausas, kur parametras \lstinline|id|| yra perduodamas kaip sveikasis skaičius. Jei jis toks nėra, užklausa net nepasiekia kontrolieriaus.
+% Šis validatorius filtruoja tik tas užklausas, kur parametras \lstinline|id|| yra perduodamas kaip sveikasis skaičius. Jei jis toks nėra, užklausa net nepasiekia kontrolieriaus.
 
-Kitas maršrutizatoriaus apribojimų panaudojimo atvejis yra kontrolieriaus veiksmų supaprastinimas (ir jį palaikančio kodo). Tarkime turime kontrolierių:
+% Kitas maršrutizatoriaus apribojimų panaudojimo atvejis yra kontrolieriaus veiksmų supaprastinimas (ir jį palaikančio kodo). Tarkime turime kontrolierių:
 
-\begin{lstlisting}[]
-  def search_by
-    if params['sort']    == 'best_match'
-      #execute
-    elsif params['sort'] == 'trending'
-      #execute
-    elsif params['sort'] == 'new'
-      #execute
-    end
-  end
-\end{lstlisting}
+% \begin{lstlisting}[]
+%   def search_by
+%     if params['sort']    == 'best_match'
+%       #execute
+%     elsif params['sort'] == 'trending'
+%       #execute
+%     elsif params['sort'] == 'new'
+%       #execute
+%     end
+%   end
+% \end{lstlisting}
 
-o tuo tarpu maršrutizatorius atrodo kaip:
+% o tuo tarpu maršrutizatorius atrodo kaip:
 
-\begin{lstlisting}[]
-  get    'product/search' => 'search#search_by'
-\end{lstlisting}
+% \begin{lstlisting}[]
+%   get    'product/search' => 'search#search_by'
+% \end{lstlisting}
 
-Panaudojant maršrutizatoriaus apribojimus galime išskaidyti atsakomybes ir padalinti veiksmus priklausomai nuo to kokie yra užklausos parametrai. Po pakeitimų \lstinline{config/routes.rb} gali atrodyti:
+% Panaudojant maršrutizatoriaus apribojimus galime išskaidyti atsakomybes ir padalinti veiksmus priklausomai nuo to kokie yra užklausos parametrai. Po pakeitimų \lstinline{config/routes.rb} gali atrodyti:
 
-\begin{lstlisting}[]
-  get    'product/search' => 'search#best_match',  constraints: BestMatchConstraint
-  get    'product/search' => 'search#trending',    constraints: TrendingSearchConstraint
-  get    'product/search' => 'search#new',         constraints: NewSearchConstraint
+% \begin{lstlisting}[]
+%   get    'product/search' => 'search#best_match',  constraints: BestMatchConstraint
+%   get    'product/search' => 'search#trending',    constraints: TrendingSearchConstraint
+%   get    'product/search' => 'search#new',         constraints: NewSearchConstraint
 
-  class BestMatchConstraint
-    def self.matches?(request)
-      request.query_parameters['sort'] == 'best_match'
-    end
-  end
+%   class BestMatchConstraint
+%     def self.matches?(request)
+%       request.query_parameters['sort'] == 'best_match'
+%     end
+%   end
 
-  class TrendingSearchConstraint
-    def self.matches?(request)
-      request.query_parameters['sort'] == 'trending'
-    end
-  end
+%   class TrendingSearchConstraint
+%     def self.matches?(request)
+%       request.query_parameters['sort'] == 'trending'
+%     end
+%   end
 
-  class NewSearchConstraint
-    def self.matches?(request)
-      request.query_parameters['sort'] == 'new'
-    end
-  end
-\end{lstlisting}
+%   class NewSearchConstraint
+%     def self.matches?(request)
+%       request.query_parameters['sort'] == 'new'
+%     end
+%   end
+% \end{lstlisting}
 
-Po tokio išskaidymo kontrolieriaus metodai atrodytų daug švariau ir gražiau:
+% Po tokio išskaidymo kontrolieriaus metodai atrodytų daug švariau ir gražiau:
 
-\begin{lstlisting}
-  def best_match
-    # execute
-  end
+% \begin{lstlisting}
+%   def best_match
+%     # execute
+%   end
 
-  def trending
-    # execute
-  end
+%   def trending
+%     # execute
+%   end
 
-  def new
-    # execute
-  end
-\end{lstlisting}
+%   def new
+%     # execute
+%   end
+% \end{lstlisting}
 
-Toliau pateikiu kartais praktikoje pasitaikantį duomenų transformavimo pavyzdį maršrutizatoriuje, kai yra pridedami nauji duomenys:
+% Toliau pateikiu kartais praktikoje pasitaikantį duomenų transformavimo pavyzdį maršrutizatoriuje, kai yra pridedami nauji duomenys:
 
-\begin{lstlisting}
-get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
-\end{lstlisting}
+% \begin{lstlisting}
+% get 'photos/:id', to: 'photos#show', defaults: { format: 'jpg' }
+% \end{lstlisting}
 
-Jeigu užklausos parametras \lstinline|format| buvo nenurodytas, numatytatasis parametras \lstinline|params[:format] = 'jpg'| bus perduotas kontrolieriui.
+% Jeigu užklausos parametras \lstinline|format| buvo nenurodytas, numatytatasis parametras \lstinline|params[:format] = 'jpg'| bus perduotas kontrolieriui.
 
-Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime, kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
+% Sukūrus reaktyvius operatorius ``RailsEventStore'' bibliotekoje būtų galima pasiekti panašių privalumų. Galima būtų turėti sudėtingesnį įvykių maršrutizatorių. Visų pirma būtų lengviau mąstyti apie kuriamą sistemą, kai loginiai vienetai yra labiau atskirti. Šiuo metu visa logika yra perkelta į skaitymo modelį, jei norime, kad įvykis nebūtų pritaikytas (dėl tam tikrų priežasčių), turime tą kodą aprašyti pačiame modelyje.
 
-\textbf{Filtravimo operatorius}
+% \textbf{Filtravimo operatorius}
 
-Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius ir leistų apdoroti tik tuos įvykius, kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti vartotojus, kurie priklauso tam tikrai A/B testo grupei, ir tik tada pritaikyti tam tikrus veiksmus.
+% Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius ir leistų apdoroti tik tuos įvykius, kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti vartotojus, kurie priklauso tam tikrai A/B testo grupei, ir tik tada pritaikyti tam tikrus veiksmus.
 
-\begin{lstlisting}
-  event_store.subscribe([ProductPurchase])
-             .filter { |event| User.find(event.user.id).ab_active? }
-             .each { |event| ApplyTestCaseScenario.execute(event) }
-\end{lstlisting}
+% \begin{lstlisting}
+%   event_store.subscribe([ProductPurchase])
+%              .filter { |event| User.find(event.user.id).ab_active? }
+%              .each { |event| ApplyTestCaseScenario.execute(event) }
+% \end{lstlisting}
 
-Tam tikras testinis atvejis yra pritaikomas tik tiems vartotojams, kurie priklauso A/B testo grupei.
+% Tam tikras testinis atvejis yra pritaikomas tik tiems vartotojams, kurie priklauso A/B testo grupei.
 
-\textbf{Transformavimo operatorius}
+% \textbf{Transformavimo operatorius}
 
-Konstrukcija \lstinline|map| leistų transformuoti įvykius bei galėtų būti naudinga eksperimentavimo tikslais. Turint visą sistemos verslo logikos įvykių istoriją galima būtų iš naujo pritaikyti visus įvykius ir stebėti sistemos elgseną kaitaliojant įvairius parametrus. Pavyzdžiui elektroninės komercijos sistemoje gali būti poreikis įsivesti tam tikrą pirkėjų lojalumo sistemą. Iš pradžių neaišku kiek kam kreditų skirti, kokį procentą nuo produkto sumos. Neaišku kurie vartotojai kiek kreditų sukaups ateityje. Tačiau turint istoriją galima šį atvejį paprastai sumodeliuoti lokaliai. Pažvelkime į pseudokodą:
+% Konstrukcija \lstinline|map| leistų transformuoti įvykius bei galėtų būti naudinga eksperimentavimo tikslais. Turint visą sistemos verslo logikos įvykių istoriją galima būtų iš naujo pritaikyti visus įvykius ir stebėti sistemos elgseną kaitaliojant įvairius parametrus. Pavyzdžiui elektroninės komercijos sistemoje gali būti poreikis įsivesti tam tikrą pirkėjų lojalumo sistemą. Iš pradžių neaišku kiek kam kreditų skirti, kokį procentą nuo produkto sumos. Neaišku kurie vartotojai kiek kreditų sukaups ateityje. Tačiau turint istoriją galima šį atvejį paprastai sumodeliuoti lokaliai. Pažvelkime į pseudokodą:
 
-\begin{lstlisting}[]
-module Transformers
-  class StoreCreditsMapper
-    CREDITS_PERCENTAGE_FOR_PURCHASE = 0.3
+% \begin{lstlisting}[]
+% module Transformers
+%   class StoreCreditsMapper
+%     CREDITS_PERCENTAGE_FOR_PURCHASE = 0.3
 
-    def self.execute(event)
-      event.user.store_credits = event.product.price * CREDITS_PERCENTAGE_FOR_PURCHASE
-    end
-  end
-end
+%     def self.execute(event)
+%       event.user.store_credits = event.product.price * CREDITS_PERCENTAGE_FOR_PURCHASE
+%     end
+%   end
+% end
 
-event_store.subscribe([ProductPurchase])
-           .filter { |event| Filters::EligibleForBuyerLoyaltyProgram.execute(event) }
-           .map { |event| Transformers::StoreCreditsMapper.execute(event) }
-           .each { |event| ReadModels::User.call(event) }
-\end{lstlisting}
+% event_store.subscribe([ProductPurchase])
+%            .filter { |event| Filters::EligibleForBuyerLoyaltyProgram.execute(event) }
+%            .map { |event| Transformers::StoreCreditsMapper.execute(event) }
+%            .each { |event| ReadModels::User.call(event) }
+% \end{lstlisting}
 
-Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
+% Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
 
-\textbf{Imties mažinimo operatorius}
+% \textbf{Imties mažinimo operatorius}
 
-Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuriant analitines aplikacijas, kur \lstinline|n| būtų išreikštas kaip procentas, kurio reikšmė būtų nuo 0 iki 100. Kai į įvykių žurnalą yra įrašoma labai daug įvykių, tik tam tikras procentas įvykių būtų toliau apdorojami. Bendru atveju šis operatorius galėtų būti išreikštas per \lstinline|filter| operatorių:
+% Imties mažinimo \lstinline|sample(n)| operatorius galėtų būti naudingas kuriant analitines aplikacijas, kur \lstinline|n| būtų išreikštas kaip procentas, kurio reikšmė būtų nuo 0 iki 100. Kai į įvykių žurnalą yra įrašoma labai daug įvykių, tik tam tikras procentas įvykių būtų toliau apdorojami. Bendru atveju šis operatorius galėtų būti išreikštas per \lstinline|filter| operatorių:
 
-\begin{lstlisting}[]
-  es.subscribe([RealtimeTimeEventAdded])
-     .filter { |event| rand(100) < 20 }
-     .each { |event| EventProcessor.call(event) }
-\end{lstlisting}
+% \begin{lstlisting}[]
+%   es.subscribe([RealtimeTimeEventAdded])
+%      .filter { |event| rand(100) < 20 }
+%      .each { |event| EventProcessor.call(event) }
+% \end{lstlisting}
 
-Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruota reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
+% Šiuo atveju \lstinline|rand(100)| sugeneruoja atsitiktinę reikšmę tarp 0 ir 99. Jei sugeneruota reikšmė bus mažesnė nei tarkime 20, tik tada \lstinline|EventProcessor| klasė bus iškviesta.
 
 \subsubsection{Skaitymo pusės asinchroninis kūrimas}
 
@@ -840,12 +840,99 @@ Toks asinchroninis darbų apdorojimas padidina sistemos našumą, padaro ją lab
 
 Toks būdas gali būti naudingas darbams, kurie užtrunka ilgiau. Pavyzdžiui, sistemoje yra galimybė įkelti prekes ir jų paveikslėlius. Paveikslėlius reikia sumažinti, sukarpyti, suprastinti kokybę ar dar kitaip apdoroti. Toks procesas trunka ilgiau nei paprastas įrašymas į duomenų bazę, todėl iškėlimas būtų labai naudingas didinant sistemos našumą.
 
+\subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
+
+Praeitame skyriuje buvo pademonstruotas įvykių kaupimo sistemos skaitymo modelio kūrimas panaudojant egzistuojančią biblioteką. Tačiau toks bibliotekos panaudojimas nėra deklaratyvus, programuotojui tenka rašyti darbo su duomenų baze operacijas. Norima tokį pašalinį efektą paslėpti, jog būtų galima koncentruotis tik ties sprendžiama problema. Toliau bus aprašomas siūlomas esamos ``RailsEventStore'' praplėtimas leidžiantis kurti skaitymo modelį komponavimo būdu, pasliapiantis duomenų bazės lygmens realizacijos detales.
+
+\subsubsection{Pavyzdinė domeno sritis ir įvykiai}
+
+Tarkime turime domeno sritį bankininkystė ir vartotojas gali atlikti šias operacijas, kurias atvaizduotų atitinkami įvykiai sistemoje:
+
+\begin{itemize}
+  \item \lstinline|AccountCreated| - susikurti sąskaitą, kuri turėtų unikalų sąskaitos identifikatorių ir einamąjį balansą.
+  \item \lstinline|MoneyDeposited| - įnešti pinigus į sąskaitą.
+  \item \lstinline|MoneyWithdrawn| - išsiimti pinigus.
+\end{itemize}
+
+\subsubsection{Skaitymo modelio kvietimas}
+
+Patogiam užklausų rašymui, pasirenkamas aktyvaus įrašo projektavimo šablonas, kuris buvo nagrinėtas literatūros analizėje.
+
+Norint surasti sąskaitą \lstinline|Account| pagal unikalų identifikatorių užtenka iškviesti:
+
+\begin{lstlisting}
+  Account.find_by(account_id: 'LT121000011101001000')
+\end{lstlisting}
+
+Norint atvaizduoti sąskaitas, kurios buvo atidarytos paskutinį mėnesį ir išrūšiuoti pagal naujumą užtenka iškviesti:
+
+\begin{lstlisting}
+  Account.filter(created_at: 1.month.ago..Time.current).order(created_at: :desc)
+\end{lstlisting}
+
+\subsubsection{Skaitymo modelio aprašas}
+
+Panaudodami \lstinline|event_store| kintamąjį, kuris yra duomenų srauto klientas, galime sukurti skaitymo modelį deklaratyviai:
+
+\begin{lstlisting}
+  event_store.
+    as(Account).
+    subscribe([AccountCreated, MoneyDeposited, MoneyWithdrawn]).
+    init( -> (state) { state.balance = 0} ).
+    when(AccountCreated), -> (state, event) { state.account_id = event.data[:account_id] }.
+    when(MoneyDeposited), -> (state, event) { state.balance += event.data[:amount] }).
+    when(MoneyWithdrawn), -> (state, event) { state.balance -= event.data[:amount] })
+\end{lstlisting}
+
+Verta pažymėti, jog čia nėra nė vienos operacijos su duomenų saugykla. Panagrinėkime šį kodo pavyzdį detaliau.
+
+\lstinline|as(Account)| aprašo, jog bus kuriamas sąskaitos tipas. Įprastai programuotojas turi apsirašyti šį modelį pats \lstinline|class Account < ActiveRecord::Base; end|. Tačiau čia gali pasitarnauti meta programavimas \cite{Olsen:2007:DPR:1349728}, kuris leidžia programuotojams būti produktyvesniems generuojant dalį kodo. Šiuo atveju biblioteka leidžia paduoti ne tik jau aprašytą aktyvaus įrašo tipą, bet priima tiek eilutės, tiek simbolio tipą ir gali dinamiškai paveldėti aktyvaus įrašo bazinį tipą:
+
+\begin{lstlisting}
+read_model_type =
+  if defined_stream_type.is_a? String
+    Object.const_set(dynamic_name, Class.new(ActiveRecord::Base))
+  elsif defined_stream_type.is_a? Symbol
+    Object.const_set(defined_stream_type.to_s.capitalize, Class.new(ActiveRecord::Base))
+  else
+    defined_stream_type
+  end
+\end{lstlisting}
+
+Aprašomas duomenų srautas elgiasi kaip stebėtojas, bei prenumeruoja vieną ar daugiau temų panaudojant \lstinline|subscribe| metodą.
+
+\lstinline|init| metodas veikia kaip inicializatorius. Jeigu skaitymo modelis dar nėra saugomas duomenų saugykloje, sukuriant įrašą bus nustatoma pradinės įrašo reikšmės. Šiuo atveju sąskaitos balansas bus 0. Metodas priima \lstinline|lambda| funkciją, kuri bus iškviesta inicializavimo metu. Supaprastintai (bibliotekoje) tai galima pavaizduoti kaip:
+
+\begin{lstlisting}
+class ReadModel
+  def init(&blk)
+    Init.new(self, &blk)
+  end
+end
+
+class Init < ReadModel
+  def initialize(source, &blk)
+    @block = blk
+
+    source.add_observer(self)
+  end
+
+  def update(event)
+    return unless record_initialized?
+
+    record = @read_model_type.new
+    @blk.call(record)
+    record.save!
+  end
+end
+\end{lstlisting}
+
 \subsection{Darbai numatomi 4-ame semestre}
 
 \begin{itemize}
   \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore. Ši biblioteka naudoja reaktoriaus projektavimo šabloną, kurį vertėtų detaliau aprašyti - privalumai, trūkumai).
 
-  \item Pabandyti gauti įžvalgų iš RailsEventStore kūrėjų apie mano inovatyvų sprendimą RailsEventStore programavimo bibliotekoje. Įsivaizduoju tai kaip atviro kodo papildinį, kurį viešai gali peržiūrėti, ar privatus susirašinėjimas.
+  % \item Pabandyti gauti įžvalgų iš RailsEventStore kūrėjų apie mano inovatyvų sprendimą RailsEventStore programavimo bibliotekoje. Įsivaizduoju tai kaip atviro kodo papildinį, kurį viešai gali peržiūrėti, ar privatus susirašinėjimas.
 
   \item Paanalizuoti kaip galima įvykius atkartoti naudojant reaktyvius operatorius, kadangi analizuojant teoriją buvo minėta, jog tai gali būti keblumas.
 
@@ -857,7 +944,7 @@ Toks būdas gali būti naudingas darbams, kurie užtrunka ilgiau. Pavyzdžiui, s
 
   \item Pateikti temas ir idėjas, kurias galima analizuoti ir kurios praverstų tobulinant šį darbą bei pačią RailsEventStore biblioteką.
 
-  \item Baigtą darbą dar kartą redaguoti, pasirūpinti formatavimo neskalndumais (jei tokių yra).
+  \item Baigtą darbą dar kartą redaguoti, pasirūpinti formatavimo nesklandumais (jei tokių yra).
 
   \item Papildyti santrumpas ir paaiškinimus.
 \end{itemize}
