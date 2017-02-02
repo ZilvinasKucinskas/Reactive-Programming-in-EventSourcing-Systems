@@ -25,7 +25,7 @@
   numbers=none,
   numberstyle=\tiny\color{gray},
   %keywordstyle=\color{blue},
-  %commentstyle=\color{dkgreen},
+  %commentstyle=\color{dkgreisen},
   %stringstyle=\color{mauve},
   frame=single,
   breaklines=true,
@@ -97,7 +97,8 @@ III semestro metu buvo pasiekti šie principiniai \textbf{darbo rezultatai}:
 \begin{itemize}
   \item Išnagrinėtos reaktyvaus programavimo bibliotekų ``RxRuby'' bei ``frapuccino'' realizacija.
   \item Išnagrinėta įvykių kaupimo bibliotekos ``RailsEventStore'' realizacija.
-  \item Aprašyta kaip atrodytų įvykių kaupimo sistemos architektūra ``Ruby on Rails'' programavimo karkase, ``Ruby'' kalboje, apjungianti MVC projektavimo šabloną CQRS, ES, reaktyvaus programavimo principus.
+  % \item Aprašyta kaip atrodytų įvykių kaupimo sistemos architektūra ``Ruby on Rails'' programavimo karkase, ``Ruby'' kalboje, apjungianti MVC projektavimo šabloną CQRS, ES, reaktyvaus programavimo principus.
+  \item Sukurtos ir aprašytos reaktyvios sistemos, apjungiančios įvykių kaupimo, komandų-užklausų atsakomybių atskyrimo bei reaktyvaus programavimo principus, kūrimo gairės.
   \item Nuspręsta praplėsti ``RailsEventStore'' projektą srautų sujungimo, filtravimo, transformavimo bei duomenų lango deklaratyviais operatoriais (įkvėpimas Steve Klabnik ``frappuccino'' biblioteka), įgalinant skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
   \item Įvestas įvykių maršrutizatoriaus terminas, aprašyti galimi panaudojimo atvejai ir teikiama nauda pritaikant reaktyvius operatorius.
 \end{itemize}
@@ -107,7 +108,7 @@ III semestro metu buvo pasiektos šios \textbf{išvados}:
 \begin{itemize}
   \item Siekiant realizuoti magistro baigiamojo darbo tikslą buvo pasirinktas esamos bibliotekos praplėtimas griežtai tipizuotoje ``Ruby'' programavimo kalboje, sukurtas panaudojimo pseudokodas, aptartos realizacijos detalės bei apribojimai.
   \item Reaktyvaus programavimo paradigma ``Ruby'' programavimo kalboje iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio.
-  \item Sukurtos ir aprašytos reaktyvios sistemos, apjungiančios įvykių kaupimo, komandų-užklausų atsakomybių atskyrimo bei reaktyvaus programavimo principus, kūrimo gairės.
+
 
   % \item Įvykių kaupimo biblioteka įgyvendina dalį išsikeltų tikslų, tačiau jai trūksta deklaratyvumo, ko pasekoje šiai bibliotekai pritaikomi reaktyvūs operatoriai, taip leidžiantys atskirti dabartines įvykių denormalizatoriaus atsakomybes į smulkesnius, lengviau suprantamus ir palaikomus komponentus.
   % \item Įvykių maršrutizatoriuje ir modelio-vaizdo-kontrolieriaus projektavimo šablono maršrutizatoriuje atsakomybės labai panašios ir jas galima palyginti. Reaktyvūs operatoriai leidžia pasiekti sudėtingesnio ``Ruby on Rails'' maršrutizatoriaus galimybes.

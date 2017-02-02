@@ -886,6 +886,8 @@ Panaudodami \lstinline|event_store| kintamąjį, kuris yra duomenų srauto klien
 
 Verta pažymėti, jog čia nėra nė vienos operacijos su duomenų saugykla. Panagrinėkime šį kodo pavyzdį detaliau.
 
+\textbf{Kuriamo skaitymo modelio tipo operatorius}
+
 \lstinline|as(Account)| aprašo, jog bus kuriamas sąskaitos tipas. Įprastai programuotojas turi apsirašyti šį modelį pats \lstinline|class Account < ActiveRecord::Base; end|. Tačiau čia gali pasitarnauti meta programavimas \cite{Olsen:2007:DPR:1349728}, kuris leidžia programuotojams būti produktyvesniems generuojant dalį kodo. Šiuo atveju biblioteka leidžia paduoti ne tik jau aprašytą aktyvaus įrašo tipą, bet priima tiek eilutės, tiek simbolio tipą ir gali dinamiškai paveldėti aktyvaus įrašo bazinį tipą:
 
 \begin{lstlisting}
@@ -900,6 +902,8 @@ read_model_type =
 \end{lstlisting}
 
 Aprašomas duomenų srautas elgiasi kaip stebėtojas, bei prenumeruoja vieną ar daugiau temų panaudojant \lstinline|subscribe| metodą.
+
+\textbf{Pradinės būsenos operatorius}
 
 \lstinline|init| metodas veikia kaip inicializatorius. Jeigu skaitymo modelis dar nėra saugomas duomenų saugykloje, sukuriant įrašą bus nustatoma pradinės įrašo reikšmės. Šiuo atveju sąskaitos balansas bus 0. Metodas priima \lstinline|lambda| funkciją, kuri bus iškviesta inicializavimo metu. Supaprastintai (bibliotekoje) tai galima pavaizduoti kaip:
 
@@ -927,20 +931,59 @@ class Init < ReadModel
 end
 \end{lstlisting}
 
+Čia \lstinline|update| metodas yra iškviečiamas kiekvieną kartą, kai duomenų srautas gauna naują įvykį, o stebėtojas jį prenumeruoja. Ši supaprastinta realizacija iš esmės yra labai panaši į Steve Klabnik sukurtą reaktyvaus programavimo ``frappuccino'' bibliotekos vidinę realizaciją.
+
+\textbf{Tipo atitikimo operatorius}
+
+Operatorių \lstinline|when(Type, &blk)| galima vadinti tipo atitikimo operatoriumi. Perduodamas \lstinline|lambda| blokas bus iškviestas tik tada kai sistemoje įvykusio įvykio tipas bus toks, koks yra apibrėžtas.
+
+% \textbf{Filtravimo operatorius}
+
+% Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius ir leistų apdoroti tik tuos įvykius, kurie atitinka tam tikrą sąlygą. Pazydžiui būtų galima filtruoti tik tas pinigų pervedimo operacijas, kurių pervedimo suma yra didesnė nei 100 eurų ir jas vėliau papildomai apmokestinti.
+
+% \begin{lstlisting}
+%   event_store.subscribe([MoneyWithdrawn]).
+%              .as(A)
+%              .filter -> (event) { event.data[:amount] > 100 }
+%              .when(MoneyWithdrawn) -> (state, event) { state.fees += event[:amount] * 0.23 }
+% \end{lstlisting}
+
+% Šiam metodui perduodamas \lstinline|lambda| blokas turi grąžinti loginę reikšmę, tai yra \lstinline|true| arba \lstinline|false|.
+
+% \textbf{Transformavimo operatorius}
+
+% Konstrukcija \lstinline|map| leistų transformuoti įvykius bei galėtų būti naudinga eksperimentavimo tikslais. Turint visą sistemos verslo logikos įvykių istoriją galima būtų iš naujo pritaikyti visus įvykius ir stebėti sistemos elgseną kaitaliojant įvairius parametrus. Pavyzdžiui elektroninės komercijos sistemoje gali būti poreikis įsivesti tam tikrą pirkėjų lojalumo sistemą. Iš pradžių neaišku kiek kam kreditų skirti, kokį procentą nuo produkto sumos. Neaišku kurie vartotojai kiek kreditų sukaups ateityje. Tačiau turint istoriją galima šį atvejį paprastai sumodeliuoti lokaliai. Pažvelkime į pseudokodą:
+
+% \begin{lstlisting}
+% module Transformers
+%   class StoreCreditsMapper
+%     CREDITS_PERCENTAGE_FOR_PURCHASE = 0.3
+
+%     def self.execute(event)
+%       event.user.store_credits = event.product.price * CREDITS_PERCENTAGE_FOR_PURCHASE
+%     end
+%   end
+% end
+
+% event_store.subscribe([ProductPurchase])
+%            .filter -> (event) { event.data[:eligible_for_buyer_loyalty_program] == true }
+%            .map { |event| Transformers::StoreCreditsMapper.execute(event) }
+% \end{lstlisting}
+
+% Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
+
 \subsection{Darbai numatomi 4-ame semestre}
 
 \begin{itemize}
-  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore. Ši biblioteka naudoja reaktoriaus projektavimo šabloną, kurį vertėtų detaliau aprašyti - privalumai, trūkumai).
+  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus RailsEventStore.
 
   % \item Pabandyti gauti įžvalgų iš RailsEventStore kūrėjų apie mano inovatyvų sprendimą RailsEventStore programavimo bibliotekoje. Įsivaizduoju tai kaip atviro kodo papildinį, kurį viešai gali peržiūrėti, ar privatus susirašinėjimas.
 
-  \item Paanalizuoti kaip galima įvykius atkartoti naudojant reaktyvius operatorius, kadangi analizuojant teoriją buvo minėta, jog tai gali būti keblumas.
+  \item Pritaikant reaktyvius operatorius, įvykius atkurti gali būti kebliau, kaip nagrinėta literatūroje, tačiau įmanoma. Šia tema literatūros tikrai trūksta, ir detalios instrukcijos labai praverstų.
 
   \item Norėtųsi darbo teorinę dalį įžvalgomis apie reaktyvaus programavimo teikiamus pranašumus, tokius kaip kodo suprantamumas, programuotojo produktyvumas remiantis Guido Salvaneschi darbu \cite{Salvaneschi:2014:ESP:2635868.2635895}.
 
   \item Norėtųsi darbo teorinę dalį papildyti apie reaktyvaus programavimo trūkumus remiantis \cite{Bainomugisha:2013:SRP:2501654.2501666} darbu.
-
-  \item Pritaikant reaktyvius operatorius, įvykius atkurti gali būti kebliau, kaip nagrinėta literatūroje, tačiau įmanoma. Šia tema literatūros tikrai trūksta, ir detalios instrukcijos labai praverstų.
 
   \item Pateikti temas ir idėjas, kurias galima analizuoti ir kurios praverstų tobulinant šį darbą bei pačią RailsEventStore biblioteką.
 
