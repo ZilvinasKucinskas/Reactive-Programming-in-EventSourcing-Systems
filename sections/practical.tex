@@ -903,7 +903,7 @@ read_model_type =
 
 Aprašomas duomenų srautas elgiasi kaip stebėtojas, bei prenumeruoja vieną ar daugiau temų panaudojant \lstinline|subscribe| metodą.
 
-\textbf{Pradinės būsenos operatorius}
+\textbf{Pradinės reikšmės operatorius}
 
 \lstinline|init| metodas veikia kaip inicializatorius. Jeigu skaitymo modelis dar nėra saugomas duomenų saugykloje, sukuriant įrašą bus nustatoma pradinės įrašo reikšmės. Šiuo atveju sąskaitos balansas bus 0. Metodas priima \lstinline|lambda| funkciją, kuri bus iškviesta inicializavimo metu. Supaprastintai (bibliotekoje) tai galima pavaizduoti kaip:
 
@@ -936,6 +936,71 @@ end
 \textbf{Tipo atitikimo operatorius}
 
 Operatorių \lstinline|when(Type, &blk)| galima vadinti tipo atitikimo operatoriumi. Perduodamas \lstinline|lambda| blokas bus iškviestas tik tada kai sistemoje įvykusio įvykio tipas bus toks, koks yra apibrėžtas.
+
+\textbf{\lstinline|each| operatorius}
+
+Kartais gali vertėti klausytis kelių srautų ir jiems pritaikyti bendras operacijas. Toks operatorius pseudokodas galėtų būti išreikštas kaip:
+
+\begin{lstlisting}
+  event_store.subscribe(Event).as(Type).each( -> (state, event) {  })
+\end{lstlisting}
+
+\textbf{Filtravimo operatorius}
+
+Tarkime vartotojas sistemoje gali tiek nusipirkti prekę, tiek užsisakyti, jog prekė būtų pagaminta pagal užsakymą. Gali kilti noras konstruoti skaitymo modelį, apjungiantį juos abu bei turint papildomų sąlygų. Pavyzdžiui vartotojui gali būti suteikiami kreditai už sėkmingą pirkimą tik tada, kai:
+
+\begin{itemize}
+  \item Pirkinio vertė yra didesnė nei 100 eurų.
+  \item Specialaus užsakymo vertė yra daugiau nei 50 eurų.
+\end{itemize}
+
+Tokį duomenų srautą būtų galima konstruoti panaudojant reaktyvų filtravimo operatorių \lstinline|filter| kaip:
+
+\begin{lstlisting}
+  product_orders_eligible_for_bonus =
+    event_store.subscribe([ProductPurchased]).
+                filter( -> (event) event.data[:price_paid] > 100)
+
+  job_orders_eligible_for_bonus =
+    event_store.subscribe([JobOrderPurchased]).
+               .filter( -> (event) event.data[:price_paid] > 50)
+\end{lstlisting}
+
+\textbf{Srautų sujungimo operatorius}
+
+Apibrėžiant filtravimo operatorių, buvo sukurti 2 srautai, kurie yra filtruojami skirtingi. Norėdami pritaikyti bendrus veiksmus jiems, turime turėti galimybę juos sujungti. Šių filtruotų srautų sujungimo operatorius \lstinline|merge| atrodytų kaip:
+
+\begin{lstlisting}
+  merged_stream = product_orders_eligible_for_bonus.merge(job_orders_eligible_for_bonus)
+\end{lstlisting}
+
+Norint kurti skaitymo modelio aprašą iš kintamojo \lstinline|merged_stream| užtektų panaudoti jau minėtą kuriamo skaitymo modelio tipo apibrėžimo operatorių \lstinline|as(Type)|, inicializatoriaus operatorių \lstinline|init|, tipo atitikimo operatorių \lstinline|when| ar operatorių \lstinline|each| kiekvienam įvykio tipui.
+
+\textbf{Skirtingi būdai struktūrizuoti skaitymo modelio aprašą}
+
+Iš esmės \lstinline|lambda| blokas yra vykdomas, kai jam iškviečiamas \lstinline|call| metodas. Kadangi aprašyti operatoriai priima \lstinline|lambda| bloką kaip parametrą, esti papildomi būdai perduoti juos.
+
+Galima apsirašyti kintamąjį:
+
+\begin{lstlisting}
+  variable = -> (event) { }
+\end{lstlisting}
+
+Taip pat galima apsirašyti klasę, kuri turi \lstinline|call| metodą:
+
+\begin{lstlisting}
+  class Denormalizers::ReadModelType::Event
+    def call(state, event)
+      # implementation
+    end
+  end
+\end{lstlisting}
+
+Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitymo modelio kūrimo aprašą, kas gali pagerinti projekto priežiūrą, skaitomumą bei programuotojo produktyvumą.
+
+% \subsubsection{Apribojimai}
+
+% Grįžkime prie vartotojo sąskaitos pavyzdžio. Jeigu norėtume kurti skaitymo modelį ir saugoti paskutinių 7 dienų sąskaitos balansą, susidurtume su sunkumais. Perduodamas \lstinline|lambda| blokas yra vykdomas tik tada, kai sistemoje atsitinka tam tikras įvykis. Tokiu atveju
 
 % \textbf{Filtravimo operatorius}
 
