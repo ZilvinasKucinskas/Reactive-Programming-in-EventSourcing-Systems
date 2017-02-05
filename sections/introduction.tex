@@ -4,7 +4,7 @@
 
 \subsection{Darbo tikslas}
 
-  Darbo tikslas yra sukurti įvykių kaupimo sistemų kūrimo gaires bei pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, neturėtų būsenos, tai yra visos operacijos su duomenų baze būtų paslėptos, o programinis kodas - griežtai tipizuotas.
+  Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, neturėtų būsenos, tai yra visos operacijos su duomenų baze būtų paslėptos, o programinis kodas - griežtai tipizuotas.
 
   % Darbo tikslas yra pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog būtų išpildyti šie reikalavimai:
 
@@ -27,9 +27,9 @@
   Siekiant tikslo, turi būti išspręsti šie uždaviniai:
 
 \begin{itemize}
-  \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus.
   \item išnagrinėti egzistuojančią (-ias) reaktyvaus programavimo biblioteką (-as).
   \item išnagrinėti egzistuojančią (-ias) įvykių kaupimo biblioteką (-as) ar programavimo karkasą (-us).
+  \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvų programavimą bei įvykių kaupimo principus, aprašyti praktines įvykių kaupimo sistemos kūrimo gaires.
   \item sukurti arba praplėsti esamą konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus.
   \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
   \item sukurti pavyzdinę programą bei įvertinti alternatyvius būdus kurti skaitymo modelį.
@@ -58,9 +58,9 @@ Kadangi reaktyvus programavimas leidžia kurti sistemas komponavimo būdu, dekla
 
 Reaktyvusis programavimas (RP) yra nauja programavimo kalbos paradigma, konkrečiai taikoma reaktyviosioms programoms kurti. Per pastaruosius keletą metų vis daugiau įmonių ir programų kūrėjų pradėjo naudoti RP žiniatinklio programoms, vartotojo sąsajoms ir asinchroninei įvykių valdomai programinei įrangai kurti. RP tapo ypač populiarus „JavaScript“ bendruomenėje, kur tokios bibliotekos kaip „Angular.js“ ir „Bacon.js“ priėmė reaktyviąją paradigmą, palaikančią automatinį keitimų platinimą.
 
-Įrodyta, kad RP leidžia programų kūrėjui realizuoti reaktyviąsias programas komponavimo būdu, paverčiant abstrakcija tokias detales kaip duomenų priklausomybės aptikimas, dėl ko reaktyviąją programinę įrangą tampa lengviau suprasti.
+Įrodyta, kad RP leidžia programų kūrėjui realizuoti reaktyviąsias programas komponavimo būdu, paverčiant abstrakcija tokias detales kaip duomenų priklausomybės aptikimas, dėl ko reaktyviąją programinę įrangą tampa lengviau suprasti \cite{Cooper:2006:EDD:2182132.2182152, Meyerovich:2009:FPL:1639949.1640091, Salvaneschi:2014:RBO:2577080.2577083}.
 
-Reaktyvusis programavimas – tai nauja programavimo paradigma, pritaikyta reaktyviosioms programoms kurti. Reaktyviojo programavimo kalbų yra įvairių, tačiau jų pagrindinė mintis, kad programų kūrėjai deklaratyviai pateikia duomenų srauto aprašą programoje. Kalbos vykdyklė apdoroja platinamus keitimus ir priklausomų reikšmių perskaičiavimą, kai to reikia.
+Reaktyvusis programavimas – tai programavimo paradigma, pritaikyta reaktyviosioms programoms kurti. Reaktyviojo programavimo kalbų yra įvairių, tačiau jų pagrindinė mintis, kad programų kūrėjai deklaratyviai pateikia duomenų srauto aprašą programoje. Kalbos vykdyklė apdoroja platinamus keitimus ir priklausomų reikšmių perskaičiavimą, kai to reikia.
 
 Nors tai dar naujas metodas, reaktyvusis programavimas yra jau plačiai naudojamas programavimo modelis. Reaktyvųjį programavimą naudoja ir „Microsoft“ bei „Netflix“. Iš kūrimo perspektyvos, reaktyviojo programavimo tikslas yra sumažinti reaktyviųjų programų sudėtingumą. Be to, reaktyvusis programavimas padaro jas geriau prižiūrimas ir sumažina klaidų skaičių.
 
