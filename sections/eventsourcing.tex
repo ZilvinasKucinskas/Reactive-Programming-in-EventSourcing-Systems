@@ -1,8 +1,8 @@
 Šis skyrius aprašo įvykių kaupimą, susijusią terminologiją. privalumus bei trūkumus, įvykių srautus bei panaudojimo atvejus. Taip pat aprašomas architektūrinis stilius - komandų-užklausų atsakomybių atskyrimas (CQRS), kuris yra naudojamas įvykių kaupimu pagrįstose sistemose. 
 
-\subsection{Aktyvus įrašas (angl. Active Record)}
+\subsection{Aktyvus įrašas}
 
-Dauguma programų sistemų reikalauja tam tikro duomenų valdymo. Įprastas būdas išlaikyti dabartinę programos būseną yra naudojant tam tikrą duomenų saugyklą (pvz.: duomenų bazę) ir gražinti saugomų objektų būseną panaudojant užklausą. Aktyvus įrašas yra programinės įrangos kūrimo šablonas darbui su dabartine programos būsena pritaikant sukūrimo, skaitymo, atnaujinimo ir ištrynimo operacijas (CRUD) objektams reliacinėje duomenų bazėje \cite{Fowler:2002:PEA:579257} (Paveikslėlis \ref{img:current_state}.a). Taikant šį programinės įrangos kūrimo šabloną, tik dabartinė objekto būsena yra palaikoma ir manipuliuojama, buvusios objekto reikšmės yra perrašomas ir neišsaugoti pakeitimai prarandami. Šis kelias puikiai tinka daugumai programų, bet turi trūkumų kalbant apie veiksmų atsekamumą bei operacijas darbui su programos būsenų istorija.
+Dauguma programų sistemų reikalauja tam tikro duomenų valdymo. Įprastas būdas išlaikyti dabartinę programos būseną yra naudojant tam tikrą duomenų saugyklą (pvz.: duomenų bazę) ir gražinti saugomų objektų būseną panaudojant užklausą. Aktyvus įrašas (angl. Active Record) yra programinės įrangos kūrimo šablonas darbui su dabartine programos būsena pritaikant sukūrimo, skaitymo, atnaujinimo ir ištrynimo operacijas (CRUD) objektams reliacinėje duomenų bazėje \cite{Fowler:2002:PEA:579257} (Paveikslėlis \ref{img:current_state}.a). Taikant šį programinės įrangos kūrimo šabloną, tik dabartinė objekto būsena yra palaikoma ir manipuliuojama, buvusios objekto reikšmės yra perrašomas ir neišsaugoti pakeitimai prarandami. Šis kelias puikiai tinka daugumai programų, bet turi trūkumų kalbant apie veiksmų atsekamumą bei operacijas darbui su programos būsenų istorija.
 
 \subsection{Įvykių kaupimo apibrėžimas}
 
@@ -43,9 +43,9 @@ Literatūros šaltiniuose dažnai randama rekomendacijų taikyti įvykių kaupim
 
 Internete galima rasti straipsnių aprašančių kaip įvykių kaupimo principas buvo panaudotas tikrose sistemose. Galima pažymėti dvi išsamias dokumentacijas: finansinės prekybos platforma LMAX \cite{Fowler:LMAX} ir Microsoft Windows Azure komandos analizė \cite{Betts:2013:ECE:2509680}. Taipogi yra sukurti keli pragramavimo karkasai paremti įvykių kaupimu: Akka\footnote{http://akka.io/} ir Event Store\footnote{http://docs.geteventstore.com/} bei Red Bull Media House kompanijos programavimo priemonių rinkinys Eventuate\footnote{https://rbmhtechnology.github.io/eventuate/}.
 
-\subsection{Komandų-užklausų atskyrimo principas (angl. Command Query Separation (CQS))}
+\subsection{Komandų-užklausų atskyrimo principas (CQS)}
 
-Komandų-užklausų atskyrimo principą pirmą kartą aprašė Bertrand Meyer \cite{Meyer:1988:OSC:534929} norėdamas patobulinti šalutinių efektų apdorojimą kuriant programą ar projektuojant API. Pagrindinė idėja yra atskirti prieigą prie objektų į:
+Komandų-užklausų atskyrimo (angl. Command Query Separation (CQS)) principą pirmą kartą aprašė Bertrand Meyer \cite{Meyer:1988:OSC:534929} norėdamas patobulinti šalutinių efektų apdorojimą kuriant programą ar projektuojant API. Pagrindinė idėja yra atskirti prieigą prie objektų į:
 
 \begin{enumerate}
 
@@ -64,9 +64,9 @@ Užklausos neturėtų sukelti pašalinių efektų. Kitais žodžiais tariant - k
     \label{img:cqs}
 \end{figure}
 
-\subsection{Komandų-užklausų atsakomybių atskyrimas (angl. Command Query Responsibility Segregation (CQRS))}
+\subsection{Komandų-užklausų atsakomybių atskyrimas (CQRS)}
 
-Komandų-užklausų atsakomybės atskyrimas – šablonas, kurį pirmasis aprašė Greg Young \cite{Young:CQRS2013}. Kai kuriuose ankstesniuose šaltiniuose šis šablonas aprašomas kaip plėtinys arba specialus komandų-užklausų atskyrimo principo atvejis, tačiau šiandien jis laikomas atskiru šablonu, sukurtu CQS principu. Pagal CQRS teigiama, kad užklausoms vykdyti naudojamas skirtingas modelis (tai yra komponentas arba objektas) nei modelis, skirtas komandoms vykdyti (Paveikslėlis \ref{img:cqs}.b). CQS padalija atsakomybę pagal kodo lygį, suskirstydamas metodus į užklausas ir komandas; CQRS analizuoja tai dar išsamiau ir netgi skirsto objektus į du tipus: skaitymo arba rašymo. G. Young aprašė šabloną taip: „CQRS yra paprastas dviejų objektų sukūrimas iš anksčiau buvusio vieno objekto“ \cite{Young:CQRS2010}.
+Komandų-užklausų atsakomybės atskyrimas (angl. Command Query Responsibility Segregation (CQRS)) – šablonas, kurį pirmasis aprašė Greg Young \cite{Young:CQRS2013}. Kai kuriuose ankstesniuose šaltiniuose šis šablonas aprašomas kaip plėtinys arba specialus komandų-užklausų atskyrimo principo atvejis, tačiau šiandien jis laikomas atskiru šablonu, sukurtu CQS principu. Pagal CQRS teigiama, kad užklausoms vykdyti naudojamas skirtingas modelis (tai yra komponentas arba objektas) nei modelis, skirtas komandoms vykdyti (Paveikslėlis \ref{img:cqs}.b). CQS padalija atsakomybę pagal kodo lygį, suskirstydamas metodus į užklausas ir komandas; CQRS analizuoja tai dar išsamiau ir netgi skirsto objektus į du tipus: skaitymo arba rašymo. G. Young aprašė šabloną taip: „CQRS yra paprastas dviejų objektų sukūrimas iš anksčiau buvusio vieno objekto“ \cite{Young:CQRS2010}.
 
 Kuriant architektūrą pagal CQRS šabloną, ilgainiui sistemoje sukuriamas nuoseklus veikimas. Užklausos ir komandos modelis yra atskiri komponentai, todėl, atsižvelgiant į jų sujungimą, jie nebūtinai turi būti sinchroniški. Jei jie sujungiami laisvai, užklausos modelyje nebūtinai kaskart bus tie patys duomenys kaip komandos modelyje. Ši charakteristika, kai užklausos modelyje gali būti laikinai nenuosekli (tai yra pasenusi) būsena, kuri kažkuriame ateities taške ilgainiui taps nuosekli, yra vadinama galutiniu nuoseklumu. Šis galutinai nuoseklus veikimas tampa itin svarbus paskirstytosioms sistemoms, kai užklausos modelis (-iai) yra fiziškai atskiriamas (-i) nuo komandos modelio (-ių). Brewer CAP teorema \cite{Fox:1999:HYS:822076.822436} teigia, kad paskirstytoji sistema turi neišvengiamai nuspręsti, kaip apdoroti nuoseklumą, nes, įvykus tinklo klaidai, ji gali užtikrinti tik dvi iš šių trijų garantijų:
 
