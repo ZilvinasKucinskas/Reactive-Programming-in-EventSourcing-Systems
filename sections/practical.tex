@@ -1,10 +1,12 @@
-  Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Kad būtų galima susidaryti bendrą vaizdą ir suvokti panaudojimo atvejį, pirmiausia reikia suprojektuoti aukštesnį sistemos vaizdą, tai yra suprojektuoti kuriamos sistemos architektūrą. CQRS ir įvykių kaupimo principas dažniausiai naudojami kartu, pritaikant šiuos principus apibrėžtose, sudėtingose bei verslo logiką apimančiose sistemos srityse. Šiuo atveju pritaikomos ir turimos DDD žinios. Toliau nagrinėjami jau esantys reaktyvaus programavimo įvykių kaupimo programavimo karkasai/bibliotekos. Sekančiame skyriuje seka jų suderinamumo analizė, aprašomi kilę iššūkiai ir galimi tolimesni darbai.
+Šioje dalyje bus bandoma parodyti, jog reaktyvų programavimą galima panaudoti įvykių kaupimo sistemose. Pirmiausia nagrinėjami jau esantys reaktyvaus programavimo bei įvykių kaupimo programavimo karkasai/bibliotekos. Kad būtų galima susidaryti bendrą vaizdą ir suvokti įvykių kaupimo sistemas, pirmiausia projektuojamas pavyzdinis įvykių kaupimo sistemos architektūros modelis. Toliau aprašomos šio pavyzdinio architektūros modelio komponentų žemesnio lygmens realizacijos detalės, kūrimo gairės. Atsižvelgiant į DDD, prieš pateikiant konkrečius pavyzdžius, skaitytojas yra supažindinamas su domeno sritimi bei galimais įvykiais. Sekančiame poskyryje aprašomas alternatyvus būdas kurti skaitymo modelį pritaikant reaktyvaus programavimo principus ir paslepiant operacijų su duomenų saugykla realizacijos detales.
 
-\subsection{Programavimo kalba ir programavimo karkasas}
+\subsection{Programavimo kalba}
 
-Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. Reaktyvių įvykių sistemų kūrimo gairėms aprašyti yra pasirinkta atviro kodo serverio pusės saityno programų programavimo karkasas ``Ruby on Rails''\footnote{http://rubyonrails.org/}, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. Kalba yra viena populiariausių atviro kodo talpykloje ``Github'', plačiai naudojama pramonėje (``Github'', ``AirBnb'', ``Etsy'', ``Shopify''), lengvai skaitoma, turi daugybę kokybiškų bibliotekų bei atitinka darbo tiksle išsikeltą sąlygą.
 
-Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
+% Reaktyvių įvykių sistemų kūrimo gairėms aprašyti yra pasirinkta atviro kodo serverio pusės saityno programų programavimo karkasas ``Ruby on Rails''\footnote{http://rubyonrails.org/}, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
+
+% Darbo autorius turi keletą metų profesionalaus darbo su šiomis technologijomis patirties, todėl praktinėje dalyje bus analizuojamos bibliotekos ar programavimo karkasai ir pateikti kodo pavyzdžiai, parašyti ``Ruby'' kalba.
 
 \subsection{Reaktyvus programavimas Ruby kalboje}
 
@@ -24,13 +26,13 @@ Iš esmės temos yra objektai, kurie siunčia pranešimus į objektus, stebinči
 
 „Ruby“ pateikiama su \lstinline|Observable| moduliu standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
 
-\subsubsection{Reaktyvus programavimas}
+% \subsubsection{Reaktyvus programavimas}
 
-Dabar, kai turime supratimą ir apie iteratoriaus, ir apie stebėtojo šablonus, atėjo laikas suformuoti reaktyviojo programavimo paradigmą
+% Dabar, kai turime supratimą ir apie iteratoriaus, ir apie stebėtojo šablonus, atėjo laikas suformuoti reaktyviojo programavimo paradigmą
 
-Pagal Reaktyvumo manifestą reaktyviosios sistemos yra: reaguojančios, atkuriamos, lanksčios ir valdomos pranešimais. Tokio tipo apibrėžimai labai glumina. Tai, kaip aš suprantu Reaktyvumo manifestą, reaktyviosios sistemos yra asinchroninės, toleruojančios triktis, išplečiamos ir palaikančios ryšį su neblokuojamu pranešimų perdavimu.
+% Pagal Reaktyvumo manifestą reaktyviosios sistemos yra: reaguojančios, atkuriamos, lanksčios ir valdomos pranešimais. Tokio tipo apibrėžimai labai glumina. Tai, kaip aš suprantu Reaktyvumo manifestą, reaktyviosios sistemos yra asinchroninės, toleruojančios triktis, išplečiamos ir palaikančios ryšį su neblokuojamu pranešimų perdavimu.
 
-Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio? Toliau bus nagrinėjamos reaktyviojo programavimo bibliotekos ``Ruby'' kalboje.
+% Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio? Toliau bus nagrinėjamos reaktyviojo programavimo bibliotekos ``Ruby'' kalboje.
 
 \subsubsection{Reaktyviojo programavimo bibliotekos}
 
@@ -321,7 +323,11 @@ Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nu
 
 % Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia apžvelgime kaip atrodytų sistemos architektūra, pritaikanti tiek CQRS, tiek ES, tiek RP principus.
 
-\subsection{Įvykių kaupimo sistemos architektūra}
+\subsection{Pavyzdinė įvykių kaupimo sistemos architektūra}
+
+Kad būtų lengviau suprasti įvykių kaupimo sistemas bei jos komponentus, šiame poskyryje sukursime pavyzdinę įvykių kaupimo sistemos architektūrą.
+
+Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}.
 
 \ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
 
@@ -364,7 +370,7 @@ Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nu
 
 \subsection{Įvykių kaupimo sistemos kūrimo gairės}
 
-Praeitame skyriuje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame skyriuje bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
+Praeitame poskyryje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame poskyryje bus demonstruojama kaip įprasta kurti tokias sistemas pramonėje bei bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
 
 \subsubsection{Nagrinėjamas sistemos scenarijus}
 
@@ -469,7 +475,7 @@ Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastara
 
 \subsubsection{Komandos}
 
-Komanda yra paprastas objektas, kuris apibrėžia parametrus veiksmo vykdymui. Remiantis domenu paremtu projektavimu, komanda turėtų būti pavadinta bendrąja verslo kalba (skvarbiąja kalba) ir išreikšti vartotojo ketinimą. Prieš komandos vykdymą turėtų būti užtikrintos teisingumo taisyklės. Teisingumo taisyklės turėtų būti paprastos, pagrįstos pačiais duomenimis, bet ne verslo logika (Kaip jau minėjome praeitame skyriuje, domeno objektas tikrina verslo logiką).
+Komanda yra paprastas objektas, kuris apibrėžia parametrus veiksmo vykdymui. Remiantis domenu paremtu projektavimu, komanda turėtų būti pavadinta bendrąja verslo kalba (skvarbiąja kalba) ir išreikšti vartotojo ketinimą. Prieš komandos vykdymą turėtų būti užtikrintos teisingumo taisyklės. Teisingumo taisyklės turėtų būti paprastos, pagrįstos pačiais duomenimis, bet ne verslo logika (Kaip jau minėjome praeitame skirsnyje, domeno objektas tikrina verslo logiką).
 
 Pažvelkime į komandos pavyzdį:
 
@@ -541,7 +547,7 @@ module Command
 end
 \end{lstlisting}
 
-Metodas \lstinline|build| ištraukia įvykius iš įvykių saugyklos, naudodamasis agregato unikaliu identifikatoriumi ir paduodamas įvykių srauto vardą. Komandų doroklė iš pradžių atkuria agregato būseną ir tada išsaugo pakeitimus įvykių žurnale. Prisiminkime praeitame skyriuje aprašytą \lstinline|unpublished_events| kintamąjį. Štai čia atsiskleidžia tikroji jo paskirtis, visi dar nepublikuoti įvykiai yra išsaugomi. Kai įvykis yra išsaugomas, visi prenumeratoriai, kurie stebi ši įvykį (arba temą) yra informuojami apie pasikeitimus.
+Metodas \lstinline|build| ištraukia įvykius iš įvykių saugyklos, naudodamasis agregato unikaliu identifikatoriumi ir paduodamas įvykių srauto vardą. Komandų doroklė iš pradžių atkuria agregato būseną ir tada išsaugo pakeitimus įvykių žurnale. Prisiminkime praeitame skirsnyje aprašytą \lstinline|unpublished_events| kintamąjį. Štai čia atsiskleidžia tikroji jo paskirtis, visi dar nepublikuoti įvykiai yra išsaugomi. Kai įvykis yra išsaugomas, visi prenumeratoriai, kurie stebi ši įvykį (arba temą) yra informuojami apie pasikeitimus.
 
 Taigi išplečiant šį atvejį, galime pavaizduoti užsakymo komandų doroklę:
 
@@ -646,7 +652,7 @@ end
 
 Pagrindinė jo paskirtis išsaugoti gautus duomenis į tam tikrus skaitymo duomenų saugyklos stulpelius (ar įrašus - priklausomai nuo duomenų saugyklos tipo). Tačiau atidžiau pažvelkime į šią eilutę - \lstinline|return if Order.where(uid: event.data.order_id).exists?|. Jeigu įvykis jau egzistuoja - jis nėra atnaujinamas. Tai jau tam tikra teisingumo taisyklė, kuri yra patikrinama prieš įrašant duomenis į duomenų saugyklą. Taigi denormalizatorius šiuo atveju turi dvi atsakomybes - filtruoti duomenis ir išsaugoti duomenis į pasirinktą duomenų saugyklą.
 
-Šią atsakomybę būtų galima padalinti panaudojant reaktyvaus programavimo išskirtinę sąvybę - reaktyvius operatorius. Juk įvykiai, kurie nebus apdoroti galėtų ir nepasiekti denormalizatoriaus. MVC projektavimo šablone maršrutizatorius turi galimybę filtruoti užklausas. Daugiau bus parodyta sekančiame skyriuje, o dabar pažvelkime į sutrumpintą įvykių maršrutizatoriaus kodą šiuo atveju:
+Šią atsakomybę būtų galima padalinti panaudojant reaktyvaus programavimo išskirtinę sąvybę - reaktyvius operatorius. Juk įvykiai, kurie nebus apdoroti galėtų ir nepasiekti denormalizatoriaus. Daugiau bus parodyta sekančiame poskyryje, o dabar pažvelkime į sutrumpintą įvykių maršrutizatoriaus kodą šiuo atveju:
 
 \begin{lstlisting}
 module Filters
@@ -842,7 +848,7 @@ Toks būdas gali būti naudingas darbams, kurie užtrunka ilgiau. Pavyzdžiui, s
 
 \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
-Praeitame skyriuje buvo pademonstruotas įvykių kaupimo sistemos skaitymo modelio kūrimas panaudojant egzistuojančią biblioteką. Tačiau toks bibliotekos panaudojimas nėra deklaratyvus, programuotojui tenka rašyti darbo su duomenų baze operacijas. Norima tokį pašalinį efektą paslėpti, jog būtų galima koncentruotis tik ties sprendžiama problema. Toliau bus aprašomas siūlomas esamos ``RailsEventStore'' praplėtimas leidžiantis kurti skaitymo modelį komponavimo būdu, pasliapiantis duomenų bazės lygmens realizacijos detales.
+Praeitame poskyryje buvo pademonstruotas įvykių kaupimo sistemos skaitymo modelio kūrimas panaudojant egzistuojančią biblioteką. Tačiau toks bibliotekos panaudojimas nėra deklaratyvus, programuotojui tenka rašyti darbo su duomenų baze operacijas. Norima tokį pašalinį efektą paslėpti, jog būtų galima koncentruotis tik ties sprendžiama problema. Toliau bus aprašomas siūlomas esamos ``RailsEventStore'' praplėtimas leidžiantis kurti skaitymo modelį komponavimo būdu, pasliapiantis duomenų bazės lygmens realizacijos detales.
 
 \subsubsection{Pavyzdinė domeno sritis ir įvykiai}
 
