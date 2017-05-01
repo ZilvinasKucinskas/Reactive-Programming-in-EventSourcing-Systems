@@ -26,9 +26,9 @@ Iš esmės temos yra objektai, kurie siunčia pranešimus į objektus, stebinči
 
 „Ruby“ programavimo kalba turi \lstinline|Observable| modulį standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
 
-\subsubsection{Reaktyviojo programavimo bibliotekos}
+\subsubsection{Reaktyvaus programavimo bibliotekos}
 
-Darbo autoriui pavyko rasti 2 reaktyviojo programavimo bibliotekas ``Ruby'' kalboje, todėl jas plačiau aptarsime.
+Darbo autoriui pavyko rasti 2 reaktyvaus programavimo bibliotekas ``Ruby'' kalboje, todėl jos bus plačiau aptartos.
 
 \begin{itemize}
   \item ``RxRuby''\footnote{https://github.com/ReactiveX/RxRuby} - 595 žvaigždutės bei 52 išsišakojimai, paskutinis atnaujinimas įvyko 2017 metų sausį. (Žiūrėta 2017-01-08)
@@ -50,10 +50,10 @@ Pirmiausia pažiūrėkime kaip veikia ``RxRuby'' paprasčiausioje formoje:
 
 \begin{lstlisting}[]
   stream = RxRuby::Observable.just(7)
-  stream.subscribe {|num| puts "Gautas skaicius #{num}" }
+  stream.subscribe { |num| puts "Gautas skaicius #{num}" }
 \end{lstlisting}
 
-Objektas, kurį gauname yra tiesiog skaičius 7, apgaubtas kaip tema. Kadangi tema realizuoja daugumą \lstinline|Enumerable| modulio metodų, galima su juo daryti praktiškai bet ką. Tačiau, kad išvengtume sudėtingumo šiame pavyzdyje, tiesiog prenumeruokime temą ir perduokime \lstinline|lambda| konstrukciją. \lstinline|Lambda| bus iškviesta kiekvieną kartą kai srautas gaus informaciją (šiuo atveju tik kartą).
+Objektas, kurį gauname, yra tiesiog skaičius 7, apgaubtas kaip tema. Kadangi tema realizuoja daugumą \lstinline|Enumerable| modulio metodų, galima su juo daryti praktiškai bet ką. Tačiau, kad išvengtume sudėtingumo šiame pavyzdyje, tiesiog prenumeruokime temą ir perduokime \lstinline|lambda| konstrukciją. \lstinline|Lambda| bus iškviesta kiekvieną kartą, kai srautas gaus informaciją (šiuo atveju tik kartą).
 
 Šio pavyzdinio atvejo išvestis bus:
 
@@ -65,9 +65,9 @@ Kadangi turime daug \lstinline|Enumerable| modulio metodų, kuriuos galime naudo
 
 \begin{lstlisting}[]
   RxRuby::Observable.range(1,10)
-    .select {|num| num.even? }
+    .select { |num| num.even? }
     .sum
-    .subscribe {|s| puts "Suma lyginiu skaiciu tarp 1 ir 10 yra: #{s}" }
+    .subscribe { |s| puts "Suma lyginiu skaiciu tarp 1 ir 10 yra: #{s}" }
 \end{lstlisting}
 
 Grąžins:
@@ -78,7 +78,7 @@ Grąžins:
 
 Paanalizuokime šį pavyzdį. Pirmiausia sukuriamas temos rėžis, su skaičiais tarp 1 ir 10. Tada iškviečiamas filtravimo operatorius \lstinline|select| temai, perduodant \lstinline|lambda| kaip parametrą. \lstinline|lambda| priima kiekvieną rėžio skaičių kaip parametrą ir filtruoja visus lyginius temos skaičius, grąžindama naują temą. Iškvietus \lstinline|sum| operatorių, susumuojami visi lyginiai skaičiai.
 
-Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Prenumeruojant tema (arba duomenų srautas) tiesiog stebima ir \lstinline|lambda| iškviečiama. Kiekvieną kartą kai tema gauna naują informaciją, duomenys bus perduodami lyg per ``piltuvėlį'' ir paskutinė \lstinline|lambda| atspausdints rezultatą.
+Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Prenumeruojant tema (arba duomenų srautas) tiesiog stebima ir \lstinline|lambda| iškviečiama. Kiekvieną kartą, kai tema gauna naują informaciją, duomenys perduodami lyg per ``piltuvėlį'' ir paskutinė \lstinline|lambda| atspausdina rezultatą.
 
 \subsubsection{Frappuccino}
 
@@ -97,8 +97,8 @@ button = Button.new
 stream = Frappuccino::Stream.new(button)
 
 counter = stream
-            .map {|event| event == :pushed ? 1 : 0 } # convert events to ints
-            .inject(0) {|sum, n| sum + n } # add them up
+            .map { |event| event == :pushed ? 1 : 0 } # convert events to ints
+            .inject(0) { |sum, n| sum + n } # add them up
 
 counter.now # => 0
 
@@ -113,19 +113,19 @@ button.push
 counter.now # => 4
 \end{lstlisting}
 
-Ši biblioteka kaip ir RxRuby naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri ir turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
+Ši biblioteka, kaip ir RxRuby, naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
 
 Reaktyūs operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| objektą, kuris taip pat yra stebėtojas.
 
-Šiame pavyzdyje yra sukuriamas mygtukas. Kiekvieną kartą kai jis paspaudžiamas visiems temos stebėtojams yra perduodamas pranešimas apie naują reikšmę. \lstinline|counter| kintamasis parodo, kiek kartų buvo paspaustas mygtukas. Nereikia kaskart iš naujo pritaikyti skaičiavimų, biblioteka leidžia apsirašyti elgseną vieną kartą deklaratyviai. \lstinline|map| reaktyvus operatorius transformuoja įvykio reikšmę - jeigu gautas simbolis \lstinline|:pushed| - reikšmė tampa 1, o priešingu atveju 0. Kitas operatorius \lstinline|inject| priima parametrą - pradinę reikšmę (šiuo atveju 0). Kiekvieną kartą kai yra gaunama reikšmė, perduodamas kodo blokas (\lstinline|lambda|) yra iškviečiamas ir rezultatas atnaujinamas.
+Šiame pavyzdyje yra sukuriamas mygtukas. Kiekvieną kartą, kai jis paspaudžiamas, visiems temos stebėtojams yra perduodamas pranešimas apie naują reikšmę. \lstinline|counter| kintamasis parodo, kiek kartų buvo paspaustas mygtukas. Nereikia kaskart iš naujo pritaikyti skaičiavimų, biblioteka leidžia apsirašyti elgseną vieną kartą deklaratyviai. \lstinline|map| reaktyvus operatorius transformuoja įvykio reikšmę - jeigu gautas simbolis \lstinline|:pushed| - reikšmė tampa 1, o priešingu atveju 0. Kitas operatorius \lstinline|inject| priima parametrą - pradinę reikšmę (šiuo atveju 0). Kiekvieną kartą, kai yra gaunama reikšmė, perduodamas kodo blokas (\lstinline|lambda|) yra iškviečiamas ir rezultatas atnaujinamas.
 
-Rezultatas yra saugomas atmintyje, todėl programai baigus darbą, reikšmės yra prarandamos. Kaip Steve Klabnik pasakojo savo prezentacijose, tokią biblioteką būtų galima naudoti vartotojo sąsajos programose. Jis teigia, jog pati idėja yra pasiskolinta iš funkcinių programavimo kalbų, ir įdomu pritaikyti naujus principus Ruby programavimo kalboje.
+Rezultatas yra saugomas atmintyje, todėl programai baigus darbą, reikšmės yra prarandamos. Pranešimo metu tarptautinėje konferencijoje ``Euruko'' Steve Klabnik pasakojo, kad tokią biblioteką būtų galima naudoti vartotojo sąsajos programose. Jis teigia, jog pati idėja yra pasiskolinta iš funkcinių programavimo kalbų, ir įdomu pritaikyti naujus principus Ruby programavimo kalboje.
 
 Kadangi reaktyvūs operatoriai grąžina naują stebėtoją - galima programuoti labai deklaratyviai:
 
 \begin{lstlisting}
   merged_stream = Frappuccino::Stream.merge(one_stream , other_stream)
-  filtered_stream = merged_stream.select{|event| event == :pushed }
+  filtered_stream = merged_stream.select{ |event| event == :pushed }
 
   filtered_stream.on_value do |event|
   # event will only ever be :pushed
