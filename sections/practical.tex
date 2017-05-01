@@ -148,15 +148,15 @@ Biblioteka leidžia tiek apjungti, tiek filtruoti, tiek perduoti bloką kodo, ku
 
 Visos bibliotekos turi MIT licenziją. Verta paminėti, jog ``RailsEventStore'' anksčiau turėjo labiau apribojančią LGPLv3\footnote{https://github.com/arkency/rails\_event\_store/commit/212b202f227a98f131dc3e8711e431e1f126b475} licenziją (iki 2016 metų birželio).
 
-Kadangi ``RailsEventStore'' yra aktyviai atnaujinima, populiariausia iš trijų, atviro kodo, įvykių kaupimą įgyvendinanti biblioteką, ją ir nagrinėsime.
+Kadangi ``RailsEventStore'' yra aktyviai atnaujinima, populiariausia iš trijų, atviro kodo, įvykių kaupimą įgyvendinanti biblioteka, ją ir nagrinėsime.
 
 \subsubsection{RailsEventStore}
 
-Įvykių kaupimo biblioteka ``RailsEventStore'' naudoja atskirą biblioteką darbui su įvykiais pavadinimu ``rails\_event\_store\_active\_record''\footnote{https://github.com/arkency/rails\_event\_store\_active\_record}. Pagal nutylėjimą ji yra numatytoji, tačiau esant reikalui lengvai pakeičiama (pavyzdžiui norint naudoti Greg Young ``GetEventStore''\footnote{https://geteventstore.com/} duomenų saugyklą). Taipogi yra galimybė naudoti duomenų saugyklą atmintyje.
+Įvykių kaupimo biblioteka ``RailsEventStore'' naudoja atskirą biblioteką darbui su įvykiais pavadinimu ``rails\_event\_store\_active\_record''\footnote{https://github.com/arkency/rails\_event\_store\_active\_record}. Pagal nutylėjimą ji yra numatytoji, tačiau esant reikalui lengvai pakeičiama (pavyzdžiui, norint naudoti Greg Young ``GetEventStore''\footnote{https://geteventstore.com/} duomenų saugyklą). Taip pat yra galimybė naudoti duomenų saugyklą atmintyje.
 
 \subsubsection{Naudojimas}
 
-Jeigu į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lstinline|rails_event_store| modulis, reikia sugeneruoti aktyvaus įrašo migraciją:
+Kai į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lstinline|rails_event_store| modulis, reikia sugeneruoti aktyvaus įrašo migraciją:
 
 \begin{lstlisting}[]
   rails generate rails_event_store:migrate
@@ -321,7 +321,7 @@ Kad būtų lengviau suprasti įvykių kaupimo sistemas bei jos komponentus, šia
 
 Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}.
 
-\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (neikeičiančios būsenos).
+\ref{img:mvc_cqrs} paveikslėlyje pavaizduotas architektūros modelis naudojant MVC projektavimo šabloną bei apjungiantis komandų-užklausų atskyrimo , įvykių kaupimo principus bei reaktyvųjį programavimą. Toliau ši diagrama bus išsamiau paaiškinta bei aprašyta pagrindiniai proceso tėkmės atvejai, komandų operacijos (keičiančios būseną) bei užklausų operacijos (nekeičiančios būsenos).
 
 \begin{figure}[H]
     \centering
@@ -362,7 +362,7 @@ Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontro
 
 \subsection{Įvykių kaupimo sistemos kūrimo gairės}
 
-Praeitame poskyryje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame poskyryje bus demonstruojama kaip įprasta kurti tokias sistemas pramonėje bei bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
+Praeitame poskyryje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame poskyryje bus demonstruojama kaip įprasta kurti tokias sistemas informacinių technologijų industrijoje bei bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
 
 \subsubsection{Nagrinėjamas sistemos scenarijus}
 
@@ -809,7 +809,7 @@ end
 
 \subsubsection{Skaitymo pusės asinchroninis kūrimas}
 
-Iš tiesų ``RailsEventStore'' biblioteka veikia sinchroniškai, tačiau skaitymo pusę generuoti galima ir asinchroniškai pasitelkiant papildomas bibliotekas tokias kaip ``Sidekiq''\footnote{https://github.com/mperham/sidekiq} ar ``https://github.com/resque/resque''. Šios bibliotekos pasižymi bendru bruožu - naudoja gijas apdoroti daugybę darbų tuo pačiu metu. Parametrai perduodami šiems darbams dažniausiai saugomi duomenų saugyklose atmintyje, tokiose kaip ``Redis''\footnote{https://redis.io/} ar ``Memcached''\footnote{https://memcached.org/} našumui užtikrinti.
+Iš tiesų ``RailsEventStore'' biblioteka veikia sinchroniškai, tačiau skaitymo pusę generuoti galima ir asinchroniškai pasitelkiant papildomas bibliotekas tokias kaip ``Sidekiq''\footnote{https://github.com/mperham/sidekiq} ar ``Rescue''\footnote{https://github.com/resque/resque}. Šios bibliotekos pasižymi bendru bruožu - naudoja gijas apdoroti daugybę darbų tuo pačiu metu. Parametrai perduodami šiems darbams dažniausiai saugomi duomenų saugyklose atmintyje, tokiose kaip ``Redis''\footnote{https://redis.io/} ar ``Memcached''\footnote{https://memcached.org/} našumui užtikrinti.
 
 Parodysime kodo pavyzdį kaip atrodytų asinchroninis užsakymo kūrimas panaudojant ``Sidekiq'':
 
