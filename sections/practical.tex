@@ -2,7 +2,7 @@
 
 \subsection{Programavimo kalba}
 
-Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. Kalba yra viena populiariausių atviro kodo talpykloje ``Github'', plačiai naudojama pramonėje (``Github'', ``AirBnb'', ``Etsy'', ``Shopify''), lengvai skaitoma, turi daugybę kokybiškų bibliotekų bei atitinka darbo tiksle išsikeltą sąlygą.
+Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objektinį, tiek funkcinį programavimą. Kalba yra viena populiariausių atviro kodo talpykloje ``Github'', plačiai naudojama informacinių technologijų industrijoje (``Github'', ``AirBnb'', ``Etsy'', ``Shopify''), lengvai skaitoma, turi daugybę kokybiškų bibliotekų bei atitinka darbo tiksle išsikeltą sąlygą.
 
 % Reaktyvių įvykių sistemų kūrimo gairėms aprašyti yra pasirinkta atviro kodo serverio pusės saityno programų programavimo karkasas ``Ruby on Rails''\footnote{http://rubyonrails.org/}, parašytas ``Ruby'' kalba. ``Ruby on Rails'' yra paremtas modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}. Verta pabrėžti, jog šis projektavimo šablonas jau buvo naudojamas ir anksčiau Smalltalk programavimo kalboje. Darbo autorius, siekiant išmokti ar sužinoti daugiau apie šį programavimo karkasą, ypatingai rekomenduoja Michael Hartl knygą ``Ruby on Rails Tutorial (Rails 5) Learn Web Development with Rails''\footnote{https://www.railstutorial.org/book}, kuri yra nemokama.
 
@@ -14,9 +14,9 @@ Pasirinkta griežtai tipizuota, dinaminė ``Ruby'' kalba, palaikanti tiek objekt
 
 \subsubsection{Iteratorius}
 
-Pagrindinė šio šablono (iteratoriaus) idėja – atsakomybė už sąrašo objekto prieigą ir perėjimą ir jo įdėjimas į iteratoriaus objektą. Iteratoriaus klasė apibrėžia prieigos prie sąrašo elementų sąsają. Iteratoriaus objektas atsakingas už esamo elemento stebėjimą; t. y. jis žino, kurie elementai jau buvo pereiti.
+Pagrindinė šio šablono (iteratoriaus) idėja – atsakomybė už sąrašo objekto prieigą ir perėjimą. Iteratoriaus klasė apibrėžia prieigos prie sąrašo elementų sąsają. Iteratoriaus objektas atsakingas už esamo elemento stebėjimą; t. y. jis žino, kurie elementai jau buvo pereiti.
 
-„Ruby“ Enumerable modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas \lstinline|Enumerable| modulis, egzempliorius, kuris yra beveik bet koks rinkinys.
+„Ruby“ programavimo kalboje \lstinline|Enumerable| modulis kaip tik tai ir daro: pateikia surašytuvą, kuriame yra uždari duomenys ir perėjimo metodai. Parašykime trumpiau: „Ruby“ iteratorius – tai klasės, į kurią įtrauktas \lstinline|Enumerable| modulis, egzempliorius, kuris yra beveik bet koks rinkinys.
 
 \subsubsection{Stebėtojas}
 
@@ -24,15 +24,7 @@ Stebėtojo šablonas yra kūrimo šablonas, kuriame objektas (vadinamas tema) tv
 
 Iš esmės temos yra objektai, kurie siunčia pranešimus į objektus, stebinčius tokias temas. Temos priverstinai įkelia pranešimus stebėtojams, todėl tai ir vadinama stebėtojo šablonu.
 
-„Ruby“ pateikiama su \lstinline|Observable| moduliu standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
-
-% \subsubsection{Reaktyvus programavimas}
-
-% Dabar, kai turime supratimą ir apie iteratoriaus, ir apie stebėtojo šablonus, atėjo laikas suformuoti reaktyviojo programavimo paradigmą
-
-% Pagal Reaktyvumo manifestą reaktyviosios sistemos yra: reaguojančios, atkuriamos, lanksčios ir valdomos pranešimais. Tokio tipo apibrėžimai labai glumina. Tai, kaip aš suprantu Reaktyvumo manifestą, reaktyviosios sistemos yra asinchroninės, toleruojančios triktis, išplečiamos ir palaikančios ryšį su neblokuojamu pranešimų perdavimu.
-
-% Tačiau mus domina realizavimas, ypač naudojant „Ruby“. Ar nustebtumėte, jei pasakyčiau, kad iš pirmo žvilgsnio reaktyviojo programavimo paradigma iš esmės yra abstrakcija ant stebėtojo ir iteratoriaus šablonų derinio? Toliau bus nagrinėjamos reaktyviojo programavimo bibliotekos ``Ruby'' kalboje.
+„Ruby“ programavimo kalba turi \lstinline|Observable| modulį standartinėje bibliotekoje, kurioje pateikiamas paprastas mechanizmas, skirtas vienam objektui (temai) informuoti prenumeratorių rinkinį (stebėtojus) apie bet kokį būsenos pasikeitimą.
 
 \subsubsection{Reaktyviojo programavimo bibliotekos}
 
