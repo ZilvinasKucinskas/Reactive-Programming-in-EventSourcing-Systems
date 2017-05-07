@@ -32,7 +32,6 @@
   \item sukurti konceptualų architektūros modelį, apjungiantį reaktyvaus programavimo bei įvykių kaupimo principus, aprašyti praktines įvykių kaupimo sistemos kūrimo gaires.
   \item sukurti arba praplėsti esamą konkretizuotą kalbą (angl. domain specific language), apjungiančią reaktyvaus programavimo bei įvykių kaupimo principus.
   \item aprašyti konkretizuotuos kalbos kūrimo metodiką, apibrėžti gautų rezultatų apribojimus, suformuluoti iškilusias problemas bei paaiškinti jų priežastis.
-  \item sukurti pavyzdinę programą bei įvertinti alternatyvius būdus kurti skaitymo modelį.
 \end{itemize}
 
 \subsection{Darbo nauda įgyvendinus tikslą}
@@ -85,19 +84,18 @@ Kiekvieną kartą kai \lstinline|Product| yra sukuriamas, atnaujinamas arba išt
 Naudojant įvykių kaupimo sistemą ir panaudojant reaktyvų programavimą, atgalinius iškvietimus būtų galima projektuoti daug konkrečiau ir vienoje vietoje. Tai galėtų atrodyti:
 
 \begin{lstlisting}[]
-event_store.as(Product)
-           .subscribe([ProductImageUploaded, ProductInformationChanged])
-           .each( -> (state, event) state.reindex)
+  Stream.new(ProductImageUploaded, ProductInformationChanged)
+      .as_persistent_type(Product)
+      .each( -> (state, event) state.reindex )
 \end{lstlisting}
 
-Čia \lstinline|event_store| yra duomenų srautas, mes nežinome kada bus gauta reikšmė, tačiau jau galime aprašyti logiką, kuri bus pritaikyta ateityje, įvykus tam tikram įvykiui. Tokiu būdu pati domeno srities logika būtų vienoje vietoje ir būtų daug lengviau suprantama. Šis apibrėžimas nurodytų kaip nutikus vienokiam ar kitokiam įvykiui, jis yra apdorojamas.
+Čia \lstinline|Stream| yra duomenų srautas. Mes nežinome kada bus gauta reikšmė, tačiau jau galime aprašyti logiką, kuri bus pritaikyta ateityje, įvykus tam tikram įvykiui. Tokiu būdu pati domeno srities logika būtų vienoje vietoje ir būtų daug lengviau suprantama. Šis apibrėžimas nurodytų kaip nutikus vienokiam ar kitokiam įvykiui, jis yra apdorojamas.
 
 Sujungus reaktyvaus programavimo principus bei įvykių kaupimą būtų galima deklaratyviai apsirašyti skaitymo modelio kūrimo aprašą pritaikant reaktyvius operatorius. Pažvelkime į vartotojo sąskaitos \lstinline|Account| skaitymo modelio kūrimo atvęjį bankininkystės sistemoje:
 
 \begin{lstlisting}
-  event_store.
-    as(Account).
-    subscribe([AccountCreated, MoneyDeposited, MoneyWithdrawn]).
+  Stream.new(AccountCreated, MoneyDeposited, MoneyWithdrawn).
+    as_persistent_type(Account).
     init( -> (state) { state.balance = 0} ).
     when(AccountCreated), -> (state, event) { state.account_id = event.data[:account_id] }.
     when(MoneyDeposited), -> (state, event) { state.balance += event.data[:amount] }).
@@ -105,27 +103,6 @@ Sujungus reaktyvaus programavimo principus bei įvykių kaupimą būtų galima d
 \end{lstlisting}
 
 Verta pastebėti, jog lokali duomenų saugykla nebuvo paminėta arba apibrėžta. Pastaroji gali būti sugeneruota bei valdoma automatiškai. Kiekvieną kartą kai sistemoje įvyksta įvykis atsinaujina sąskaitos skaitymo modelio tipas \lstinline|Account(account_id: string, balance: decimal)|, o užklausos vykdomos pasinaudojant aktyvaus įrašo projektavimo šablonu, pavyzdžiui: \lstinline|Account.find_by(account_id: 'LT121000011101001000')|
-
-%  tokias konstrukcijas kaip \lstinline|filter| bei \lstinline|map|. Konstrukcija \lstinline|filter| veiktų kaip filtravimo operatorius, ir leistų apdoroti tik tuos įvykius kurie atitinka tam tikrą sąlygą. Konstrukcija \lstinline|map| leistų transformuoti įvykius bei galėtų būti naudinga eksperimentavimo tikslais. Turint visą sistemos verslo logikos įvykių istoriją galima būtų iš naujo pritaikyti visus įvykius ir stebėti sistemos elgseną kaitaliojant įvairius parametrus. Pavyzdžiui elektroninės komercijos sistemoje gali būti poreikis įsivesti tam tikrą pirkėjų lojalumo sistemą. Iš pradžių neaišku kiek kam kreditų skirti, kokį procentą nuo produkto sumos. Neaišku kurie vartotojai kiek kreditų sukaups ateityje. Tačiau turint istoriją galima šį atvejį paprastai sumodeliuoti lokaliai. Pažvelkime į pseudokodą:
-
-% \begin{lstlisting}[]
-% module Transformers
-%   class StoreCreditsMapper
-%     CREDITS_PERCENTAGE_FOR_PURCHASE = 0.3
-
-%     def self.execute(event)
-%       event.user.store_credits = event.product.price * CREDITS_PERCENTAGE_FOR_PURCHASE
-%     end
-%   end
-% end
-
-% event_store.subscribe([ProductPurchase])
-%            .filter { |event| Filters::EligibleForBuyerLoyaltyProgram.execute(event) }
-%            .map { |event| Transformers::StoreCreditsMapper.execute(event) }
-%            .each { |event| ReadModels::User.call(event) }
-% \end{lstlisting}
-
-% Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to, tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
 
 \subsection{Tyrimo metodika}
 

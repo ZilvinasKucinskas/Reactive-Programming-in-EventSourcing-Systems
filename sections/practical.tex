@@ -838,163 +838,163 @@ Toks asinchroninis darbų apdorojimas padidina sistemos našumą, padaro ją lab
 
 Toks būdas gali būti naudingas darbams, kurie užtrunka ilgiau. Pavyzdžiui, sistemoje yra galimybė įkelti prekes ir jų paveikslėlius. Paveikslėlius reikia sumažinti, sukarpyti, suprastinti kokybę ar dar kitaip apdoroti. Toks procesas trunka ilgiau nei paprastas įrašymas į duomenų bazę, todėl iškėlimas būtų labai naudingas didinant sistemos našumą.
 
-\subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
+% \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
-Praeitame poskyryje buvo pademonstruotas įvykių kaupimo sistemos skaitymo modelio kūrimas panaudojant egzistuojančią biblioteką. Tačiau toks bibliotekos panaudojimas nėra deklaratyvus, programuotojui tenka rašyti darbo su duomenų baze operacijas. Norima tokį pašalinį efektą paslėpti, jog būtų galima koncentruotis tik ties sprendžiama problema. Toliau bus aprašomas siūlomas esamos ``RailsEventStore'' praplėtimas leidžiantis kurti skaitymo modelį komponavimo būdu, paslepiantis duomenų bazės lygmens realizacijos detales.
+% Praeitame poskyryje buvo pademonstruotas įvykių kaupimo sistemos skaitymo modelio kūrimas panaudojant egzistuojančią biblioteką. Tačiau toks bibliotekos panaudojimas nėra deklaratyvus, programuotojui tenka rašyti darbo su duomenų baze operacijas. Norima tokį pašalinį efektą paslėpti, jog būtų galima koncentruotis tik ties sprendžiama problema. Toliau bus aprašomas siūlomas esamos ``RailsEventStore'' praplėtimas leidžiantis kurti skaitymo modelį komponavimo būdu, paslepiantis duomenų bazės lygmens realizacijos detales.
 
-\subsubsection{Pavyzdinė domeno sritis ir įvykiai}
+% \subsubsection{Pavyzdinė domeno sritis ir įvykiai}
 
-Tarkime turime domeno sritį bankininkystė ir vartotojas gali atlikti šias operacijas, kurias atvaizduotų atitinkami įvykiai sistemoje:
+% Tarkime turime domeno sritį bankininkystė ir vartotojas gali atlikti šias operacijas, kurias atvaizduotų atitinkami įvykiai sistemoje:
 
-\begin{itemize}
-  \item \lstinline|AccountCreated| - susikurti sąskaitą, kuri turėtų unikalų sąskaitos identifikatorių ir einamąjį balansą.
-  \item \lstinline|MoneyDeposited| - įnešti pinigus į sąskaitą.
-  \item \lstinline|MoneyWithdrawn| - išsiimti pinigus.
-\end{itemize}
+% \begin{itemize}
+%   \item \lstinline|AccountCreated| - susikurti sąskaitą, kuri turėtų unikalų sąskaitos identifikatorių ir einamąjį balansą.
+%   \item \lstinline|MoneyDeposited| - įnešti pinigus į sąskaitą.
+%   \item \lstinline|MoneyWithdrawn| - išsiimti pinigus.
+% \end{itemize}
 
-\subsubsection{Skaitymo modelio kvietimas}
+% \subsubsection{Skaitymo modelio kvietimas}
 
-Patogiam užklausų rašymui, pasirenkamas aktyvaus įrašo projektavimo šablonas, kuris buvo nagrinėtas literatūros analizėje.
+% Patogiam užklausų rašymui, pasirenkamas aktyvaus įrašo projektavimo šablonas, kuris buvo nagrinėtas literatūros analizėje.
 
-Norint surasti sąskaitą \lstinline|Account| pagal unikalų identifikatorių užtenka iškviesti:
+% Norint surasti sąskaitą \lstinline|Account| pagal unikalų identifikatorių užtenka iškviesti:
 
-\begin{lstlisting}
-  Account.find_by(account_id: 'LT121000011101001000')
-\end{lstlisting}
+% \begin{lstlisting}
+%   Account.find_by(account_id: 'LT121000011101001000')
+% \end{lstlisting}
 
-Norint atvaizduoti sąskaitas, kurios buvo atidarytos paskutinį mėnesį ir išrūšiuoti pagal naujumą užtenka iškviesti:
+% Norint atvaizduoti sąskaitas, kurios buvo atidarytos paskutinį mėnesį ir išrūšiuoti pagal naujumą užtenka iškviesti:
 
-\begin{lstlisting}
-  Account.filter(created_at: 1.month.ago..Time.current).order(created_at: :desc)
-\end{lstlisting}
+% \begin{lstlisting}
+%   Account.filter(created_at: 1.month.ago..Time.current).order(created_at: :desc)
+% \end{lstlisting}
 
-\subsubsection{Skaitymo modelio aprašas}
+% \subsubsection{Skaitymo modelio aprašas}
 
-Panaudodami \lstinline|event_store| kintamąjį, kuris yra duomenų srauto klientas, galime sukurti skaitymo modelį deklaratyviai:
+% Panaudodami \lstinline|event_store| kintamąjį, kuris yra duomenų srauto klientas, galime sukurti skaitymo modelį deklaratyviai:
 
-\begin{lstlisting}
-  event_store.
-    as(Account).
-    subscribe([AccountCreated, MoneyDeposited, MoneyWithdrawn]).
-    init( -> (state) { state.balance = 0} ).
-    when(AccountCreated), -> (state, event) { state.account_id = event.data[:account_id] }.
-    when(MoneyDeposited), -> (state, event) { state.balance += event.data[:amount] }).
-    when(MoneyWithdrawn), -> (state, event) { state.balance -= event.data[:amount] })
-\end{lstlisting}
+% \begin{lstlisting}
+%   event_store.
+%     as(Account).
+%     subscribe([AccountCreated, MoneyDeposited, MoneyWithdrawn]).
+%     init( -> (state) { state.balance = 0} ).
+%     when(AccountCreated), -> (state, event) { state.account_id = event.data[:account_id] }.
+%     when(MoneyDeposited), -> (state, event) { state.balance += event.data[:amount] }).
+%     when(MoneyWithdrawn), -> (state, event) { state.balance -= event.data[:amount] })
+% \end{lstlisting}
 
-Verta pažymėti, jog čia nėra nė vienos operacijos su duomenų saugykla. Panagrinėkime šį kodo pavyzdį detaliau.
+% Verta pažymėti, jog čia nėra nė vienos operacijos su duomenų saugykla. Panagrinėkime šį kodo pavyzdį detaliau.
 
-\textbf{Kuriamo skaitymo modelio tipo operatorius}
+% \textbf{Kuriamo skaitymo modelio tipo operatorius}
 
-\lstinline|as(Account)| aprašo, jog bus kuriamas sąskaitos tipas. Įprastai programuotojas turi apsirašyti šį modelį pats \lstinline|class Account < ActiveRecord::Base; end|. Tačiau čia gali pasitarnauti meta programavimas \cite{Olsen:2007:DPR:1349728}, kuris leidžia programuotojams būti produktyvesniems generuojant dalį kodo. Šiuo atveju biblioteka leidžia paduoti ne tik jau aprašytą aktyvaus įrašo tipą, bet priima tiek eilutės, tiek simbolio tipą ir gali dinamiškai paveldėti aktyvaus įrašo bazinį tipą:
+% \lstinline|as(Account)| aprašo, jog bus kuriamas sąskaitos tipas. Įprastai programuotojas turi apsirašyti šį modelį pats \lstinline|class Account < ActiveRecord::Base; end|. Tačiau čia gali pasitarnauti meta programavimas \cite{Olsen:2007:DPR:1349728}, kuris leidžia programuotojams būti produktyvesniems generuojant dalį kodo. Šiuo atveju biblioteka leidžia paduoti ne tik jau aprašytą aktyvaus įrašo tipą, bet priima tiek eilutės, tiek simbolio tipą ir gali dinamiškai paveldėti aktyvaus įrašo bazinį tipą:
 
-\begin{lstlisting}
-read_model_type =
-  if defined_stream_type.is_a? String
-    Object.const_set(dynamic_name, Class.new(ActiveRecord::Base))
-  elsif defined_stream_type.is_a? Symbol
-    Object.const_set(defined_stream_type.to_s.capitalize, Class.new(ActiveRecord::Base))
-  else
-    defined_stream_type
-  end
-\end{lstlisting}
+% \begin{lstlisting}
+% read_model_type =
+%   if defined_stream_type.is_a? String
+%     Object.const_set(dynamic_name, Class.new(ActiveRecord::Base))
+%   elsif defined_stream_type.is_a? Symbol
+%     Object.const_set(defined_stream_type.to_s.capitalize, Class.new(ActiveRecord::Base))
+%   else
+%     defined_stream_type
+%   end
+% \end{lstlisting}
 
-Aprašomas duomenų srautas elgiasi kaip stebėtojas, bei prenumeruoja vieną ar daugiau temų panaudojant \lstinline|subscribe| metodą.
+% Aprašomas duomenų srautas elgiasi kaip stebėtojas, bei prenumeruoja vieną ar daugiau temų panaudojant \lstinline|subscribe| metodą.
 
-\textbf{Pradinės reikšmės operatorius}
+% \textbf{Pradinės reikšmės operatorius}
 
-\lstinline|init| metodas veikia kaip inicializatorius. Jeigu skaitymo modelis dar nėra saugomas duomenų saugykloje, sukuriant įrašą bus nustatoma pradinės įrašo reikšmės. Šiuo atveju sąskaitos balansas bus 0. Metodas priima \lstinline|lambda| funkciją, kuri bus iškviesta inicializavimo metu. Supaprastintai (bibliotekoje) tai galima pavaizduoti kaip:
+% \lstinline|init| metodas veikia kaip inicializatorius. Jeigu skaitymo modelis dar nėra saugomas duomenų saugykloje, sukuriant įrašą bus nustatoma pradinės įrašo reikšmės. Šiuo atveju sąskaitos balansas bus 0. Metodas priima \lstinline|lambda| funkciją, kuri bus iškviesta inicializavimo metu. Supaprastintai (bibliotekoje) tai galima pavaizduoti kaip:
 
-\begin{lstlisting}
-class ReadModel
-  def init(&blk)
-    Init.new(self, &blk)
-  end
-end
+% \begin{lstlisting}
+% class ReadModel
+%   def init(&blk)
+%     Init.new(self, &blk)
+%   end
+% end
 
-class Init < ReadModel
-  def initialize(source, &blk)
-    @block = blk
+% class Init < ReadModel
+%   def initialize(source, &blk)
+%     @block = blk
 
-    source.add_observer(self)
-  end
+%     source.add_observer(self)
+%   end
 
-  def update(event)
-    return unless record_initialized?
+%   def update(event)
+%     return unless record_initialized?
 
-    record = @read_model_type.new
-    @blk.call(record)
-    record.save!
-  end
-end
-\end{lstlisting}
+%     record = @read_model_type.new
+%     @blk.call(record)
+%     record.save!
+%   end
+% end
+% \end{lstlisting}
 
-Čia \lstinline|update| metodas yra iškviečiamas kiekvieną kartą, kai duomenų srautas gauna naują įvykį, o stebėtojas jį prenumeruoja. Ši supaprastinta realizacija iš esmės yra labai panaši į Steve Klabnik sukurtą reaktyvaus programavimo ``frappuccino'' bibliotekos vidinę realizaciją.
+% Čia \lstinline|update| metodas yra iškviečiamas kiekvieną kartą, kai duomenų srautas gauna naują įvykį, o stebėtojas jį prenumeruoja. Ši supaprastinta realizacija iš esmės yra labai panaši į Steve Klabnik sukurtą reaktyvaus programavimo ``frappuccino'' bibliotekos vidinę realizaciją.
 
-\textbf{Tipo atitikimo operatorius}
+% \textbf{Tipo atitikimo operatorius}
 
-Operatorių \lstinline|when(Type, &blk)| galima vadinti tipo atitikimo operatoriumi. Perduodamas \lstinline|lambda| blokas bus iškviestas tik tada kai sistemoje įvykusio įvykio tipas bus toks, koks yra apibrėžtas.
+% Operatorių \lstinline|when(Type, &blk)| galima vadinti tipo atitikimo operatoriumi. Perduodamas \lstinline|lambda| blokas bus iškviestas tik tada kai sistemoje įvykusio įvykio tipas bus toks, koks yra apibrėžtas.
 
-\textbf{\lstinline|each| operatorius}
+% \textbf{\lstinline|each| operatorius}
 
-Kartais gali vertėti klausytis kelių srautų ir jiems pritaikyti bendras operacijas. Toks operatorius pseudokodas galėtų būti išreikštas kaip:
+% Kartais gali vertėti klausytis kelių srautų ir jiems pritaikyti bendras operacijas. Toks operatorius pseudokodas galėtų būti išreikštas kaip:
 
-\begin{lstlisting}
-  event_store.subscribe(Event).as(Type).each( -> (state, event) {  })
-\end{lstlisting}
+% \begin{lstlisting}
+%   event_store.subscribe(Event).as(Type).each( -> (state, event) {  })
+% \end{lstlisting}
 
-\textbf{Filtravimo operatorius}
+% \textbf{Filtravimo operatorius}
 
-Tarkime vartotojas sistemoje gali tiek nusipirkti prekę, tiek užsisakyti, jog prekė būtų pagaminta pagal užsakymą. Gali kilti noras konstruoti skaitymo modelį, apjungiantį juos abu bei turint papildomų sąlygų. Pavyzdžiui vartotojui gali būti suteikiami kreditai už sėkmingą pirkimą tik tada, kai:
+% Tarkime vartotojas sistemoje gali tiek nusipirkti prekę, tiek užsisakyti, jog prekė būtų pagaminta pagal užsakymą. Gali kilti noras konstruoti skaitymo modelį, apjungiantį juos abu bei turint papildomų sąlygų. Pavyzdžiui vartotojui gali būti suteikiami kreditai už sėkmingą pirkimą tik tada, kai:
 
-\begin{itemize}
-  \item Pirkinio vertė yra didesnė nei 100 eurų.
-  \item Specialaus užsakymo vertė yra daugiau nei 50 eurų.
-\end{itemize}
+% \begin{itemize}
+%   \item Pirkinio vertė yra didesnė nei 100 eurų.
+%   \item Specialaus užsakymo vertė yra daugiau nei 50 eurų.
+% \end{itemize}
 
-Tokį duomenų srautą būtų galima konstruoti panaudojant reaktyvų filtravimo operatorių \lstinline|filter| kaip:
+% Tokį duomenų srautą būtų galima konstruoti panaudojant reaktyvų filtravimo operatorių \lstinline|filter| kaip:
 
-\begin{lstlisting}
-  product_orders_eligible_for_bonus =
-    event_store.subscribe([ProductPurchased]).
-                filter( -> (event) event.data[:price_paid] > 100)
+% \begin{lstlisting}
+%   product_orders_eligible_for_bonus =
+%     event_store.subscribe([ProductPurchased]).
+%                 filter( -> (event) event.data[:price_paid] > 100)
 
-  job_orders_eligible_for_bonus =
-    event_store.subscribe([JobOrderPurchased]).
-               .filter( -> (event) event.data[:price_paid] > 50)
-\end{lstlisting}
+%   job_orders_eligible_for_bonus =
+%     event_store.subscribe([JobOrderPurchased]).
+%                .filter( -> (event) event.data[:price_paid] > 50)
+% \end{lstlisting}
 
-\textbf{Srautų sujungimo operatorius}
+% \textbf{Srautų sujungimo operatorius}
 
-Apibrėžiant filtravimo operatorių, buvo sukurti 2 srautai, kurie yra filtruojami skirtingi. Norėdami pritaikyti bendrus veiksmus jiems, turime turėti galimybę juos sujungti. Šių filtruotų srautų sujungimo operatorius \lstinline|merge| atrodytų kaip:
+% Apibrėžiant filtravimo operatorių, buvo sukurti 2 srautai, kurie yra filtruojami skirtingi. Norėdami pritaikyti bendrus veiksmus jiems, turime turėti galimybę juos sujungti. Šių filtruotų srautų sujungimo operatorius \lstinline|merge| atrodytų kaip:
 
-\begin{lstlisting}
-  merged_stream = product_orders_eligible_for_bonus.merge(job_orders_eligible_for_bonus)
-\end{lstlisting}
+% \begin{lstlisting}
+%   merged_stream = product_orders_eligible_for_bonus.merge(job_orders_eligible_for_bonus)
+% \end{lstlisting}
 
-Norint kurti skaitymo modelio aprašą iš kintamojo \lstinline|merged_stream| užtektų panaudoti jau minėtą kuriamo skaitymo modelio tipo apibrėžimo operatorių \lstinline|as(Type)|, inicializatoriaus operatorių \lstinline|init|, tipo atitikimo operatorių \lstinline|when| ar operatorių \lstinline|each| kiekvienam įvykio tipui.
+% Norint kurti skaitymo modelio aprašą iš kintamojo \lstinline|merged_stream| užtektų panaudoti jau minėtą kuriamo skaitymo modelio tipo apibrėžimo operatorių \lstinline|as(Type)|, inicializatoriaus operatorių \lstinline|init|, tipo atitikimo operatorių \lstinline|when| ar operatorių \lstinline|each| kiekvienam įvykio tipui.
 
-\textbf{Skirtingi būdai struktūrizuoti skaitymo modelio aprašą}
+% \textbf{Skirtingi būdai struktūrizuoti skaitymo modelio aprašą}
 
-Iš esmės \lstinline|lambda| blokas yra vykdomas, kai jam iškviečiamas \lstinline|call| metodas. Kadangi aprašyti operatoriai priima \lstinline|lambda| bloką kaip parametrą, esti papildomi būdai perduoti juos.
+% Iš esmės \lstinline|lambda| blokas yra vykdomas, kai jam iškviečiamas \lstinline|call| metodas. Kadangi aprašyti operatoriai priima \lstinline|lambda| bloką kaip parametrą, esti papildomi būdai perduoti juos.
 
-Galima apsirašyti kintamąjį:
+% Galima apsirašyti kintamąjį:
 
-\begin{lstlisting}
-  variable = -> (event) { }
-\end{lstlisting}
+% \begin{lstlisting}
+%   variable = -> (event) { }
+% \end{lstlisting}
 
-Taip pat galima apsirašyti klasę, kuri turi \lstinline|call| metodą:
+% Taip pat galima apsirašyti klasę, kuri turi \lstinline|call| metodą:
 
-\begin{lstlisting}
-  class Denormalizers::ReadModelType::Event
-    def call(state, event)
-      # implementation
-    end
-  end
-\end{lstlisting}
+% \begin{lstlisting}
+%   class Denormalizers::ReadModelType::Event
+%     def call(state, event)
+%       # implementation
+%     end
+%   end
+% \end{lstlisting}
 
-Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitymo modelio kūrimo aprašą, kas gali pagerinti projekto priežiūrą, skaitomumą bei programuotojo produktyvumą.
+% Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitymo modelio kūrimo aprašą, kas gali pagerinti projekto priežiūrą, skaitomumą bei programuotojo produktyvumą.
 
 % \subsubsection{Apribojimai}
 
@@ -1035,20 +1035,23 @@ Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitym
 
 % Pritaikant visus įvykius iš naujo ir koreguojant tik \lstinline|CREDITS_PERCENTAGE_FOR_PURCHASE| yra gana lengva numatyti pirkėjų sukauptus kreditus per tam tikrą laiką. Toks įvykių maršrutizatoriaus kodas yra deklaratyvus, imperatyvios konstrukcijos yra pritaikomos tik tose vietose kur reikia. Toks būdas labai aiškiai padalintų atsakomybes į filtravimą, duomenų transformavimą ir skaitymo modelio būsenos atnaujinimo operacijas. To pasekoje nebereiktų visų šių veiksmų atlikti ir realizuoti skaitymo modelyje, kaip tai dažniausiai daroma. Skaitymo modelio kodas būtų trumpesnis ir rūpintųsi tik duomenų atnaujinimu. Be to tipiniu atveju nereiktų skaityti visų įrašytų įvykių nurodant likusių kreditų kiekį vartotojui. Užtektų iškviesti \lstinline|current_user.store_credits|.
 
-\subsection{Darbai numatomi 4-ame semestre}
+% \subsection{Darbai numatomi 4-ame semestre}
 
-\begin{itemize}
-  \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus ``RailsEventStore''.
+% \begin{itemize}
+%   \item Papildyti darbą įžvalgomis realizuojant aprašytus pakeitimus ``RailsEventStore''.
 
-  \item Aprašyti kaip pasikeitus skaitymo modelio kūrimo aprašui ar įvykus nenumatytai klaidai yra atkuriami įvykiai bei atnaujinama skaitymo modelio būsena.
+%   \item Aprašyti kaip pasikeitus skaitymo modelio kūrimo aprašui ar įvykus nenumatytai klaidai yra atkuriami įvykiai bei atnaujinama skaitymo modelio būsena.
 
-  \item Įvertinti skirtingus būdus kurti skaitymo modelį įvykių kaupimo sistemose.
+%   \item Įvertinti skirtingus būdus kurti skaitymo modelį įvykių kaupimo sistemose.
 
-  \item Papildyti darbo teorinę dalį įžvalgomis apie reaktyvaus programavimo teikiamus pranašumus, tokius kaip kodo suprantamumas, programuotojo produktyvumas remiantis Guido Salvaneschi darbu \cite{Salvaneschi:2014:ESP:2635868.2635895}.
+%   \item Papildyti darbo teorinę dalį įžvalgomis apie reaktyvaus programavimo teikiamus pranašumus, tokius kaip kodo suprantamumas, programuotojo produktyvumas remiantis Guido Salvaneschi darbu \cite{Salvaneschi:2014:ESP:2635868.2635895}.
 
-  \item Papildyti darbo teorinę dalį apie reaktyvaus programavimo trūkumus remiantis \cite{Bainomugisha:2013:SRP:2501654.2501666} darbu.
+%   \item Papildyti darbo teorinę dalį apie reaktyvaus programavimo trūkumus remiantis \cite{Bainomugisha:2013:SRP:2501654.2501666} darbu.
 
-  \item Pateikti temas, kurios būtų naudingos tobulinant šį darbą.
+%   \item Pateikti temas, kurios būtų naudingos tobulinant šį darbą.
 
-  \item Pateikti pavyzdinę programą, kuri panaudoja aprašytą skaitymo modelio kūrimo aprašą, panaudojant reaktyvius operatorius bei paslepiant operacijų su duomenų saugykla realizacijos detales.
-\end{itemize}
+%   \item Pateikti pavyzdinę programą, kuri panaudoja aprašytą skaitymo modelio kūrimo aprašą, panaudojant reaktyvius operatorius bei paslepiant operacijų su duomenų saugykla realizacijos detales.
+% \end{itemize}
+
+\input{sections/cappuccino}
+
