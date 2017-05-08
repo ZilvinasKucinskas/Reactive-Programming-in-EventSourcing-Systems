@@ -97,7 +97,7 @@ Eventsourcing describes current state as series of events that occurred in a sys
   \item Išnagrinėta įvykių kaupimo bibliotekos ``RailsEventStore'' realizacija.
   \item Išanalizuota kaip įprastai kuriamos įvykių kaupimo sistemos IT industrijoje - sukurtas pavyzdinis architektūros modelis, apjungiantis reaktyvaus programavimo bei įvykių kaupimo principus, aprašytos praktinės įvykių kaupimo sistemų kūrimo gairės.
   \item Tikslui pasiekti, sukurta biblioteka, galinti tiek publikuoti įvykius, tiek kurti skaitymo modelį naudojantis reaktyviais operatoriais ir paslepiant operacijų su duomenų saugykla realizacijos detales.
-  \item Aprašyta sukurtos bibliotekos kūrimo metodika. Įgyvendinti srautų sujungimo \lstinline|merge|, filtravimo \lstinline|filter|, transformavimo \lstinline|map|, kuriamo skaitymo modelio tipo apibrėžimo \lstinline|as_persistent_type|, pradinės reišmės \lstinline|init|, tipo atitikimo \lstinline|when| bei iteratoriaus \lstinline|each| deklaratyvius operatorius, įgalinant skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
+  \item Aprašyta sukurtos bibliotekos kūrimo metodika. Įgyvendinti srautų sujungimo \lstinline|merge|, filtravimo \lstinline|filter|, transformavimo \lstinline|map|, kuriamo skaitymo modelio tipo apibrėžimo \lstinline|as_persistent_type|, pradinės reišmės \lstinline|init|, tipo atitikimo \lstinline|when| bei iteratoriaus \lstinline|each| deklaratyvūs operatoriai, įgalinantys skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
   \item Sukurtos bibliotekos funkcionalumas validuotas parašant jai naudojimosi testus.
 \end{itemize}
 
@@ -108,7 +108,7 @@ Eventsourcing describes current state as series of events that occurred in a sys
 Siekiant tikslo susidurta su dviem pagrindiniais iššūkiais: kaip realizuoti reaktyvius operatorius ir kaip gudriai išsaugoti tarpinę programos būseną paslepiant operacijų su duomenų baze detales. Šie iššūkiai yra išsprendžiami:
 
 \begin{itemize}
-  \item Reaktyvūs operatoriai gali būti realizuojami pasinaudojant stebėtojo projektavimo šablonu, objektinio programavimo sąvybėmis (paveldėjimu) ir introspekcija.
+  \item Reaktyvūs operatoriai gali būti realizuojami pasinaudojant stebėtojo projektavimo šablonu, objektinio programavimo sąvybėmis (paveldėjimu, polimorfizmu) ir introspekcija.
   \item Tarpinės būsenos saugojimo problema yra išsprendžiama pasinaudojant metaprogramavimu (introspekcija ir refleksija) ir metodų apjungimo principu.
 \end{itemize}
 
