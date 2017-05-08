@@ -315,9 +315,11 @@ Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nu
 
 % Dalį reikalavimų ši biblioteka tikrai įgyvendina, tačiau kitus reikės įrodyti arba parodyti sekančiuose skyriuose. Pirmiausia apžvelgime kaip atrodytų sistemos architektūra, pritaikanti tiek CQRS, tiek ES, tiek RP principus.
 
-\subsection{Pavyzdinė įvykių kaupimo sistemos architektūra}
+\subsection{Įprastas būdas kurti įvykių kaupimo sistemas IT industrijoje}
 
-Kad būtų lengviau suprasti įvykių kaupimo sistemas bei jos komponentus, šiame poskyryje sukursime pavyzdinę įvykių kaupimo sistemos architektūrą.
+Kad būtų lengviau suprasti įvykių kaupimo sistemas bei jos komponentus, šiame poskyryje sukursime pavyzdinę įvykių kaupimo sistemos architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą bei įvykių kaupimą. Šiame poskyryje bus demonstruojama kaip įprasta kurti tokias sistemas informacinių technologijų industrijoje bei bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
+
+\subsubsection{Pavyzdinė įvykių kaupimo sistemos architektūra}
 
 Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontrolieriaus (MVC) projektavimo šablonu, kurį dar 9 dešimtmetyje aprašė Glenn Krasner ir Stephen Pope kaip bendrinę sąvoką \cite{Krasner:1988:CUM:50757.50759}.
 
@@ -330,7 +332,7 @@ Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontro
     \label{img:mvc_cqrs}
 \end{figure}
 
-\subsubsection{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
+\textbf{Pavyzdinis procesas - vartotojas įsideda daiktą į pirkinių krepšelį}
 
 \begin{enumerate}
   \item Vartotojas pateikia užklausą programai įdėti pirkinį į pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart/add/1|.
@@ -346,7 +348,7 @@ Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontro
   \item Kai tik įvykis jau įrašytas į įvykių žurnalą, galima vartotojui pranešti apie sėkmingą rezultatą.
 \end{enumerate}
 
-\subsubsection{Pavyzdinis procesas - vartotojas peržiūri savo pirkinių krepšelį}
+\textbf{Pavyzdinis procesas - vartotojas peržiūri savo pirkinių krepšelį}
 
 \begin{enumerate}
   \item Vartotojas pateikia užklausą programai peržiūrėti savo pirkinių krepšelį. Pavyzdinė užklausos semantika - \lstinline|https://mysite.com/cart|.
@@ -359,10 +361,6 @@ Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontro
 
   \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
 \end{enumerate}
-
-\subsection{Įvykių kaupimo sistemos kūrimo gairės}
-
-Praeitame poskyryje, \ref{img:mvc_cqrs} paveikslėlyje, pateikėme architektūros modelį, apjungiantį modelio-kontrolieriaus-vaizdo projektavimo šabloną, komandų-užklausų atskyrimo principą, įvykių kaupimą bei reaktyvaus programavimo sąsają įvykių apdorojimui, bei aprašėme proceso tėkmę aukštame lygyje. Šiame poskyryje bus demonstruojama kaip įprasta kurti tokias sistemas informacinių technologijų industrijoje bei bus gilinamąsi į kiekvieną komponentą žemesniame, kodo lygmenyje.
 
 \subsubsection{Nagrinėjamas sistemos scenarijus}
 
