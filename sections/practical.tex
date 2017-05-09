@@ -362,10 +362,6 @@ Tarkime turime tipinę saityno serverio sistemą, paremtą modelio-vaizdo-kontro
   \item Galiausiai vartotojui pateikiamas krepšelio vaizdas.
 \end{enumerate}
 
-\subsubsection{Nagrinėjamas sistemos scenarijus}
-
-Nagrinėsime architektūros tekmės procese minėtus atvejus kai vartotojas gali įsidėti bei išimti prekes iš pirkinių krepšelio bei padaryti užsakymą.
-
 \subsubsection{Domeno modelis}
 
 Remiantis literatūros analizėje aptartu domenu pagrįstu projektavimu - pradedant kurti įvykių kaupimo sistemą, pirmiausia reikia apsibrėžti domeno modelį, arba tiksliau agregatus, kuriuos aprašo Martin Fowler \cite{Fowler:Aggregate}. Naudojant įvykių kaupimą, domeno modelis yra sukuriamas remiantis domeno įvykiais. Duomenų struktūra nesaugo dabartinės būsenos, o saugo eilę domeno įvykių, kurie buvo pritaikyti agregatui nuo sistemos gyvavimo pradžios. Tai leidžia konstruoti agregatą, neatskleidžiant jo būsenos ir taip apsaugant jo invariantus.
@@ -640,31 +636,31 @@ module Denormalizers
 end
 \end{lstlisting}
 
-Pagrindinė jo paskirtis išsaugoti gautus duomenis į tam tikrus skaitymo duomenų saugyklos stulpelius (ar įrašus - priklausomai nuo duomenų saugyklos tipo). Tačiau atidžiau pažvelkime į šią eilutę - \lstinline|return if Order.where(uid: event.data.order_id).exists?|. Jeigu įvykis jau egzistuoja - jis nėra atnaujinamas. Tai jau tam tikra teisingumo taisyklė, kuri yra patikrinama prieš įrašant duomenis į duomenų saugyklą. Taigi denormalizatorius šiuo atveju turi dvi atsakomybes - filtruoti duomenis ir išsaugoti duomenis į pasirinktą duomenų saugyklą.
+Pagrindinė jo paskirtis išsaugoti gautus duomenis į tam tikrus skaitymo duomenų saugyklos stulpelius (ar įrašus - priklausomai nuo duomenų saugyklos tipo). Tačiau atidžiau pažvelkime į šią eilutę - \lstinline|return if Order.where(uid: event.data.order_id).exists?|. Jeigu įvykis jau egzistuoja - jis nėra atnaujinamas. Tai jau tam tikra teisingumo taisyklė, kuri yra patikrinama prieš įrašant duomenis į duomenų saugyklą. Taigi denormalizatorius šiuo atveju turi dvi atsakomybes - filtruoti duomenis ir išsaugoti duomenis į pasirinktą duomenų saugyklą. Kaip pamatysime vėliau darbe, kuriant biblioteką, apjungiančią reaktyvaus programavimo ir įvykių kaupimo principus, skaitymo modelio kūrimas gali būti supaprastintas.
 
-Šią atsakomybę būtų galima padalinti panaudojant reaktyvaus programavimo išskirtinę sąvybę - reaktyvius operatorius. Juk įvykiai, kurie nebus apdoroti galėtų ir nepasiekti denormalizatoriaus. Daugiau bus parodyta sekančiame poskyryje, o dabar pažvelkime į sutrumpintą įvykių maršrutizatoriaus kodą šiuo atveju:
+% Šią atsakomybę būtų galima padalinti panaudojant reaktyvaus programavimo išskirtinę sąvybę - reaktyvius operatorius. Juk įvykiai, kurie nebus apdoroti galėtų ir nepasiekti denormalizatoriaus. Daugiau bus parodyta sekančiame poskyryje, o dabar pažvelkime į sutrumpintą įvykių maršrutizatoriaus kodą šiuo atveju:
 
-\begin{lstlisting}
-module Filters
-  clas OrderExists
-    def self.execute(event)
-      Order.where(uid: event.data.order_id).exists?
-    end
-  end
-end
+% \begin{lstlisting}
+% module Filters
+%   clas OrderExists
+%     def self.execute(event)
+%       Order.where(uid: event.data.order_id).exists?
+%     end
+%   end
+% end
 
-module EventStoreSetup
-  def event_store
-    @event_store ||= RailsEventStore::Client.new.tap do |es|
-      es.subscribe([Events::OrderCreated])
-        .filter { |event| Filters::OrderExists.execute(event) }
-        .each { |event| Denormalizers::OrderCreated.call(event) }
-    end
-  end
-end
-\end{lstlisting}
+% module EventStoreSetup
+%   def event_store
+%     @event_store ||= RailsEventStore::Client.new.tap do |es|
+%       es.subscribe([Events::OrderCreated])
+%         .filter { |event| Filters::OrderExists.execute(event) }
+%         .each { |event| Denormalizers::OrderCreated.call(event) }
+%     end
+%   end
+% end
+% \end{lstlisting}
 
-Šiuo atveju kodas tikrinantis ar užsakymas egzistuoja yra atskirtas ir iškeltas į atskirą filtrų modelį. \lstinline|es.subscribe([Events::OrderCreated])| iš tikrųjų yra srautas. Srautams aprašyti galima naudoti reaktyvius operatorius, juos jungti paduodant daugiau stebimų domeno įvykių kaip masyvą ar, šiuo atveju, iškviesti \lstinline|filter| metodą, paduodant jam \lstinline|lambda| bloką, kuris bus įvykdytas ateityje. Jeigu filtras grąžina \lstinline|false|, tai yra neigiamą reikšmę, jis neperduodamas toliau. Tolesnis blokas įvykdomas tik tada, kai filtras grąžina teigiamą reikšmę.
+% Šiuo atveju kodas tikrinantis ar užsakymas egzistuoja yra atskirtas ir iškeltas į atskirą filtrų modelį. \lstinline|es.subscribe([Events::OrderCreated])| iš tikrųjų yra srautas. Srautams aprašyti galima naudoti reaktyvius operatorius, juos jungti paduodant daugiau stebimų domeno įvykių kaip masyvą ar, šiuo atveju, iškviesti \lstinline|filter| metodą, paduodant jam \lstinline|lambda| bloką, kuris bus įvykdytas ateityje. Jeigu filtras grąžina \lstinline|false|, tai yra neigiamą reikšmę, jis neperduodamas toliau. Tolesnis blokas įvykdomas tik tada, kai filtras grąžina teigiamą reikšmę.
 
 % Kaip buvo nagrinėta literatūros analizėje, įrodyta, jog deklaratyvus stilius yra pranašesnis už imperatyvųjį kodą. Sekančiame skyriuje panagrinėsime kokius privalumus toks atsakomybių atskyrimas suteikia.
 
