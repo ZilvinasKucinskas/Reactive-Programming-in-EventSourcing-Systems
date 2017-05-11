@@ -1,6 +1,6 @@
 \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
-Šiame poskyryje bus siekiama pasiekti darbo tikslą - pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, neturėtų būsenos, tai yra visos operacijos su duomenų baze būtų paslėptos. Pirmiausia bus aprašyta problema, su kuria susiduriama kuriant įvykių kaupimo sistemos skaitymo modelį naudojantis ``RailsEventStore'' biblioteka. Vėliau bus pristatyti kuriamos patobulintos bibliotekos reaktyvūs operatoriai bei jų panaudojimo atvejai, aprašyta kūrimo eigos metodika, iššūkiai bei jų sprendimai, suformuluoti apribojimai.
+Šiame poskyryje bus siekiama pasiekti darbo tikslą - pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, neturėtų būsenos, tai yra visos operacijos su duomenų baze būtų paslėptos. Pirmiausia bus aprašyta problema, su kuria susiduriama kuriant įvykių kaupimo sistemos skaitymo modelį naudojantis ``RailsEventStore'' biblioteka. Vėliau bus pristatyti kuriamos patobulintos bibliotekos reaktyvūs operatoriai bei jų panaudojimo atvejai, pagrindinės realizacijos problemos bei jų sprendimai, suformuluoti apribojimai.
 
 \subsubsection{Įprasto būdo kurti įvykių kaupimo sistemas problema}
 
@@ -90,7 +90,7 @@ Kuriant biblioteką pasirinkta įgyvendinti šiuos operatorius:
 
 Šie operatoriai bus plačiau paaiškinti ir pademonstruoti aprašant realizacijos detales.
 
-\subsubsection{Pagrindiniai realizacijos iššūkiai}
+\subsubsection{Pagrindinės realizacijos problemos}
 
 Apsibrėžus kuriamos bibliotekos norimą pasiekti funkcionalumą bei naudojimosi sintaksę, kyla daugiau klausimų:
 
@@ -100,7 +100,7 @@ Apsibrėžus kuriamos bibliotekos norimą pasiekti funkcionalumą bei naudojimos
   \item Kaip išsaugoti tarpinę skaitymo modelio būseną paslepiant operacijų su duomenų saugykla detales?
 \end{itemize}
 
-Sekančiame skyriuje aptarsime bibliotekos realizacijos detales bei kertinius sprendimus, atsakančius į išsikeltus klausimus.
+Sekančiame skyriuje aptarsime bibliotekos realizacijos detales bei kertinius sprendimus, atsakančius į išsikeltas problemas.
 
 \subsubsection{Realizacijos detalės}
 
