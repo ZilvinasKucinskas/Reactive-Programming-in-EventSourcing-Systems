@@ -319,6 +319,30 @@ Taip pat galima apsirašyti klasę, kuri turi \lstinline|call| metodą:
 
 Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitymo modelio kūrimo aprašą, kas gali pagerinti projekto priežiūrą, skaitomumą bei programuotojo produktyvumą.
 
+\subsubsection{Konkretizuotas taisyklių rinkinys}
+
+Sukūrus biblioteką, galime konkretizuoti taisykles, reikalingas srauto ir reaktyvių operatorių realizacijai. Šios taisyklės pateiktos diagramoje, kuri pavaizduota \ref{img:cappuccino_rules} paveikslėlyje. Iteratoriaus operatorius \lstinline|each(state_change_function)| yra praleistas, nes yra labai panašus į tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Vienintelis skirtumas, jog iteratoriaus operatorius netikrina tipo.
+
+\textbf{Pagrindinės taisyklės}:
+
+\begin{itemize}
+  \item Kad galėtume naudoti reaktyvius operatorius, pirmiausia reikia sukurti srautą.
+  \item Galima jungti skirtingus srautus.
+  \item Srautui galima kviesti reaktyvius operatorius.
+  \item Vienas srautas gali kurti daugiausiai vieną skaitymo modelį.
+  \item Tarpinę būseną saugančius operatorius galima kviesti tik tada, kai srautui būna perduotas tipas ir pirminis raktas. Sukurtoje bibliotekoje šią atsakomybę įgyvendina tipo apibrėžimo operatorius \lstinline|as_persistent_type(type, primary_key)|.
+  \item Kiekvienas įvykis privalo turėti kuriamo skaitymo modelio pirminio rakto informaciją, saugomą tokiu pačiu vardu, kokį turi pirminis raktas.
+  \item Pradinės būsenos operatorius \lstinline|init(state_change_function)| privalo būti kviečiamas prieš iteratoriaus \lstinline|each(state_change_function)| bei tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Pastarieji operatoriai sukuria tarpinę būseną nepritaikant pradinės būsenos, todėl pradinės būsenos operatorius prarastų prasmę.
+  \item Kuriamas skaitymo modelis turi būti denormalizuotas, tai yra turi turėti visą informaciją, reikalingą jo panaudojimo atvejui.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{img/cappuccino_rules}
+    \caption{Srauto ir reaktyvių operatorių realizacijos taisyklių diagrama}
+    \label{img:cappuccino_rules}
+\end{figure}
+
 \subsubsection{Apribojimai}
 
 Sujungus reaktyvaus programavimo ir įvykių kaupimo principus ir sukūrus biblioteką, pastebėti tam tikri apribojimai, kuriuos verta paminėti:
@@ -326,7 +350,7 @@ Sujungus reaktyvaus programavimo ir įvykių kaupimo principus ir sukūrus bibli
 \begin{itemize}
   \item Saugant tarpinę skaitymo modelio tipo būseną reikalingas ne tik tipas, bet ir to skaitymo modelio pirminis raktas. Šis identifikatorius paimamas iš prenumeruojamo įvykio nešamos informacijos. Dėl šio priežasties kiekvienas prenumeruojamas įvykis privalo turėti šią informaciją.
   \item Analizuojant įvykių kaupimo sistemų kūrimą bei teoriją, buvo pastebėta, jog kuriamas skaitymo modelis yra denormalizuotas, tai yra jis turi visą informaciją, reikalingą vaizdui pateikti. Dėl šios priežasties, biblioteka nepalaiko kelių skaitymo modelių, sujungtų išoriniais raktais, kūrimo.
-  \item Srautas nėra baigtinis, operatorių funkcijos pritaikomos tik nutikus įvykiui, todėl neįmanoma užklausti pagal kintantį laiką. Pavyzdžiui, negalėtume sukurti tam tikro skaitymo modelio, kuris vaizduotų paskutinių 24h operacijas. Norint tikslumo, tam derėtų pasinaudoti įvykių saugyklos adapteriu \lstinline|EventRepository|, skaityti paskutinius įvykius sistemoje ir kurti laikiną skaitymo modelį nesinaudojant biblioteka.
+  \item Srautas nėra baigtinis, operatorių funkcijos pritaikomos tik nutikus įvykiui, todėl neįmanoma užklausti pagal kintantį laiką. Pavyzdžiui, negalėtume sukurti tam tikro skaitymo modelio, kuris vaizduotų operacijas, įvykusias per paskutines 24 valandas. Norint tikslumo, tam derėtų pasinaudoti įvykių saugyklos adapteriu \lstinline|EventRepository|, skaityti paskutinius įvykius sistemoje ir kurti laikiną skaitymo modelį nesinaudojant biblioteka.
   \item Sukurta biblioteka niekada nesunaikina tarpinės skaitymo modelio būsenos. Esant reikalui identifikuoti sunaikintą būseną, galima prenumeruoti naikinimo įvykį ir turėti tam tikrą \lstinline|status| identifikatorių, kuris pažymėtų skaitymo modelio būseną sistemoje. Pavyzdžiui, elektroninėje parduotuvėje gali tekti žinoti ar produktas pradedamas kelti, įkeltas, suspenduotas ar ištrintas.
 \end{itemize}
 
