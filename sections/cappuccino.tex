@@ -153,15 +153,11 @@ Kai tik įvykis išsaugomas duomenų saugykloje, visi įvykio prenumeratoriai yr
 
 \textbf{Skaitymo modelio kūrimo aprašo realizacija}
 
-Skaitymo modelis yra kuriamas pasinaudojant duomenų srautais. Inicializuojant duomenų srautą \lstinline|Stream.new(*sources)|, konstruktoriuje apibrėžiami prenumeruojami įvykiai:
+Skaitymo modelis yra kuriamas pasinaudojant duomenų srautais. Inicializuojant duomenų srautą \lstinline|Stream.new(*sources)|, srautas geba pats pasirūpinti, jog būtų informuotas apie naujus įvykius sistemoje. Tam pasiekti, konstruktoriuje apibrėžiami prenumeruojami įvykiai:
 
 \begin{lstlisting}
 sources.each { source.add_observer(self) }
 \end{lstlisting}
-
-Srautas geba pats pasirūpinti, jog būtų informuotas apie naujus įvykius sistemoje.
-
-Srautas taip pat realizuoja svarbų metodą \lstinline|update|, kuris yra visada iškviečiamas gavus naują įvykį.
 
 Kiekvienas reaktyvus operatorius yra kuriamas labai panašiai, todėl pateiksime tik porą operatorių realizaciją:
 
@@ -176,7 +172,9 @@ end
 #...
 \end{lstlisting}
 
-Grąžinama nauja atitinkama klasė, kuri paveldi \lstinline|Stream| srautą. Verta pastebėti, jog perduodamas ir pradinis srautas. Taigi srautas \lstinline|Stream| tuo pačiu metu gali būti ir stebėtojas, ir tema.
+Grąžinama nauja atitinkama klasė, kuri paveldi \lstinline|Stream| srautą. Verta pastebėti, jog perduodamas ir pradinis srautas. Reaktyvaus operatoriaus klasė inicializavimo metu iškviečia \lstinline|source.add_observer(self)| ir taip prenumeruoja srautą, kuris sukūrė šį reaktyvų operatorių. Taigi srautas \lstinline|Stream| tuo pačiu metu gali būti ir stebėtojas, ir tema.
+
+Srautas \lstinline|Stream| realizuoja svarbų metodą \lstinline|update|, kuris yra visada iškviečiamas gavus naują įvykį. Šis metodas pažymi, jog įvyko pasikeitimai ir perduoda pakeitimus visiems stebėtojams. Reaktyvių operatorių klasės pasinaudoja objektinio programavimo sąvybe - polimorfizmu ir perrašo šį funkcionalumą priklausomai nuo operatoriaus. Šis funkcionalumas bus pademonstruotas aprašant reaktyvius operatorius.
 
 \textbf{Kuriamo skaitymo modelio tipo operatorius}
 
