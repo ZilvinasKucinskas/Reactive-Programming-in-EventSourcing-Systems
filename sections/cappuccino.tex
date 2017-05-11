@@ -327,6 +327,7 @@ Sujungus reaktyvaus programavimo ir įvykių kaupimo principus ir sukūrus bibli
 
 \begin{itemize}
   \item Saugant tarpinę skaitymo modelio tipo būseną reikalingas ne tik tipas, bet ir to skaitymo modelio pirminis raktas. Šis identifikatorius paimamas iš prenumeruojamo įvykio nešamos informacijos. Dėl šio priežasties kiekvienas prenumeruojamas įvykis privalo turėti šią informaciją.
+  \item Analizuojant įvykių kaupimo sistemų kūrimą bei teoriją, buvo pastebėta, jog kuriamas skaitymo modelis yra denormalizuotas, tai yra jis turi visą informaciją, reikalingą vaizdui pateikti. Dėl šios priežasties, biblioteka nepalaiko kelių skaitymo modelių, sujungtų išoriniais raktais, kūrimo.
   \item Srautas nėra baigtinis, operatorių funkcijos pritaikomos tik nutikus įvykiui, todėl neįmanoma užklausti pagal kintantį laiką. Pavyzdžiui, negalėtume sukurti tam tikro skaitymo modelio, kuris vaizduotų paskutinių 24h operacijas. Norint tikslumo, tam derėtų pasinaudoti įvykių saugyklos adapteriu \lstinline|EventRepository|, skaityti paskutinius įvykius sistemoje ir kurti laikiną skaitymo modelį nesinaudojant biblioteka.
   \item Sukurta biblioteka niekada nesunaikina tarpinės skaitymo modelio būsenos. Esant reikalui identifikuoti sunaikintą būseną, galima prenumeruoti naikinimo įvykį ir turėti tam tikrą \lstinline|status| identifikatorių, kuris pažymėtų skaitymo modelio būseną sistemoje. Pavyzdžiui, elektroninėje parduotuvėje gali tekti žinoti ar produktas pradedamas kelti, įkeltas, suspenduotas ar ištrintas.
 \end{itemize}
