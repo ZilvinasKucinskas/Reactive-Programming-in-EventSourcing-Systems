@@ -105,11 +105,11 @@ Eventsourcing describes current state as series of events that occurred in a sys
 
 Įmanoma pritaikyti reaktyvaus programavimo principus įvykių kaupimo sistemose taip, jog skaitymo modelis būtų kuriamas tik komponavimo būdu, paslepiant operacijų su duomenų saugykla realizacijos detales griežtai tipizuotoje programavimo kalboje. Tikslui pasiekti tinka griežtai tipizuota ``Ruby'' programavimo kalba.
 
-Siekiant tikslo susidurta su dviem pagrindiniais iššūkiais: kaip realizuoti reaktyvius operatorius ir kaip gudriai išsaugoti tarpinę programos būseną paslepiant operacijų su duomenų baze detales. Šie iššūkiai yra išsprendžiami:
+Siekiant tikslo susidurta su dvejomis pagrindinėmis problemomis: kaip realizuoti reaktyvius operatorius ir kaip gudriai išsaugoti tarpinę programos būseną paslepiant operacijų su duomenų baze detales. Pastarosios problemos yra išsprendžiamos:
 
 \begin{itemize}
   \item Reaktyvūs operatoriai gali būti realizuojami pasinaudojant stebėtojo projektavimo šablonu, objektinio programavimo sąvybėmis (paveldėjimu, polimorfizmu) ir introspekcija.
-  \item Tarpinės būsenos saugojimo problema yra išsprendžiama pasinaudojant metaprogramavimu (introspekcija ir refleksija) ir metodų apjungimo principu.
+  \item Tarpinės būsenos saugojimo problema yra išsprendžiama pasinaudojant metaprogramavimu (introspekcija ir refleksija) ir metodų jungimo principu (angl. method chaining).
 \end{itemize}
 
 \printbibliography[heading=bibintoc]  % Šaltinių sąraše nurodoma panaudota
