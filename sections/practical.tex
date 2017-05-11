@@ -84,9 +84,9 @@ Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Pre
 
 Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro kodo projektus\footnote{https://github.com/steveklabnik}, 2013 metais pristatė reaktyvaus programavimo idėjas Ruby kalboje įvairiose konferencijose, tarp jų Euruko2013 \cite{klabnik:euruko}, RubyConf India 2013 \cite{klabnik:india} ir kitos.
 
-Panagrinėkime šios bibliotekos pavyzdį:
+Panagrinėkime ``Frappuccino'' bibliotekos panaudojimo pavyzdį, pavaizduotą \ref{frappuccino} kodo pavyzdyje:
 
-\begin{lstlisting}[]
+\begin{lstlisting}[caption=``Frappuccino'' bibliotekos panaudojimo pavyzdys, label=frappuccino]
 class Button
   def push
     emit(:pushed) # emit sends a value into the stream
@@ -128,7 +128,7 @@ Kadangi reaktyvūs operatoriai grąžina naują stebėtoją - galima programuoti
   filtered_stream = merged_stream.select{ |event| event == :pushed }
 
   filtered_stream.on_value do |event|
-  # event will only ever be :pushed
+    # event will only ever be :pushed
   end
 \end{lstlisting}
 
@@ -163,9 +163,9 @@ Kai į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lst
   rake db:migrate
 \end{lstlisting}
 
-Ši migracija iš tikrųjų sukuria tokią lentelę:
+Sukurta migracija pavaizduota \ref{event_store_events_table} kodo pavyzdyje. Matome, jog kiekvienas įvykis turi srauto pavadinimą, įvykio tipą, unikalų identifikatorių, tam tikrus meta duomenis (čia gali būti tokia informacija kaip kliento IP, šalis iš kurios buvo atlikta užklausa ir t.t.), duomenų laukas, kuris aktyvaus įrašo pagalba serializuojamas į maišos duomenų struktūrą (angl. hash) bei sukūrimo laiką. Taipogi sukuriami reikalingi indeksai, kurie reikalingi greitesnėms užklausoms filtruojant pagal indeksuojamus lentelės stulpelius.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=Įvykių saugojimo migracija, label=event_store_events_table]
     create_table(:event_store_events) do |t|
       t.string      :stream,      null: false
       t.string      :event_type,  null: false
@@ -179,8 +179,6 @@ Kai į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lst
     add_index :event_store_events, :event_type
     add_index :event_store_events, :event_id, unique: true
 \end{lstlisting}
-
-Matome, jog kiekvienas įvykis turi srauto pavadinimą, įvykio tipą, unikalų identifikatorių, tam tikrus meta duomenis (čia gali būti tokia informacija kaip kliento IP, šalis iš kurios buvo atlikta užklausa ir t.t.), duomenų laukas, kuris aktyvaus įrašo pagalba serializuojamas į maišos duomenų struktūrą (angl. hash) bei sukūrimo laiką. Taipogi sukuriami reikalingi indeksai, kurie reikalingi greitesnėms užklausoms filtruojant pagal indeksuojamus lentelės stulpelius.
 
 Norint naudoti bibliotekos funkcionalumą, tereikia sukurti \lstinline|RailsEventStore::Client| klasės egzempliorių:
 
@@ -261,11 +259,11 @@ client.delete_stream(stream_name)
 
 \subsubsection{Prenumeratų mechanizmas}
 
-Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
+Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Prenumeratorių mechanizmo panaudojimas demonstruojamas \ref{event_store_subscription} kodo pavyzdyje. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
 
-Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Pavyzdys pateiktas žemiau:
+Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Verta pastebėti, jog įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=``EventStore'' bibliotekos prenumeratorių mechanizmo panaudojimas, label=event_store_subscription]
 class CartReadModel
     def call(event)
         if event.event_type == 'AddToCart'
@@ -287,8 +285,6 @@ end
 cart = CartReadModel.new
 client.subscribe(cart, [AddToCart, RemoveFromCart]) 
 \end{lstlisting}
-
-Galima pastebėti - įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
 
 % \subsection{Reaktyvus programavimas bei įvykių kaupimas kartu}
 
@@ -386,9 +382,9 @@ Pagal nagrinėjamą scenarijų minėti įvykiai apibrėžia šiuos veiksmus:
   \item \lstinline|OrderCreated| - įvykdytas užsakymas.
 \end{itemize}
 
-Kai turime apsibrėžtus domeno įvykius, galime juos pritaikyti domeno objektui:
+Kai turime apsibrėžtus domeno įvykius, galime juos pritaikyti domeno objektui. Panagrinėkime \ref{apply_domain_events} kodo pavyzdį. \lstinline|Domain::Order| klasė turi metodą \lstinline|initialize|, kuris sukuria pradinę agregato būseną. Taip pat, klasė turi \lstinline|create| metodą. Pastarasis turėtų būti naudojamas kitų objektų, iškviečiant agregato funkcijas. Čia turėtų būti apsaugomi invariantai, tikrinama verslo logika, teisingumo taisyklės. Remiantis CQRS principu, šis metodas neturėtų grąžinti reikšmės - jis privalo būti tik įvykdomas arba nutraukti vykdymą iškeliant išimtinę situaciją. Taipogi šiame metode agregato būsena niekada nėra keičiama. Vietoje to yra sukonstruojamas ir pritaikomas naujas domeno įvykis (kurį apsirašėme anksčiau).
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=Įvykių pritaikymas domeno objektui, label=apply_domain_events]
 module Domain
   class Order
     include AggregateRoot::Base
@@ -423,11 +419,11 @@ module Domain
 end
 \end{lstlisting}
 
-Panagrinėkime šį atvejį išsamiau. \lstinline|Domain::Order| klasė turi metodą \lstinline|initialize|, kuris sukuria pradinę agregato būseną. Taip pat, klasė turi \lstinline|create| metodą. Pastarasis turėtų būti naudojamas kitų objektų, iškviečiant agregato funkcijas. Čia turėtų būti apsaugomi invariantai, tikrinama verslo logika, teisingumo taisyklės. Remiantis CQRS principu, šis metodas neturėtų grąžinti reikšmės - jis privalo būti tik įvykdomas arba nutraukti vykdymą iškeliant išimtinę situaciją. Taipogi šiame metode agregato būsena niekada nėra keičiama. Vietoje to yra sukonstruojamas ir pritaikomas naujas domeno įvykis (kurį apsirašėme anksčiau).
+Reiktų detaliau panagrinėti iš kur įtraukiamas \lstinline|AggregateRoot::Base| modulis. Tai yra ``aggregate\_root''\footnote{https://github.com/arkency/aggregate\_root} biblioteka, kuri atkeliauja kartu su ``RailsEventStore biblioteka''. \ref{aggregate_root} kodo pavyzdyje demonstruojamas svarbiausias funkcionalumas. Modulis įterpia metodą \lstinline|apply|. Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, customer_id)} yra sukuriamas naujas domeno įvykis ir pritaikomas agregatui - būsena pasikeičia ir \lstinline|@unpublished_events| kintamasis saugo pakeitimus. Jis saugo visus agregato sukurtus domeno įvykius, kol metodas yra vykdomas.
 
-Reiktų detaliau panagrinėti iš kur įtraukiamas \lstinline|AggregateRoot::Base| modulis. Tai yra ``aggregate\_root''\footnote{https://github.com/arkency/aggregate\_root} biblioteka, kuri atkeliauja kartu su ``RailsEventStore biblioteka''. Ji įterpia metodą \lstinline|apply|:
+Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastarasis atnaujina agregato būseną priklausomai nuo įvykusio domeno įvykio. Nesvarbu ar pats agregatas publikavo įvykį, ar įvykis buvo nuskaitytas iš įvykių žurnalo ir pritaikytas atkuriant dabartinę agregato būseną, šioje vietoje negali būti verslo logikos ar teisingumo taisyklių. Tai tik būsenos atkūrimas, o istorijos keisti negalima, kaip buvo nagrinėta literatūroje.
 
-\begin{lstlisting}
+\begin{lstlisting}[caption=``AggregateRoot'' modulis, label=aggregate_root]
 module AggregateRoot
   class DefaultApplyStrategy
     def call(aggregate, event)
@@ -454,10 +450,6 @@ module AggregateRoot
   end
 end
 \end{lstlisting}
-
-Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, customer_id)} yra sukuriamas naujas domeno įvykis ir pritaikomas agregatui - būsena pasikeičia ir \lstinline|@unpublished_events| kintamasis saugo pakeitimus. Jis saugo visus agregato sukurtus domeno įvykius, kol metodas yra vykdomas.
-
-Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastarasis atnaujina agregato būseną priklausomai nuo įvykusio domeno įvykio. Nesvarbu ar pats agregatas publikavo įvykį, ar įvykis buvo nuskaitytas iš įvykių žurnalo ir pritaikytas atkuriant dabartinę agregato būseną, šioje vietoje negali būti verslo logikos ar teisingumo taisyklių. Tai tik būsenos atkūrimas, o istorijos keisti negalima, kaip buvo nagrinėta literatūroje.
 
 \subsubsection{Komandos}
 
