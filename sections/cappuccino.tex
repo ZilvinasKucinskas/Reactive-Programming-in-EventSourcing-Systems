@@ -180,9 +180,9 @@ Grąžinama nauja atitinkama klasė, kuri paveldi \lstinline|Stream| srautą. Ve
 
 \textbf{Kuriamo skaitymo modelio tipo operatorius}
 
-Norint išsaugoti tarpinę skaitymo modelio būseną duomenų saugykloje, reikia žinoti skaitymo modelio tipą bei jo unikalų identifikatorių.
+Norint išsaugoti tarpinę skaitymo modelio būseną duomenų saugykloje, reikia žinoti skaitymo modelio tipą bei jo pirminį raktą.
 
-\lstinline|as_persistent_type(resource_type, unique_resource_identifier)| yra srauto metodas, kuris įsimena kuriamo skaitymo modelio tipą bei jo unikalų identifikatorių. Naudojant reaktyvius operatorius, modelio tipas ir unikalus identifikatorius yra automatiškai perduodamas naujam reaktyvaus operatorio srautui. Bendruoju atveju, unikalus identifikatorius gali būti nuspėtas. Tarkime, jeigu kuriamas vartotojo sąskaitos skaitymo modelis \lstinline|Account|, unikalus identifikatorius greičiausiai bus \lstinline|account_id|. Kartais gali atsirasti noras kurti sudėtingesnius skaitymo modelio vaizdus. Tarkime, programos vartotojas gali turėti kelias sąskaitas. Tokius atveju unikalus identifikatorius turėtų būti pora \lstinline|user_id, account_id| - vartotojo kodas ir sąskaitos kodas. Norint sukurti tokį skaitymo modelį, užtektų kuriamo skaitymo modelio aprašo srautui iškviesti \lstinline|as_persistent_type(Account, [:account_id, :user_id])|. Tvarka šiuo atveju nesvarbi. Metodas grąžina pasinaudoja metodų apjungimo principu, tai yra grąžina objektą, kuriam buvo iškviestas.
+\lstinline|as_persistent_type(resource_type, unique_resource_identifier)| yra srauto metodas, kuris įsimena kuriamo skaitymo modelio tipą bei jo pirminį raktą. Naudojant reaktyvius operatorius, modelio tipas ir pirminis raktas yra automatiškai perduodami reaktyvaus operatoriaus srautui. Bendruoju atveju, pirminis raktas gali būti nuspėtas. Tarkime, jeigu kuriamas vartotojo sąskaitos skaitymo modelis \lstinline|Account|, pirminis raktas greičiausiai bus \lstinline|account_id|. Kartais gali atsirasti noras kurti sudėtingesnius skaitymo modelio vaizdus. Tarkime, programos vartotojas gali turėti kelias sąskaitas. Tokius atveju pirminis raktas turėtų būti pora \lstinline|user_id, account_id| - vartotojo kodas ir sąskaitos kodas. Norint sukurti tokį skaitymo modelį, užtektų kuriamo skaitymo modelio aprašo srautui iškviesti \lstinline|as_persistent_type(Account, [:account_id, :user_id])|. Pirminio rakto sudedamųjų dalių tvarka šiuo atveju nesvarbi. Metodas grąžina pasinaudoja metodų apjungimo principu, tai yra grąžina objektą, kuriam buvo iškviestas.
 
 Įprastai programuotojas turi apsirašyti aktyvaus įrašo modelį pats \lstinline|class Account < ActiveRecord::Base; end|. Tačiau čia gali pasitarnauti meta programavimas \cite{Olsen:2007:DPR:1349728}, kuris leidžia programuotojams būti produktyvesniems generuojant dalį kodo. Šiuo atveju biblioteka leidžia paduoti ne tik jau aprašytą aktyvaus įrašo tipą, bet priima tiek eilutės, tiek simbolio tipą ir gali dinamiškai paveldėti aktyvaus įrašo bazinį tipą panaudojant refleksija:
 
@@ -271,7 +271,7 @@ def update(event)
 end
 \end{lstlisting}
 
-Čia \lstinline|update| metodas yra iškviečiamas kiekvieną kartą, kai duomenų srautas gauna naują įvykį, o stebėtojas jį prenumeruoja. \lstinline|Init| tipo srautas saugo informaciją apie kuriamą skaitymo modelio tipą, todėl iš gauto įvykio gali išgauti unikalaus identifikatoriaus informaciją. Jeigu toks skaitymo modelis dar nėra sukurtas sistemoje, naujas įrašas yra sukonstruojamas, pritaikoma būsenos keitimo funkcija ir programos tarpinė būsena yra išsaugoma duomenų saugykloje. Įvykis visada perduodamas toliau visiems prenumeratoriams.
+Čia \lstinline|update| metodas yra iškviečiamas kiekvieną kartą, kai duomenų srautas gauna naują įvykį, o stebėtojas jį prenumeruoja. \lstinline|Init| tipo srautas saugo informaciją apie kuriamą skaitymo modelio tipą, todėl iš gauto įvykio gali išgauti pirminio rakto informaciją. Jeigu toks skaitymo modelis dar nėra sukurtas sistemoje, naujas įrašas yra sukonstruojamas, pritaikoma būsenos keitimo funkcija ir programos tarpinė būsena yra išsaugoma duomenų saugykloje. Įvykis visada perduodamas toliau visiems prenumeratoriams.
 
 \textbf{Tipo atitikimo operatorius}
 
@@ -326,7 +326,7 @@ Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitym
 Sujungus reaktyvaus programavimo ir įvykių kaupimo principus ir sukūrus biblioteką, pastebėti tam tikri apribojimai, kuriuos verta paminėti:
 
 \begin{itemize}
-  \item Saugant tarpinę skaitymo modelio tipo būseną reikalingas ne tik tipas, bet ir to skaitymo modelio unikalus identifikatorius. Šis identifikatorius paimamas iš prenumeruojamo įvykio nešamos informacijos. Dėl šio priežasties kiekvienas prenumeruojamas įvykis privalo turėti šią informaciją.
+  \item Saugant tarpinę skaitymo modelio tipo būseną reikalingas ne tik tipas, bet ir to skaitymo modelio pirminis raktas. Šis identifikatorius paimamas iš prenumeruojamo įvykio nešamos informacijos. Dėl šio priežasties kiekvienas prenumeruojamas įvykis privalo turėti šią informaciją.
   \item Srautas nėra baigtinis, operatorių funkcijos pritaikomos tik nutikus įvykiui, todėl neįmanoma užklausti pagal kintantį laiką. Pavyzdžiui, negalėtume sukurti tam tikro skaitymo modelio, kuris vaizduotų paskutinių 24h operacijas. Norint tikslumo, tam derėtų pasinaudoti įvykių saugyklos adapteriu \lstinline|EventRepository|, skaityti paskutinius įvykius sistemoje ir kurti laikiną skaitymo modelį nesinaudojant biblioteka.
   \item Sukurta biblioteka niekada nesunaikina tarpinės skaitymo modelio būsenos. Esant reikalui identifikuoti sunaikintą būseną, galima prenumeruoti naikinimo įvykį ir turėti tam tikrą \lstinline|status| identifikatorių, kuris pažymėtų skaitymo modelio būseną sistemoje. Pavyzdžiui, elektroninėje parduotuvėje gali tekti žinoti ar produktas pradedamas kelti, įkeltas, suspenduotas ar ištrintas.
 \end{itemize}
