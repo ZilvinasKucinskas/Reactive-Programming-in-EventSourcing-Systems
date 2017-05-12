@@ -321,15 +321,31 @@ Lankstumas suteikia galimybę laisvai struktūrizuoti kodą, sutrumpinti skaitym
 
 \subsubsection{Konkretizuotas taisyklių rinkinys}
 
-Sukūrus biblioteką, galime konkretizuoti taisykles, reikalingas srauto ir reaktyvių operatorių realizacijai. Šios taisyklės pateiktos diagramoje, kuri pavaizduota \ref{img:cappuccino_rules} paveikslėlyje. Iteratoriaus operatorius \lstinline|each(state_change_function)| yra praleistas, nes yra labai panašus į tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Vienintelis skirtumas, jog iteratoriaus operatorius netikrina tipo.
-
-\textbf{Pagrindinės taisyklės}:
+Sukūrus biblioteką, galime konkretizuoti taisykles, reikalingas srauto ir reaktyvių operatorių realizacijai. Labiausiai dominantys klausimai yra:
 
 \begin{itemize}
-  \item Kad galėtume naudoti reaktyvius operatorius, pirmiausia reikia sukurti srautą.
-  \item Galima jungti skirtingus srautus.
-  \item Srautui galima kviesti reaktyvius operatorius.
-  \item Vienas srautas gali kurti daugiausiai vieną skaitymo modelį.
+  \item Kaip reaktyvūs operatoriai transformuoja srauto žinutes į tarpinę būseną?
+  \item Kokios taisyklės transformuoja tarpinę būseną į skaitymo modelį.
+\end{itemize}
+
+Atsakymas į pirmąjį klausimą pateiktas diagramoje, kuri pavaizduota \ref{img:cappuccino_rules} paveikslėlyje. Ši diagrama parodo ryšį tarp srautų ir reaktyvių operatorių bei aprašo kokie veiksmai yra atliekami su gauta srauto žinute, tai yra tam tikru prenumeruojamu įvykiu. Iteratoriaus operatorius \lstinline|each(state_change_function)| yra praleistas, nes yra labai panašus į tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Vienintelis skirtumas, jog iteratoriaus operatorius netikrina tipo.
+
+Atsakant į antrąjį klausimą, verta panagrinėti, kaip tarpinė būsena yra sukuriama, jai pritaikoma būsenos keitimo funkcija ir kaip ši būsena yra išsaugoma. Čia būtina sąlyga yra kuriamo skaitymo modelio tipo bei pirminio rakto žinojimas. Toliau paaiškinsime diagramoje aprašytus žingsnius:
+
+\begin{itemize}
+  \item \textbf{Tarpinės būsenos sukūrimas} - jei tarpinė būsena neegzistuoja duomenų saugykloje, sukuriamas objektas, turintis tokius pačius laukus kaip ir kuriamas skaitymo modelis. Skaitymo modelio laukai gaunami žinant kuriamo skaitymo modelio tipą. Sukurti objekto laukai privalo turėti tiek rašymo tiek skaitymo prieigą.
+  \item \textbf{Tarpinės būsenos suradimas} - jei tarpinė būsena egzistuoja duomenų saugykloje, reikia surasti šią būseną. Būsena randama padarius užklausą į duomenų saugyklą panaudojant skaitymo modelio tipą bei pirminį raktą. Sukuriamas objektas, turintis tokius pačius laukus kaip ir kuriamas skaitymo modelis. Sukurti objekto laukai privalo turėti tiek rašymo tiek skaitymo prieigą. Sukurtam objektui priskiriami užklausos metu gauta informacija apie esamą tarpinę būseną.
+  \item \textbf{Tarpinės būsenos keitimo funkcijos pritaikymas} - turint praeituose žingsniuose sukurtą objektą, kuris turi visus skaitymo modelio laukus, iškviečiama tarpinės būsenos keitimo funkcija. Sukurtas objektas yra perduodamas kaip argumentas šiai funkcijai. Funkcija modifikuoja pastarojo objekto laukus.
+  \item \textbf{Tarpinės būsenos išsaugojimas} - praeituose žingsniuose buvo sukurtas ir modifikuotas objektas, saugantis tarpinę skaitymo modelio būseną. Kadangi visi objekto laukai atitinka skaitymo modelio duomenų saugyklos laukus, padaroma užklausa, kuri išsaugo (jei tarpinė būsena nesaugoma duomenų saugykloje) arba atnaujina (jei tarpinė būsena jau saugoma duomenų saugykloje) šią informaciją duomenų saugykloje.
+\end{itemize}
+
+Toliau aprašysime, papildomas taisykles, aprašančias srauto ir reaktyvių operatorių panaudojimą:
+
+\begin{itemize}
+  \item Kad galėtume naudoti reaktyvius operatorius, pirmiausia reikia sukurti srauto objekto egzemplioriu.
+  \item Galima jungti skirtingus srauto objektų egzempliorius.
+  \item Srauto objekto egzemplioriui galima kviesti reaktyvius operatorius.
+  \item Vienam srauto objekto egzemplioriui rekomenduojama kurti tik vieną skaitymo modelį.
   \item Tarpinę būseną saugančius operatorius galima kviesti tik tada, kai srautui būna perduotas tipas ir pirminis raktas. Sukurtoje bibliotekoje šią atsakomybę įgyvendina tipo apibrėžimo operatorius \lstinline|as_persistent_type(type, primary_key)|.
   \item Kiekvienas įvykis privalo turėti kuriamo skaitymo modelio pirminio rakto informaciją, saugomą tokiu pačiu vardu, kokį turi pirminis raktas.
   \item Pradinės būsenos operatorius \lstinline|init(state_change_function)| privalo būti kviečiamas prieš iteratoriaus \lstinline|each(state_change_function)| bei tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Pastarieji operatoriai sukuria tarpinę būseną nepritaikant pradinės būsenos, todėl pradinės būsenos operatorius prarastų prasmę.
@@ -356,7 +372,9 @@ Sujungus reaktyvaus programavimo ir įvykių kaupimo principus ir sukūrus bibli
 
 \subsubsection{Pavyzdinis projektas panaudojantis aprašytą biblioteką}
 
-Pilnas išeities kodas yra prieinamas skaitmeninėje laikmenoje, kuri yra pridėta prie darbo. Projekto aplanko pavadinimas yra \lstinline|cappuccino|. Pagrindinės nuorodos:
+% Pilnas išeities kodas yra prieinamas skaitmeninėje laikmenoje, kuri yra pridėta prie darbo. Projekto aplanko pavadinimas yra \lstinline|cappuccino|.
+
+Pilnas išeities kodas yra prieinamas atviro kodo talpykloje ``Github'', projektas pavadintas ``cappuccino''\footnote{https://github.com/ZilvinasKucinskas/cappuccino} vardu. Pagrindinės nuorodos:
 
 \begin{itemize}
   \item \lstinline|README.md| - aprašytos diegimo instrukcijos, testų paleidimo instrukcijos bei bibliotekos naudojimosi instrukcijos.
