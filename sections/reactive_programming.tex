@@ -10,7 +10,7 @@ Funkcinis reaktyvus programavimas, neretai vadinamas tiesiog FRP, dažnai yra ne
 
 \subsection{Įvadas į reaktyvųjį programavimą}
 
-Reaktyvųjį programavimą galima laikyti tam tikra deklaratyviojo programavimo atmaina. Pagrindinė jo idėja – reaktyviųjų reikšmių samprata. Tokios reikšmės priklauso viena nuo kitos, jos dinamiškai keičiasi ir yra skaidriai atnaujinamos. RP tikslas – apibrėžti statinius arba dinaminius reikšmių ryšius, kai jų nereikia atnaujinti ar sinchronizuoti rankomis. Kodas tiesiogiai apibrėžia duomenų srautą, o kalba netiesiogiai apdoroja platinamus pakeitimus. \ref{reactive_pseudocode} kodo pavyzdyje pavaizduota reaktyviojo programavimo idėja imperatyvioje nuoseklių komandų aplinkoje. Reikšmė \lstinline|sum| nurodo skaičiavimą \lstinline|a + b|. Kai kuri nors iš šių reikšmių pasikeičia, \lstinline|sum| reikšmė išlieka teisinga.
+Reaktyvųjį programavimą galima laikyti tam tikra deklaratyviojo programavimo atmaina. Pagrindinė jo idėja – reaktyviųjų reikšmių samprata. Tokios reikšmės priklauso viena nuo kitos, jos dinamiškai keičiasi ir yra skaidriai atnaujinamos. RP tikslas – apibrėžti statinius arba dinaminius reikšmių ryšius, kai jų nereikia atnaujinti ar sinchronizuoti išreikštiniu būdu. Kodas tiesiogiai apibrėžia duomenų srautą, o vykdomoji aplinka netiesiogiai apdoroja platinamus pakeitimus. \ref{reactive_pseudocode} kodo pavyzdyje pavaizduota reaktyviojo programavimo idėja imperatyvioje nuoseklių komandų aplinkoje. Reikšmė \lstinline|sum| nurodo skaičiavimą \lstinline|a + b|. Kai kuri nors iš šių reikšmių pasikeičia, \lstinline|sum| reikšmė išlieka teisinga.
 
 \begin{lstlisting}[caption=Reaktyvaus programavimo pseudokodas, label=reactive_pseudocode]
 a <- 0
