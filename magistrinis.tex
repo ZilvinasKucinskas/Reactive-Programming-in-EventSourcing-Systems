@@ -93,9 +93,6 @@ Eventsourcing describes current state as series of events that occurred in a sys
 \textbf{Darbo rezultatai}:
 
 \begin{itemize}
-  % \item Išnagrinėtos reaktyvaus programavimo bibliotekų ``RxRuby'' bei ``frapuccino'' realizacija.
-  % \item Išnagrinėta įvykių kaupimo bibliotekos ``RailsEventStore'' realizacija.
-  % \item Išanalizuota kaip įprastai kuriamos įvykių kaupimo sistemos IT industrijoje - sukurtas pavyzdinis architektūros modelis, apjungiantis reaktyvaus programavimo bei įvykių kaupimo principus, aprašytos praktinės įvykių kaupimo sistemų kūrimo gairės.
   \item Sukurtas pavyzdinis architektūros modelis, apjungiantis reaktyvaus programavimo bei įvykių kaupimo principus, aprašytos praktinės įvykių kaupimo sistemų kūrimo gairės.
   \item Sukurta biblioteka, įrodanti, jog tikslas yra pasiekiamas. Biblioteka gali tiek publikuoti įvykius, tiek kurti skaitymo modelį naudojantis reaktyviais operatoriais ir paslepiant operacijų su duomenų saugykla realizacijos detales.
   \item Aprašyta sukurtos bibliotekos realizacijos detalės, taisyklės ir suformuluoti apribojimai. Įgyvendinti srautų sujungimo \lstinline|merge|, filtravimo \lstinline|filter|, transformavimo \lstinline|map|, kuriamo skaitymo modelio tipo apibrėžimo \lstinline|as_persistent_type|, pradinės reišmės \lstinline|init|, tipo atitikimo \lstinline|when| bei iteratoriaus \lstinline|each| deklaratyvūs operatoriai, įgalinantys skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
@@ -113,7 +110,8 @@ Siekiant tikslo susidurta su dvejomis pagrindinėmis problemomis: kaip realizuot
   \item Tarpinės būsenos saugojimo problema yra išsprendžiama pasinaudojant metaprogramavimu (introspekcija ir refleksija) ir metodų jungimo principu (angl. method chaining).
 \end{itemize}
 
-\printbibliography[heading=bibintoc]  % Šaltinių sąraše nurodoma panaudota
+\printbibliography[heading=bibintoc]
+% Šaltinių sąraše nurodoma panaudota
 % literatūra, kitokie šaltiniai. Abėcėlės tvarka išdėstomi darbe panaudotų
 % (cituotų, perfrazuotų ar bent paminėtų) mokslo leidinių, kitokių publikacijų
 % bibliografiniai aprašai. Šaltinių sąrašas spausdinamas iš naujo puslapio.
