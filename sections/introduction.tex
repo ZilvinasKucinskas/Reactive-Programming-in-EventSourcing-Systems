@@ -35,8 +35,6 @@
 
 Kadangi reaktyvus programavimas leidžia kurti sistemas komponavimo būdu, deklaratyviai, pasiekus tikslą būtų galima supaprastinti įvykių kaupimu pagrįstų sistemų kūrimą, struktūrizuoti kodą į smulkesnius, lengviau suprantamus ir palaikomus komponentus.
 
-% Toks atskyrimas leistų atlikti panašią paskirtį kaip modelio-kontrolieriaus-vaizdo projektavimo šablono maršrutizatorius. Būtų galima apsirašyti kas ir kokius įvykius apdoroja su papildoma galimybe filtruoti ir transformuoti gautus įvykius.
-
 \subsection{Tyrimo aktualumas}
 
 Reaktyvusis programavimas (RP) yra programavimo kalbos paradigma, konkrečiai taikoma reaktyviosioms programoms kurti. Per pastaruosius keletą metų vis daugiau įmonių ir programų kūrėjų pradėjo naudoti RP žiniatinklio programoms, vartotojo sąsajoms ir asinchroninei įvykių valdomai programinei įrangai kurti. RP tapo ypač populiarus „JavaScript“ bendruomenėje, kur tokios bibliotekos kaip „Angular.js“ ir „Bacon.js“ priėmė reaktyviąją paradigmą, palaikančią automatinį keitimų platinimą.
@@ -70,7 +68,7 @@ Naudojant įvykių kaupimo sistemą ir panaudojant reaktyvų programavimą, atga
 \begin{lstlisting}[]
   Stream.new(ProductImageUploaded, ProductInformationChanged)
       .as_persistent_type(Product)
-      .each( -> (state, event) state.reindex )
+      .each( -> (state, event) { state.reindex })
 \end{lstlisting}
 
 Čia \lstinline|Stream| yra duomenų srautas. Mes nežinome kada bus gauta reikšmė, tačiau jau galime aprašyti logiką, kuri bus pritaikyta ateityje, įvykus tam tikram įvykiui. Tokiu būdu pati domeno srities logika būtų vienoje vietoje ir būtų daug lengviau suprantama. Šis apibrėžimas nurodytų kaip nutikus vienokiam ar kitokiam įvykiui, jis yra apdorojamas.
@@ -78,12 +76,11 @@ Naudojant įvykių kaupimo sistemą ir panaudojant reaktyvų programavimą, atga
 Sujungus reaktyvaus programavimo principus bei įvykių kaupimą būtų galima deklaratyviai apsirašyti skaitymo modelio kūrimo aprašą pritaikant reaktyvius operatorius. Pažvelkime į vartotojo sąskaitos \lstinline|Account| skaitymo modelio kūrimo atvęjį bankininkystės sistemoje:
 
 \begin{lstlisting}
-  Stream.new(AccountCreated, MoneyDeposited, MoneyWithdrawn).
+  Stream.new(MoneyDeposited, MoneyWithdrawn).
     as_persistent_type(Account).
     init( -> (state) { state.balance = 0} ).
-    when(AccountCreated), -> (state, event) { state.account_id = event.data[:account_id] }.
-    when(MoneyDeposited), -> (state, event) { state.balance += event.data[:amount] }).
-    when(MoneyWithdrawn), -> (state, event) { state.balance -= event.data[:amount] })
+    when(MoneyDeposited, -> (state, event) { state.balance += event.data[:amount] }).
+    when(MoneyWithdrawn, -> (state, event) { state.balance -= event.data[:amount] })
 \end{lstlisting}
 
 Verta pastebėti, jog lokali duomenų saugykla nebuvo paminėta arba apibrėžta. Pastaroji gali būti sugeneruota bei valdoma automatiškai. Kiekvieną kartą kai sistemoje įvyksta įvykis atsinaujina sąskaitos skaitymo modelio tipas \lstinline|Account(account_id: string, balance: decimal)|, o užklausos vykdomos pasinaudojant aktyvaus įrašo projektavimo šablonu, pavyzdžiui: \lstinline|Account.find_by(account_id: 'LT121000011101001000')|
