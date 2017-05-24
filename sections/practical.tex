@@ -286,74 +286,11 @@ Pagal nagrinėjamą scenarijų minėti įvykiai apibrėžia šiuos veiksmus:
   \item \lstinline|OrderCreated| - įvykdytas užsakymas.
 \end{itemize}
 
-Kai turime apsibrėžtus domeno įvykius, galime juos pritaikyti domeno objektui. Panagrinėkime \ref{apply_domain_events} kodo pavyzdį. \lstinline|Domain::Order| klasė turi metodą \lstinline|initialize|, kuris sukuria pradinę agregato būseną. Taip pat, klasė turi \lstinline|create| metodą. Pastarasis turėtų būti naudojamas kitų objektų, iškviečiant agregato funkcijas. Čia turėtų būti apsaugomi invariantai, tikrinama verslo logika, teisingumo taisyklės. Remiantis CQRS principu, šis metodas neturėtų grąžinti reikšmės - jis privalo būti tik įvykdomas arba nutraukti vykdymą iškeliant išimtinę situaciją. Taipogi šiame metode agregato būsena niekada nėra keičiama. Vietoje to yra sukonstruojamas ir pritaikomas naujas domeno įvykis (kurį apsirašėme anksčiau).
+Kai turime apsibrėžtus domeno įvykius, galime juos pritaikyti domeno objektui. Panagrinėkime \ref{apply_domain_events} kodo pavyzdį (priedas \ref{appendix_rails_event_store}). \lstinline|Domain::Order| klasė turi metodą \lstinline|initialize|, kuris sukuria pradinę agregato būseną. Taip pat, klasė turi \lstinline|create| metodą. Pastarasis turėtų būti naudojamas kitų objektų, iškviečiant agregato funkcijas. Čia turėtų būti apsaugomi invariantai, tikrinama verslo logika, teisingumo taisyklės. Remiantis CQRS principu, šis metodas neturėtų grąžinti reikšmės - jis privalo būti tik įvykdomas arba nutraukti vykdymą iškeliant išimtinę situaciją. Taipogi šiame metode agregato būsena niekada nėra keičiama. Vietoje to yra sukonstruojamas ir pritaikomas naujas domeno įvykis (kurį apsirašėme anksčiau).
 
-\begin{lstlisting}[caption=Įvykių pritaikymas domeno objektui, label=apply_domain_events]
-module Domain
-  class Order
-    include AggregateRoot::Base
-
-    AlreadyCreated    = Class.new(StandardError)
-    MissingCustomer   = Class.new(StandardError)
-
-    def initialize(id = SecureRandom.uuid)
-      @id = id
-      @state = :draft
-    end
-
-    def create(order_number, customer_id)
-      raise AlreadyCreated unless state == :draft
-      raise MissingCustomer unless customer_id
-      apply Events::OrderCreated.create(@id, order_number, customer_id)
-    end
-
-    # ...
-
-    def apply_order_created(event)
-      @customer_id = event.customer_id
-      @number = event.order_number
-      @state = :created
-    end
-
-    private
-    attr_accessor :id, :customer_id, :order_number, :state
-
-    # ...
-  end
-end
-\end{lstlisting}
-
-Reiktų detaliau panagrinėti iš kur įtraukiamas \lstinline|AggregateRoot::Base| modulis. Tai yra ``aggregate\_root''\footnote{https://github.com/arkency/aggregate\_root} biblioteka, kuri atkeliauja kartu su ``RailsEventStore biblioteka''. \ref{aggregate_root} kodo pavyzdyje demonstruojamas svarbiausias funkcionalumas. Modulis įterpia metodą \lstinline|apply|. Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, customer_id)} yra sukuriamas naujas domeno įvykis ir pritaikomas agregatui - būsena pasikeičia ir \lstinline|@unpublished_events| kintamasis saugo pakeitimus. Jis saugo visus agregato sukurtus domeno įvykius, kol metodas yra vykdomas.
+Reiktų detaliau panagrinėti iš kur įtraukiamas \lstinline|AggregateRoot::Base| modulis. Tai yra ``aggregate\_root''\footnote{https://github.com/arkency/aggregate\_root} biblioteka, kuri atkeliauja kartu su ``RailsEventStore biblioteka''. \ref{aggregate_root} kodo pavyzdyje (priedas \ref{appendix_rails_event_store}) demonstruojamas svarbiausias funkcionalumas. Modulis įterpia metodą \lstinline|apply|. Kviečiant \lstinline{apply Events::OrderCreated.create(@id, order_number, customer_id)} yra sukuriamas naujas domeno įvykis ir pritaikomas agregatui - būsena pasikeičia ir \lstinline|@unpublished_events| kintamasis saugo pakeitimus. Jis saugo visus agregato sukurtus domeno įvykius, kol metodas yra vykdomas.
 
 Paskutinis svarbus momentas yra \lstinline|apply_order_created| metodas. Pastarasis atnaujina agregato būseną priklausomai nuo įvykusio domeno įvykio. Nesvarbu ar pats agregatas publikavo įvykį, ar įvykis buvo nuskaitytas iš įvykių žurnalo ir pritaikytas atkuriant dabartinę agregato būseną, šioje vietoje negali būti verslo logikos ar teisingumo taisyklių. Tai tik būsenos atkūrimas, o istorijos keisti negalima, kaip buvo nagrinėta literatūroje.
-
-\begin{lstlisting}[caption=``AggregateRoot'' modulis, label=aggregate_root]
-module AggregateRoot
-  class DefaultApplyStrategy
-    def call(aggregate, event)
-      event_name_processed = event.class.name.demodulize.underscore
-      aggregate.method("apply_#{event_name_processed}").call(event)
-    end
-  end
-end
-
-module AggregateRoot
-  def apply(event)
-    apply_strategy.(self, event)
-    unpublished_events << event
-  end
-
-  private
-
-  def unpublished_events
-    @unpublished_events ||= []
-  end
-
-  def apply_strategy
-    DefaultApplyStrategy.new
-  end
-end
-\end{lstlisting}
 
 \subsubsection{Komandos}
 

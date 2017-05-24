@@ -66,3 +66,66 @@ end
 cart = CartReadModel.new
 client.subscribe(cart, [AddToCart, RemoveFromCart]) 
 \end{lstlisting}
+
+\begin{lstlisting}[caption=Įvykių pritaikymas domeno objektui, label=apply_domain_events]
+module Domain
+  class Order
+    include AggregateRoot::Base
+
+    AlreadyCreated    = Class.new(StandardError)
+    MissingCustomer   = Class.new(StandardError)
+
+    def initialize(id = SecureRandom.uuid)
+      @id = id
+      @state = :draft
+    end
+
+    def create(order_number, customer_id)
+      raise AlreadyCreated unless state == :draft
+      raise MissingCustomer unless customer_id
+      apply Events::OrderCreated.create(@id, order_number, customer_id)
+    end
+
+    # ...
+
+    def apply_order_created(event)
+      @customer_id = event.customer_id
+      @number = event.order_number
+      @state = :created
+    end
+
+    private
+    attr_accessor :id, :customer_id, :order_number, :state
+
+    # ...
+  end
+end
+\end{lstlisting}
+
+\begin{lstlisting}[caption=``AggregateRoot'' modulis, label=aggregate_root]
+module AggregateRoot
+  class DefaultApplyStrategy
+    def call(aggregate, event)
+      event_name_processed = event.class.name.demodulize.underscore
+      aggregate.method("apply_#{event_name_processed}").call(event)
+    end
+  end
+end
+
+module AggregateRoot
+  def apply(event)
+    apply_strategy.(self, event)
+    unpublished_events << event
+  end
+
+  private
+
+  def unpublished_events
+    @unpublished_events ||= []
+  end
+
+  def apply_strategy
+    DefaultApplyStrategy.new
+  end
+end
+\end{lstlisting}
