@@ -95,7 +95,7 @@ Eventsourcing describes current state as series of events that occurred in a sys
 \begin{itemize}
   \item Sukurtas pavyzdinis architektūros modelis, apjungiantis reaktyvaus programavimo bei įvykių kaupimo principus, aprašytos praktinės įvykių kaupimo sistemų kūrimo gairės.
   \item Sukurta biblioteka, įrodanti, jog tikslas yra pasiekiamas. Biblioteka gali tiek publikuoti įvykius, tiek kurti skaitymo modelį naudojantis reaktyviais operatoriais ir paslepiant operacijų su duomenų saugykla realizacijos detales.
-  \item Aprašyta sukurtos bibliotekos realizacijos detalės, taisyklės ir suformuluoti apribojimai. Įgyvendinti srautų sujungimo \lstinline|merge|, filtravimo \lstinline|filter|, transformavimo \lstinline|map|, kuriamo skaitymo modelio tipo apibrėžimo \lstinline|as_persistent_type|, pradinės reišmės \lstinline|init|, tipo atitikimo \lstinline|when| bei iteratoriaus \lstinline|each| deklaratyvūs operatoriai, įgalinantys skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.
+  \item Aprašyta sukurtos bibliotekos realizacijos detalės, taisyklės ir suformuluoti apribojimai. Įgyvendinti srautų sujungimo \lstinline|merge|, filtravimo \lstinline|filter|, transformavimo \lstinline|map|, kuriamo skaitymo modelio tipo apibrėžimo \lstinline|as_persistent_type|, pradinės reišmės \lstinline|init|, tipo atitikimo \lstinline|when| bei iteratoriaus \lstinline|each| deklaratyvūs operatoriai, įgalinantys skaitymo modelio kūrimą paslepiant operacijų su duomenų saugykla realizacijos detales.g
   \item Sukurtos bibliotekos funkcionalumas validuotas parašant jai naudojimosi testus.
 \end{itemize}
 
@@ -108,6 +108,13 @@ Siekiant tikslo susidurta su dvejomis pagrindinėmis problemomis: kaip realizuot
 \begin{itemize}
   \item Reaktyvūs operatoriai gali būti realizuojami pasinaudojant stebėtojo projektavimo šablonu, objektinio programavimo sąvybėmis (paveldėjimu, polimorfizmu) ir introspekcija.
   \item Tarpinės būsenos saugojimo problema yra išsprendžiama pasinaudojant metaprogramavimu (introspekcija ir refleksija) ir metodų jungimo principu (angl. method chaining).
+\end{itemize}
+
+\textbf{Pasiūlymai tolimesniam darbui}:
+
+\begin{itemize}
+  \item Plečiant ir modifikuojant kuriamą įvykių kaupimo sistemą arba įvykus nenumatytai klaidai, gali tekti atkurti skaitymo modelį iš naujo. Dėl šios priežasties būtų verta atlikti skaitymo modelio būsenos atkūrimo būdų lyginamąją analizę. Reikėtų išnagrinėti ką siūlo esamos įvykių kaupimo bibliotekos bei pritaikyti tinkamą sprendimą šiame darbe sukurtai bibliotekai.
+  \item Įrodyti koks rinkinys reaktyvių operatorių yra pakankamas, norint užtikrinti denormalizuoto skaitymo modelio kūrimo išsprendžiamumą tik komponavimo būdu.
 \end{itemize}
 
 \printbibliography[heading=bibintoc]
