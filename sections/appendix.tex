@@ -29,6 +29,21 @@ counter.now # => 4
 
 \section{Projekto, panaudojančio``RailsEventStore'' biblioteką išeities kodo pavyzdžiai} \label{appendix_rails_event_store}
 
+\begin{lstlisting}[caption=Įvykių saugojimo migracija, label=event_store_events_table]
+    create_table(:event_store_events) do |t|
+      t.string      :stream,      null: false
+      t.string      :event_type,  null: false
+      t.string      :event_id,    null: false
+      t.text        :metadata
+      t.text        :data,        null: false
+      t.datetime    :created_at,  null: false
+    end
+    add_index :event_store_events, :stream
+    add_index :event_store_events, :created_at
+    add_index :event_store_events, :event_type
+    add_index :event_store_events, :event_id, unique: true
+\end{lstlisting}
+
 \begin{lstlisting}[caption=``EventStore'' bibliotekos prenumeratorių mechanizmo panaudojimas, label=event_store_subscription]
 class CartReadModel
     def call(event)

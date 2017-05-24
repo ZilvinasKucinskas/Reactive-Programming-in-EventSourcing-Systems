@@ -130,22 +130,7 @@ Kai į ``Ruby on Rails'' projekto \lstinline|Gemfile| failą jau įtrauktas \lst
   rake db:migrate
 \end{lstlisting}
 
-Sukurta migracija pavaizduota \ref{event_store_events_table} kodo pavyzdyje. Matome, jog kiekvienas įvykis turi srauto pavadinimą, įvykio tipą, unikalų identifikatorių, tam tikrus meta duomenis (čia gali būti tokia informacija kaip kliento IP, šalis iš kurios buvo atlikta užklausa ir t.t.), duomenų laukas, kuris aktyvaus įrašo pagalba serializuojamas į maišos duomenų struktūrą (angl. hash) bei sukūrimo laiką. Taipogi sukuriami reikalingi indeksai, kurie reikalingi greitesnėms užklausoms filtruojant pagal indeksuojamus lentelės stulpelius.
-
-\begin{lstlisting}[caption=Įvykių saugojimo migracija, label=event_store_events_table]
-    create_table(:event_store_events) do |t|
-      t.string      :stream,      null: false
-      t.string      :event_type,  null: false
-      t.string      :event_id,    null: false
-      t.text        :metadata
-      t.text        :data,        null: false
-      t.datetime    :created_at,  null: false
-    end
-    add_index :event_store_events, :stream
-    add_index :event_store_events, :created_at
-    add_index :event_store_events, :event_type
-    add_index :event_store_events, :event_id, unique: true
-\end{lstlisting}
+Sukurta migracija pavaizduota \ref{event_store_events_table} kodo pavyzdyje (priedas \ref{appendix_rails_event_store}. Matome, jog kiekvienas įvykis turi srauto pavadinimą, įvykio tipą, unikalų identifikatorių, tam tikrus meta duomenis (čia gali būti tokia informacija kaip kliento IP, šalis iš kurios buvo atlikta užklausa ir t.t.), duomenų laukas, kuris aktyvaus įrašo pagalba serializuojamas į maišos duomenų struktūrą (angl. hash) bei sukūrimo laiką. Taipogi sukuriami reikalingi indeksai, kurie reikalingi greitesnėms užklausoms filtruojant pagal indeksuojamus lentelės stulpelius.
 
 Norint naudoti bibliotekos funkcionalumą, tereikia sukurti \lstinline|RailsEventStore::Client| klasės egzempliorių:
 
