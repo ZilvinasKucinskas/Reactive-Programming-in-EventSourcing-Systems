@@ -1,0 +1,53 @@
+\section{``Frappuccino'' bibliotekos išeities kodo pavyzdžiai} \label{appendix_frappuccino}
+
+\begin{lstlisting}[caption=``Frappuccino'' bibliotekos panaudojimo pavyzdys, label=frappuccino]
+class Button
+  def push
+    emit(:pushed) # emit sends a value into the stream
+  end
+end
+
+button = Button.new
+stream = Frappuccino::Stream.new(button)
+
+counter = stream
+            .map { |event| event == :pushed ? 1 : 0 } # convert events to ints
+            .inject(0) { |sum, n| sum + n } # add them up
+
+counter.now # => 0
+
+button.push
+button.push
+button.push
+
+counter.now # => 3
+
+button.push
+
+counter.now # => 4
+\end{lstlisting}
+
+\section{Projekto, panaudojančio``RailsEventStore'' biblioteką išeities kodo pavyzdžiai} \label{appendix_rails_event_store}
+
+\begin{lstlisting}[caption=``EventStore'' bibliotekos prenumeratorių mechanizmo panaudojimas, label=event_store_subscription]
+class CartReadModel
+    def call(event)
+        if event.event_type == 'AddToCart'
+            add_to_cart(event.data)
+        end
+        if event.event_type == 'RemoveFromCart'
+            remove_from_cart(event.data)
+        end
+    end
+    private
+    def add_to_cart(event_data)
+        #Implementation here
+    end
+    def remove_from_cart(event_data)
+        #Implementation here
+    end 
+end
+ 
+cart = CartReadModel.new
+client.subscribe(cart, [AddToCart, RemoveFromCart]) 
+\end{lstlisting}

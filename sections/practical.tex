@@ -80,36 +80,7 @@ Galiausiai operatoriaus \lstinline|sum| grąžinama tema yra prenumeruojama. Pre
 
 Steve Klabnik, žymus žmogus Ruby bendruomenėje dėl savo įnašo į atviro kodo projektus\footnote{https://github.com/steveklabnik}, 2013 metais pristatė reaktyvaus programavimo idėjas Ruby kalboje įvairiose konferencijose, tarp jų Euruko2013 \cite{klabnik:euruko}, RubyConf India 2013 \cite{klabnik:india} ir kitos.
 
-Panagrinėkime ``Frappuccino'' bibliotekos panaudojimo pavyzdį, pavaizduotą \ref{frappuccino} kodo pavyzdyje:
-
-\begin{lstlisting}[caption=``Frappuccino'' bibliotekos panaudojimo pavyzdys, label=frappuccino]
-class Button
-  def push
-    emit(:pushed) # emit sends a value into the stream
-  end
-end
-
-button = Button.new
-stream = Frappuccino::Stream.new(button)
-
-counter = stream
-            .map { |event| event == :pushed ? 1 : 0 } # convert events to ints
-            .inject(0) { |sum, n| sum + n } # add them up
-
-counter.now # => 0
-
-button.push
-button.push
-button.push
-
-counter.now # => 3
-
-button.push
-
-counter.now # => 4
-\end{lstlisting}
-
-Ši biblioteka, kaip ir RxRuby, naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
+Panagrinėkime ``Frappuccino'' bibliotekos panaudojimo pavyzdį, pavaizduotą \ref{frappuccino} kodo pavyzdyje (priedas \ref{appendix_frappuccino}). Ši biblioteka, kaip ir RxRuby, naudoja stebėtojo projektavimo šabloną. Sukuriant srautą, klasė \lstinline|Button| iš tikrųjų dinamiškai išplečia \lstinline|Frappuccino::Source| klasę, kuri turi \lstinline|emit| metodą. Taipogi \lstinline|Button| klasė paverčiama tema. \lstinline|emit| metodas iškviečia \lstinline|notify_observers(value)| metodą ir nauja reikšmė perduodama visiems stebėtojams.
 
 Reaktyūs operatoriai (tokie kaip \lstinline|map|, \lstinline|merge| ir kiti) yra realizuoti grąžinant naują \lstinline|Frappuccino::Stream| objektą, kuris taip pat yra stebėtojas.
 
@@ -255,32 +226,9 @@ client.delete_stream(stream_name)
 
 \subsubsection{Prenumeratų mechanizmas}
 
-Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Prenumeratorių mechanizmo panaudojimas demonstruojamas \ref{event_store_subscription} kodo pavyzdyje. Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
+Biblioteka leidžia sinchroniškai klausyti specifinių įvykių. Prenumeratorių mechanizmo panaudojimas demonstruojamas \ref{event_store_subscription} kodo pavyzdyje (priedas \ref{appendix_rails_event_store}). Vienintelis reikalavimas yra, jog prenumeratoriaus klasė turi įgyvendinti \lstinline|call(event)| metodą.
 
 Šis funkcionalumas yra įgyvendintas naudojant reaktoriaus projektavimo šabloną (angl. Reactor pattern). Verta pastebėti, jog įvykių srautas gali būti begalinis, apibrėžiama, kas nutikus įvykiui yra įvykdoma, tai yra atnaujima dabartinė prekių krepšelio reikšmė. Prenumeruojami iškart keli įvykių tipai, tai yra 2 skirtingi srautai. Galime šį veikimą laikyti kaip reaktyvaus operatoriaus \lstinline|merge| realizaciją.
-
-\begin{lstlisting}[caption=``EventStore'' bibliotekos prenumeratorių mechanizmo panaudojimas, label=event_store_subscription]
-class CartReadModel
-    def call(event)
-        if event.event_type == 'AddToCart'
-            add_to_cart(event.data)
-        end
-        if event.event_type == 'RemoveFromCart'
-            remove_from_cart(event.data)
-        end
-    end
-    private
-    def add_to_cart(event_data)
-        #Implementation here
-    end
-    def remove_from_cart(event_data)
-        #Implementation here
-    end 
-end
- 
-cart = CartReadModel.new
-client.subscribe(cart, [AddToCart, RemoveFromCart]) 
-\end{lstlisting}
 
 \subsection{Įprastas būdas kurti įvykių kaupimo sistemas IT industrijoje}
 
