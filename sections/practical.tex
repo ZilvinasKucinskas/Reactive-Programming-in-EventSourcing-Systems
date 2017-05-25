@@ -312,29 +312,7 @@ module Command
 end
 \end{lstlisting}
 
-``Ruby'' programavimo kalboje tai dar žinoma kaip formos objektai (angl. Form Objects)\footnote{https://webuild.envato.com/blog/creating-form-objects-with-activemodel-and-virtus/}. Iš esmės, norint leisti patikrinti teisingumo taisykles, tėvinė klasė \lstinline|Base| naudoja dalį \lstinline|ActiveModel| funkcijų:
-
-\begin{lstlisting}
-module Command
-  class Base
-    include ActiveModel::Model
-    include ActiveModel::Validations
-    include ActiveModel::Conversion
-
-    def initialize(attributes={})
-      super
-    end
-
-    def validate!
-      raise ValidationError, errors unless valid?
-    end
-
-    def persisted?
-      false
-    end
-  end
-end
-\end{lstlisting}
+``Ruby'' programavimo kalboje tai dar žinoma kaip formos objektai (angl. Form Objects)\footnote{https://webuild.envato.com/blog/creating-form-objects-with-activemodel-and-virtus/}. Iš esmės, norint leisti patikrinti teisingumo taisykles, tėvinė klasė \lstinline|Base| naudoja dalį \lstinline|ActiveModel| funkcijų. Išeities kodas demonstruojamas \ref{command_base} kodo pavyzdyje (priedas \ref{appendix_rails_event_store}).
 
 \subsubsection{Komandų apdorojimas}
 
