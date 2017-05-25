@@ -151,3 +151,50 @@ module Command
   end
 end
 \end{lstlisting}
+
+\begin{lstlisting}[caption=Komandų doroklė, label=command_handler]
+module Command
+  class Handler
+    def initialize(repository:, **_)
+      @repository = repository
+    end
+
+    protected
+    def with_aggregate(aggregate_id)
+      aggregate = build(aggregate_id)
+      yield aggregate
+      repository.store(aggregate)
+    end
+
+    private
+    attr_accessor :repository
+
+    def build(aggregate_id)
+      aggregate_class.new(aggregate_id).tap do |aggregate|
+        repository.load(aggregate)
+      end
+    end
+  end
+end
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Komandų priskyrimas doroklėms, label=command_handler_execute]
+module Command
+  module Execute
+    def execute(command, **args)
+      command.validate!
+      args = AggregateRoot::Repository.new(event_store) if args.empty?
+      handler_for(command).new(**args).call(command)
+    end
+
+    private
+    def handler_for(command)
+      {
+        Command::CreateOrder          => CommandHandlers::CreateOrder,
+        Command::AddItemToBasket      => CommandHandlers::AddItemToBasket,
+        Command::RemoveItemFromBasket => CommandHandlers::RemoveItemFromBasket,
+      }.fetch(command.class)
+    end
+  end
+end
+\end{lstlisting}
