@@ -69,8 +69,8 @@ account_view =
   Stream.new(AccountCreated, MoneyDeposited, MoneyWithdrawn).
     as_persistent_type(Account).
     init( -> (state) { state.balance = 0} ).
-    when(MoneyDeposited), -> (state, event) { state.balance += event[:data][:amount] }).
-    when(MoneyWithdrawn), -> (state, event) { state.balance -= event[:data][:amount] })
+    when(MoneyDeposited, -> (state, event) { state.balance += event[:data][:amount] }).
+    when(MoneyWithdrawn, -> (state, event) { state.balance -= event[:data][:amount] })
 \end{lstlisting}
 
 Verta pažymėti, jog čia nėra nė vienos operacijos su duomenų saugykla. Jeigu būtų sukurta vartotojo sąskaita su kodu ``LT121000011101001000'', dabartinį sąskaitos balansą galėtume gauti tiesiog iškvietę \lstinline|Account.find_by(account_id: 'LT121000011101001000').balance|
@@ -120,9 +120,7 @@ Analizuojant reaktyvaus programavimo bibliotekas, buvo pastebėta, jog jos naudo
 \begin{lstlisting}
 class AccountCreated < EventStore::Event
 end
-
 # arba
-
 AccountCreated = Class.new(EventStore::Event)
 \end{lstlisting}
 
@@ -226,11 +224,11 @@ Tokį duomenų srautą galima konstruoti panaudojant reaktyvų filtravimo operat
 \begin{lstlisting}
   product_orders_eligible_for_bonus =
     Stream.new(ProductPurchased).
-                filter( -> (event) event[:data][:price_paid] > 100)
+                filter(-> (event) event[:data][:price_paid] > 100)
 
   job_orders_eligible_for_bonus =
     Stream.new(JobOrderPurchased).
-               .filter( -> (event) event[:data][:price_paid] > 50)
+               .filter(-> (event) event[:data][:price_paid] > 50)
 \end{lstlisting}
 
 \textbf{Srautų sujungimo operatorius}
@@ -292,7 +290,7 @@ Kartais gali vertėti klausytis kelių įvykių šaltinių ir jiems pritaikyti b
 \begin{lstlisting}[]
   Stream.new(ProductImageUploaded, ProductInformationChanged)
       .as_persistent_type(Product)
-      .each( -> (state, event) state.reindex )
+      .each(-> (state, event) state.reindex )
 \end{lstlisting}
 
 Iteratoriaus operatoriaus \lstinline|each| realizacija yra identiška tipo atitikimo operatoriui. Vienintelis skirtumas, jog būsenos keitimo funkcija yra pritaikoma visems prenumeruojamiems įvykiams.
