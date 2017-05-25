@@ -328,7 +328,7 @@ Sukūrus biblioteką, galime konkretizuoti taisykles, reikalingas srauto ir reak
 
 Atsakymas į pirmąjį klausimą pateiktas diagramoje, kuri pavaizduota \ref{img:cappuccino_rules} paveikslėlyje. Ši diagrama parodo ryšį tarp srautų ir reaktyvių operatorių bei aprašo kokie veiksmai yra atliekami su gauta srauto žinute, tai yra tam tikru prenumeruojamu įvykiu. Iteratoriaus operatorius \lstinline|each(state_change_function)| yra praleistas, nes yra labai panašus į tipo atitikimo operatorių \lstinline|when(type, state_change_function)|. Vienintelis skirtumas, jog iteratoriaus operatorius netikrina tipo.
 
-Atsakant į antrąjį klausimą, verta panagrinėti, kaip tarpinė būsena yra sukuriama, jai pritaikoma būsenos keitimo funkcija ir kaip ši būsena yra išsaugoma. Čia būtina sąlyga yra kuriamo skaitymo modelio tipo bei pirminio rakto žinojimas. Toliau paaiškinsime diagramoje aprašytus žingsnius:
+Atsakant į antrąjį klausimą, verta panagrinėti, kaip tarpinė būsena yra sukuriama, kaip jai pritaikoma būsenos keitimo funkcija ir kaip ši būsena yra išsaugoma. Čia būtina sąlyga yra kuriamo skaitymo modelio tipo bei pirminio rakto žinojimas. Toliau paaiškinsime diagramoje aprašytus žingsnius:
 
 \begin{itemize}
   \item \textbf{Tarpinės būsenos sukūrimas} - jei tarpinė būsena neegzistuoja duomenų saugykloje, sukuriamas objektas, turintis tokius pačius laukus kaip ir kuriamas skaitymo modelis. Skaitymo modelio laukai gaunami žinant kuriamo skaitymo modelio tipą. Sukurti objekto laukai privalo turėti tiek rašymo tiek skaitymo prieigą.
